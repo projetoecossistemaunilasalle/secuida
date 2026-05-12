@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&family=Source+Sans+3:wght@400;600;700&display=swap');
+
+@theme {
+  --font-display: "Atkinson Hyperlegible Next", ui-sans-serif, system-ui, sans-serif;
+  --font-headline: "Atkinson Hyperlegible Next", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+
+  --color-primary: #006a43;
+  --color-primary-container: #188557;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #f6fff6;
+  
+  --color-secondary: #425e91;
+  --color-secondary-container: #a8c4fe;
+  --color-on-secondary-container: #345083;
+
+  --color-surface: #f9f9ff;
+  --color-surface-container: #e7eeff;
+  --color-surface-container-low: #f0f3ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-on-surface: #111c2c;
+  --color-on-surface-variant: #3e4942;
+
+  --color-outline: #6e7a71;
+  --color-outline-variant: #bdcabf;
+  
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+
+  --radius-xl: 1.5rem;
+  --radius-lg: 1rem;
+  --radius-md: 0.75rem;
+
+  --spacing-container-mobile: 1.25rem;
+  --spacing-container-desktop: 2.5rem;
+  --spacing-stack-sm: 0.5rem;
+  --spacing-stack-md: 1.5rem;
+  --spacing-stack-lg: 3rem;
+}
+
+@layer base {
+  body {
+    @apply bg-surface text-on-surface font-body antialiased;
+  }
+}
+
+@utility shadow-soft {
+  box-shadow: 0 4px 12px rgba(27, 58, 107, 0.08);
+}
+
+@utility shadow-pronounced {
+  box-shadow: 0 8px 24px -8px rgba(27, 58, 107, 0.12);
+}
+
+input[type=range] {
+  @apply appearance-none bg-transparent w-full cursor-pointer;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+  @apply h-2 bg-surface-container rounded-full;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  @apply appearance-none h-6 w-6 rounded-full bg-primary -mt-2 shadow-soft;
+}
+
+input[type=range]::-moz-range-track {
+  @apply h-2 bg-surface-container rounded-full;
+}
+
+input[type=range]::-moz-range-thumb {
+  @apply h-6 w-6 rounded-full bg-primary border-none shadow-soft;
+}
