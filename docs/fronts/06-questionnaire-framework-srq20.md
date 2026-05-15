@@ -1,0 +1,127 @@
+
+# Front 06 — Questionnaire Framework & SRQ-20 Test Flow
+
+## Goal
+
+Build questionnaire support as part of the guided-flow framework, with SRQ-20 as the first validation/test case.
+
+SRQ-20 should not be treated as the only special or sensitive questionnaire. The architecture should support multiple structured, scored, interruptible questionnaires in the future.
+
+---
+
+## Principle
+
+A questionnaire is a specialized flow type.
+
+```txt
+guided_conversation
+clinical_or_structured_questionnaire
+screening_questionnaire
+self_reflection_questionnaire
+````
+
+The framework should support:
+
+* consent nodes;
+* yes/no questions;
+* multiple-choice questions;
+* scoring;
+* thresholds;
+* early interruption rules;
+* result recommendations;
+* safety destinations.
+
+---
+
+## SRQ-20 Role
+
+SRQ-20 is the first implementation because it exercises the important framework capabilities:
+
+```txt
+consent
+fixed question count
+scoring
+threshold result
+safety interruption
+recommendation mapping
+```
+
+It should be used to prove the questionnaire framework, not hardcoded as a unique one-off.
+
+---
+
+## SRQ-20 Required Behavior
+
+* User is told clearly they are answering SRQ-20.
+* User consents before beginning.
+* There are 20 yes/no questions.
+* Affirmative answers are scored.
+* Score of 7 or more produces a possible-distress support result.
+* Result copy must avoid diagnostic language.
+* If the suicidal ideation question is answered affirmatively, the questionnaire stops immediately.
+* The user is routed to immediate support content.
+* The interrupted questionnaire should not be offered for resumption.
+
+---
+
+## JSON Model
+
+```json
+{
+  "id": "srq20",
+  "type": "questionnaire",
+  "questionnaire": {
+    "instrument": "SRQ-20",
+    "scoring_method": "sum_affirmative",
+    "thresholds": [
+      {
+        "id": "possible_distress",
+        "min": 7,
+        "recommendation_id": "professional-support"
+      }
+    ]
+  },
+  "safety_rules": [
+    {
+      "id": "srq20-q17-support",
+      "when": {
+        "node_id": "q17",
+        "answer_value": true
+      },
+      "action": "route_to_support",
+      "target": "/apoio"
+    }
+  ]
+}
+```
+
+---
+
+## Testing Requirements
+
+Minimum tests:
+
+```txt
+loads valid questionnaire
+rejects questionnaire without consent
+rejects missing question IDs
+rejects broken next references
+scores affirmative answers correctly
+maps score >= 7 to correct result
+Q17 affirmative interrupts immediately
+Q17 affirmative prevents resume
+declined consent exits gracefully
+result copy avoids diagnosis wording
+```
+
+---
+
+## Acceptance Criteria
+
+* SRQ-20 is represented as JSON-compatible content.
+* Questionnaire logic is generic.
+* Scoring is not implemented inside React components.
+* Safety rules are declarative.
+* SRQ-20 validates successfully.
+* SRQ-20 tests pass.
+* The framework can support another questionnaire without major refactor.
