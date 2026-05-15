@@ -80,7 +80,7 @@ Recommended public routes:
 /educacao/:resourceId
 ```
 
-Initial implementation should map existing views only:
+Initial implementation should add all public routes listed above. Existing screens should be wired where they already exist, and the remaining routes can use simple temporary placeholder screens until their dedicated fronts are implemented.
 
 | Route | Existing View | Purpose |
 |---|---|---|
@@ -88,14 +88,9 @@ Initial implementation should map existing views only:
 | `/orientacao` | `AssessmentView` | Current guided orientation prototype |
 | `/apoio` | `EmergencyView` | Immediate support screen |
 | `/contatos` | `NetworkView` | Local support directory |
-
-Deferred routes:
-
-| Route | Status |
-|---|---|
-| `/educacao` | Add later when education library front begins |
-| `/educacao/:resourceId` | Add later when resource detail model exists |
-| `/privacidade` | Add later with privacy copy/session policy |
+| `/educacao` | Temporary placeholder | Education library route reserved for Front 10 |
+| `/educacao/:resourceId` | Temporary placeholder | Resource detail route reserved for Front 10 |
+| `/privacidade` | Temporary placeholder | Privacy route reserved for Front 11 |
 
 Important: avoid `/crise` as a public route. Use `/apoio` for the immediate support path.
 
@@ -146,6 +141,8 @@ export const routes = {
   support: '/apoio',
   contacts: '/contatos',
   education: '/educacao',
+  educationDetail: '/educacao/:resourceId',
+  privacy: '/privacidade',
 } as const;
 ```
 
@@ -233,12 +230,17 @@ Recommended manifest baseline:
   "display": "standalone",
   "start_url": "/SeCuida-Prototipo/",
   "scope": "/SeCuida-Prototipo/",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#006a43",
+  "background_color": "#f9f9ff"
 }
 ```
 
-The actual colors should be aligned with the design tokens in `src/index.css`.
+The colors above match the current design tokens in `src/index.css`:
+
+- `--color-primary: #006a43`
+- `--color-background: #f9f9ff`
+
+Use the current app icon direction for the PWA icons. The icon files should not be placeholders: officially download or export the app icon assets during this phase and commit the generated PNGs under `public/icons/`.
 
 Because `vite.config.ts` currently sets:
 
@@ -247,6 +249,8 @@ base: '/SeCuida-Prototipo/'
 ```
 
 PWA paths should respect GitHub Pages/subpath deployment.
+
+Production fallback behavior for deep links is intentionally out of scope for this development slice. It can be handled when the app is prepared for production deployment.
 
 ---
 
@@ -261,8 +265,8 @@ Update `index.html`:
 Add basic PWA metadata:
 
 ```html
-<meta name="theme-color" content="..." />
-<link rel="manifest" href="/SeCuida-Prototipo/manifest.webmanifest" />
+<meta name="theme-color" content="#006a43" />
+<link rel="manifest" href="%BASE_URL%manifest.webmanifest" />
 ```
 
 Keep:
@@ -303,13 +307,14 @@ Scope:
 5. extract `TopBar` and `BottomNav` from the current `src/App.tsx`;
 6. replace `currentView` with route-based rendering;
 7. update `src/main.tsx` to render the new app entry;
-8. update view navigation callbacks to use routes.
+8. update view navigation callbacks to use routes;
+9. add temporary placeholder screens for `/educacao`, `/educacao/:resourceId`, and `/privacidade`.
 
 Acceptance criteria:
 
 - React Router is installed;
-- the app has stable routes for `/`, `/orientacao`, `/apoio`, and `/contatos`;
-- direct URL access works for the implemented routes;
+- the app has stable routes for `/`, `/orientacao`, `/apoio`, `/contatos`, `/educacao`, `/educacao/:resourceId`, and `/privacidade`;
+- direct URL access works for the implemented routes in the local development environment;
 - browser back/forward works;
 - bottom navigation active state reflects the current route;
 - no `currentView` screen-switching state remains;
@@ -322,11 +327,11 @@ Acceptance criteria:
 Scope:
 
 1. create `public/manifest.webmanifest`;
-2. add placeholder or final app icons;
+2. officially download or export the current app icon assets and save them as PNGs;
 3. link the manifest from `index.html`;
 4. set `html lang="pt-BR"`;
 5. add theme color metadata;
-6. validate GitHub Pages subpath behavior.
+6. reference the committed icons from the manifest.
 
 Acceptance criteria:
 
@@ -334,6 +339,8 @@ Acceptance criteria:
 - app name and short name are `SeCuida`;
 - display mode is `standalone`;
 - start URL and scope respect `/SeCuida-Prototipo/`;
+- manifest icons point to committed PNG files under `public/icons/`;
+- icons include 192px, 512px, and maskable 512px variants;
 - `html lang` is `pt-BR`;
 - no sensitive state is cached or persisted.
 
@@ -397,9 +404,9 @@ Guardrail: do not add localStorage, saved progress, cached answers, or stored tr
 
 Guardrail: use `/apoio`, not `/crise`.
 
-### Risk: breaking GitHub Pages deployment
+### Risk: confusing development routes with production deployment support
 
-Guardrail: preserve the current Vite base path unless deployment strategy changes intentionally.
+Guardrail: preserve the current Vite base path, but do not spend this slice on production fallback behavior or GitHub Pages deep-link compatibility. Handle that deliberately when preparing for production deployment.
 
 ### Risk: overbuilding architecture too soon
 
@@ -416,7 +423,7 @@ npm run lint
 npm run build
 ```
 
-Current `npm run lint` is TypeScript checking through `tsc --noEmit`, not ESLint.
+Current `npm run lint` is TypeScript checking through `tsc --noEmit`, not ESLint. After Front 02D adds the minimal test harness, also run `npm run test` for architecture changes that touch routed screens or app shell behavior.
 
 ---
 
@@ -426,8 +433,9 @@ Front 01A is done when:
 
 - the app uses React Router for top-level navigation;
 - stable routes exist for the current main screens;
+- temporary routes exist for `/educacao`, `/educacao/:resourceId`, and `/privacidade`;
 - desktop and mobile navigation use route matching;
-- direct route access works;
+- direct route access works in local development;
 - browser navigation works;
 - `currentView` is removed;
 - no persistence or backend behavior is introduced;
@@ -438,6 +446,7 @@ Front 01B is done when:
 
 - manifest exists;
 - metadata is updated;
+- current app icon assets are officially downloaded or exported into `public/icons/`;
 - `html lang="pt-BR"` is set;
 - app installability foundation is present;
 - no unsafe caching or sensitive persistence is added.
