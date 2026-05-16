@@ -24,6 +24,7 @@ export function resolveOptions(state: FlowRuntimeState, flows: GuidedFlow[]): Ru
           label: option.label,
           flowId: activeFlow.id,
           next: option.next,
+          effects: option.effects,
         }))
       : [];
 

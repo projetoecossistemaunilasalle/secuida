@@ -2,7 +2,7 @@ import { createInitialFlowState, createMessage, getActiveFlow, getFlowById } fro
 import { resolveOptions } from './resolveOptions';
 import { resumeFlow } from './resumeFlow';
 import { suspendFlow } from './suspendFlow';
-import type { FlowRuntimeState, GuidedFlow, RuntimeOption } from './types';
+import type { FlowEffect, FlowNode, FlowRuntimeState, GuidedFlow, RuntimeOption } from './types';
 
 export function advanceFlow(state: FlowRuntimeState, flows: GuidedFlow[], selectedLabel: string): FlowRuntimeState {
   const selectedOption = resolveOptions(state, flows).find((option) => option.label === selectedLabel);
@@ -36,19 +36,37 @@ export function advanceFlow(state: FlowRuntimeState, flows: GuidedFlow[], select
   }
 
   const activeFlow = getActiveFlow(state, flows);
-  const nextNode = activeFlow.nodes[selectedOption.next];
-  const userMessage = createMessage('user', selectedOption.label, activeFlow.id, state.activeNodeId);
-  const botMessage = createMessage('bot', nextNode.text, activeFlow.id, nextNode.id);
+  const currentNodeId = state.activeNodeId ?? activeFlow.entry.nodeId;
+  const currentNode = activeFlow.nodes[currentNodeId];
+  const matchingOption =
+    currentNode.kind === 'choice'
+      ? currentNode.options.find((option) => option.id === selectedOption.id)
+      : undefined;
 
-  return {
-    ...state,
-    activeNodeId: nextNode.id,
-    transcript: [...state.transcript, userMessage, botMessage],
-    answers: {
-      ...state.answers,
-      [state.activeNodeId ?? activeFlow.entry.nodeId]: selectedOption.id,
+  if (!matchingOption) {
+    throw new Error(`Selection ${selectedLabel} is not available for node ${currentNodeId}.`);
+  }
+
+  const userMessage = createMessage('user', selectedOption.label, activeFlow.id, currentNodeId);
+  const effectedState = applyOptionEffects(
+    {
+      ...state,
+      transcript: [...state.transcript, userMessage],
+      answers: {
+        ...state.answers,
+        [currentNodeId]: selectedOption.id,
+      },
+      pendingNavigation: undefined,
     },
-  };
+    activeFlow.id,
+    matchingOption.effects ?? [],
+  );
+
+  if (effectedState.pendingNavigation) {
+    return effectedState;
+  }
+
+  return advanceToNode(effectedState, activeFlow, matchingOption.next);
 }
 
 function endFlow(state: FlowRuntimeState, selectedLabel: string): FlowRuntimeState {
@@ -71,4 +89,62 @@ function appendUserMessage(state: FlowRuntimeState, selectedOption: RuntimeOptio
     ...state,
     transcript: [...state.transcript, createMessage('user', selectedOption.label, flowId, state.activeNodeId)],
   };
+}
+
+function applyOptionEffects(
+  state: FlowRuntimeState,
+  flowId: string,
+  effects: FlowEffect[],
+): FlowRuntimeState {
+  return effects.reduce((nextState, effect) => {
+    if (effect.kind === 'score') {
+      return {
+        ...nextState,
+        scores: {
+          ...nextState.scores,
+          [effect.scoreKey]: (nextState.scores[effect.scoreKey] ?? 0) + effect.value,
+        },
+      };
+    }
+
+    return {
+      ...nextState,
+      activeFlowId: undefined,
+      activeNodeId: undefined,
+      pendingNavigation: effect.destination,
+      safetyFlags: {
+        ...nextState.safetyFlags,
+        ...(effect.blockResume ? { [`block-resume:${flowId}`]: true } : {}),
+      },
+      transcript: [
+        ...nextState.transcript,
+        createMessage('bot', effect.message, flowId, nextState.activeNodeId),
+      ],
+    };
+  }, state);
+}
+
+function advanceToNode(state: FlowRuntimeState, flow: GuidedFlow, nodeId: string): FlowRuntimeState {
+  const node = flow.nodes[nodeId];
+
+  if (node.kind === 'score_branch') {
+    return advanceToNode(state, flow, resolveScoreBranchNextNode(state, node));
+  }
+
+  return {
+    ...state,
+    activeNodeId: node.id,
+    transcript: [...state.transcript, createMessage('bot', node.text, flow.id, node.id)],
+  };
+}
+
+function resolveScoreBranchNextNode(state: FlowRuntimeState, node: Extract<FlowNode, { kind: 'score_branch' }>) {
+  const score = state.scores[node.scoreKey] ?? 0;
+  const branch = node.branches.find((candidate) => score >= candidate.min && score <= candidate.max);
+
+  if (!branch) {
+    throw new Error(`No score branch found for ${node.scoreKey} score ${score}.`);
+  }
+
+  return branch.next;
 }

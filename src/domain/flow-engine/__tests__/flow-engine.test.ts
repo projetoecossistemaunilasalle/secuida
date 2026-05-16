@@ -344,4 +344,59 @@ describe('flow runtime', () => {
     expect(nextState.activeNodeId).toBe('low-result');
     expect(nextState.transcript.map((message) => message.text)).toContain('Resultado baixo.');
   });
+
+  it('handles safety interruption as a generic JSON option effect', () => {
+    const safetyFlow: GuidedFlow = {
+      ...scoringFlow,
+      id: 'safety-flow',
+      title: 'Fluxo com segurança',
+      entry: {
+        nodeId: 'q1',
+        enteringPhrases: ['Quero testar segurança'],
+        transitionMessage: 'Vamos testar segurança.',
+      },
+      nodes: {
+        q1: {
+          id: 'q1',
+          kind: 'choice',
+          text: 'Você precisa de apoio agora?',
+          options: [
+            {
+              id: 'yes',
+              label: 'Sim',
+              next: 'high-result',
+              effects: [
+                {
+                  kind: 'safety_interrupt',
+                  message: 'Vamos te direcionar para apoio imediato.',
+                  destination: '/apoio',
+                  blockResume: true,
+                },
+              ],
+            },
+            { id: 'no', label: 'Não', next: 'low-result' },
+          ],
+        },
+        'low-result': {
+          id: 'low-result',
+          kind: 'result',
+          text: 'Seguimos com calma.',
+        },
+        'high-result': {
+          id: 'high-result',
+          kind: 'result',
+          text: 'Este texto não deve aparecer antes do apoio.',
+        },
+      },
+    };
+
+    const nextState = advanceFlow(createInitialFlowState(safetyFlow, [safetyFlow]), [safetyFlow], 'Sim');
+
+    expect(nextState.pendingNavigation).toBe('/apoio');
+    expect(nextState.activeFlowId).toBeUndefined();
+    expect(nextState.activeNodeId).toBeUndefined();
+    expect(nextState.safetyFlags['block-resume:safety-flow']).toBe(true);
+    expect(nextState.transcript.map((message) => message.text)).toContain('Vamos te direcionar para apoio imediato.');
+    expect(nextState.transcript.map((message) => message.text)).not.toContain('Este texto não deve aparecer antes do apoio.');
+  });
 });

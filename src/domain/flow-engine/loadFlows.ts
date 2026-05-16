@@ -53,6 +53,7 @@ export function createInitialFlowState(flow: GuidedFlow, flows: GuidedFlow[]): F
     answers: {},
     scores: {},
     safetyFlags: {},
+    pendingNavigation: undefined,
   };
 }
 
