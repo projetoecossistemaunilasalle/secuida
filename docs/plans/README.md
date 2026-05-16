@@ -18,6 +18,7 @@ They consolidate:
 | Folder ownership and feature boundaries | [`02-folder-structure-feature-boundaries.md`](./02-folder-structure-feature-boundaries.md) |
 | Design system and reusable UI primitives | [`03-design-system-primitives.md`](./03-design-system-primitives.md) |
 | Typed content and data modeling | [`04-content-data-modeling.md`](./04-content-data-modeling.md) |
+| Guided flow and constrained chatbot framework | [`05-guided-flow-chatbot-framework.md`](./05-guided-flow-chatbot-framework.md) |
 
 ## Required Execution Method
 
@@ -39,4 +40,3 @@ Subagents should receive narrow ownership. They must not revert unrelated edits,
 - Keep domain/content modules independent from React.
 - Treat all support, service, resource, and mental-health copy as reviewable content.
 - Run `npm run lint` and `npm run build` before merging each completed slice.
-
