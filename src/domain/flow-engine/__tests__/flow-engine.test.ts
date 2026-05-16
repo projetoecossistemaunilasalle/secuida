@@ -4,6 +4,7 @@ import { createInitialFlowState, createInitialFlowStateFromRegistry } from '../l
 import { resolveOptions } from '../resolveOptions';
 import { resumeFlow } from '../resumeFlow';
 import { suspendFlow } from '../suspendFlow';
+import { parseGuidedFlow } from '../parseFlow';
 import { validateFlow } from '../validateFlow';
 import type { GuidedFlow } from '../types';
 
@@ -110,6 +111,19 @@ describe('validateFlow', () => {
     };
 
     expect(validateFlow(invalidFlow).errors).toContain('Flow fixture-flow node key start must match node id different-start.');
+  });
+
+  it('parses unknown JSON-shaped flow content into a typed guided flow', () => {
+    const parsed = parseGuidedFlow(validFlow);
+
+    expect(parsed.id).toBe('fixture-flow');
+    expect(parsed.nodes.start.kind).toBe('choice');
+  });
+
+  it('rejects invalid JSON-shaped flow content at the parser boundary', () => {
+    expect(() => parseGuidedFlow({ id: 'broken-flow' })).toThrow(
+      'Flow entry is required. Flow nodes are required.',
+    );
   });
 });
 
