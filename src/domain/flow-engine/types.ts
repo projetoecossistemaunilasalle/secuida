@@ -1,10 +1,25 @@
 import type { ContentLocale, ContentStatus } from '../content/types';
 
 export type FlowType = 'guided_conversation';
-export type FlowNodeKind = 'choice' | 'result';
+export type FlowNodeKind = 'choice' | 'result' | 'score_branch';
 export type ChatMessageSender = 'bot' | 'user';
 export type RuntimeOptionKind = 'node_option' | 'entry_phrase' | 'global_action' | 'resume_flow';
 export type GlobalActionTarget = '/apoio' | '/contatos' | '/educacao' | 'end';
+
+export interface ScoreFlowEffect {
+  kind: 'score';
+  scoreKey: string;
+  value: number;
+}
+
+export interface SafetyInterruptFlowEffect {
+  kind: 'safety_interrupt';
+  message: string;
+  destination: Exclude<GlobalActionTarget, 'end'>;
+  blockResume: boolean;
+}
+
+export type FlowEffect = ScoreFlowEffect | SafetyInterruptFlowEffect;
 
 export interface FlowEntry {
   nodeId: string;
@@ -16,6 +31,7 @@ export interface FlowOption {
   id: string;
   label: string;
   next: string;
+  effects?: FlowEffect[];
 }
 
 export interface ChoiceFlowNode {
@@ -32,7 +48,22 @@ export interface ResultFlowNode {
   recommendations?: string[];
 }
 
-export type FlowNode = ChoiceFlowNode | ResultFlowNode;
+export interface ScoreBranch {
+  id: string;
+  min: number;
+  max: number;
+  next: string;
+}
+
+export interface ScoreBranchFlowNode {
+  id: string;
+  kind: 'score_branch';
+  text: string;
+  scoreKey: string;
+  branches: ScoreBranch[];
+}
+
+export type FlowNode = ChoiceFlowNode | ResultFlowNode | ScoreBranchFlowNode;
 
 export interface GuidedFlow {
   id: string;
@@ -68,6 +99,7 @@ export interface FlowRuntimeState {
   answers: Record<string, string>;
   scores: Record<string, number>;
   safetyFlags: Record<string, boolean>;
+  pendingNavigation?: Exclude<GlobalActionTarget, 'end'>;
 }
 
 export interface RuntimeNodeOption {
@@ -76,6 +108,7 @@ export interface RuntimeNodeOption {
   label: string;
   flowId: string;
   next: string;
+  effects?: FlowEffect[];
 }
 
 export interface RuntimeEntryOption {

@@ -36,6 +36,60 @@ const validFlow: GuidedFlow = {
   },
 };
 
+const scoringFlow: GuidedFlow = {
+  id: 'scoring-flow',
+  version: '1.0.0',
+  locale: 'pt-BR',
+  title: 'Fluxo com pontuação',
+  type: 'guided_conversation',
+  status: 'draft',
+  entry: {
+    nodeId: 'q1',
+    enteringPhrases: ['Quero testar pontuação'],
+    transitionMessage: 'Vamos testar uma pergunta com pontuação.',
+  },
+  nodes: {
+    q1: {
+      id: 'q1',
+      kind: 'choice',
+      text: 'Você quer somar um ponto?',
+      options: [
+        {
+          id: 'yes',
+          label: 'Sim',
+          next: 'score-branch',
+          effects: [{ kind: 'score', scoreKey: 'fixture-score', value: 1 }],
+        },
+        {
+          id: 'no',
+          label: 'Não',
+          next: 'score-branch',
+        },
+      ],
+    },
+    'score-branch': {
+      id: 'score-branch',
+      kind: 'score_branch',
+      text: 'Calculando o melhor retorno.',
+      scoreKey: 'fixture-score',
+      branches: [
+        { id: 'low', min: 0, max: 0, next: 'low-result' },
+        { id: 'high', min: 1, max: 20, next: 'high-result' },
+      ],
+    },
+    'low-result': {
+      id: 'low-result',
+      kind: 'result',
+      text: 'Resultado baixo.',
+    },
+    'high-result': {
+      id: 'high-result',
+      kind: 'result',
+      text: 'Resultado alto.',
+    },
+  },
+};
+
 const secondFlow: GuidedFlow = {
   id: 'second-flow',
   version: '1.0.0',
@@ -223,5 +277,23 @@ describe('flow runtime', () => {
 
     expect(resumed.activeFlowId).toBe('fixture-flow');
     expect(resumed.activeNodeId).toBe('start');
+  });
+
+  it('applies generic score effects and resolves score branches without React-specific logic', () => {
+    const initialState = createInitialFlowState(scoringFlow, [scoringFlow]);
+    const nextState = advanceFlow(initialState, [scoringFlow], 'Sim');
+
+    expect(nextState.scores['fixture-score']).toBe(1);
+    expect(nextState.activeNodeId).toBe('high-result');
+    expect(nextState.transcript.map((message) => message.text)).toContain('Resultado alto.');
+  });
+
+  it('resolves score branches using zero when the score key has not been set', () => {
+    const initialState = createInitialFlowState(scoringFlow, [scoringFlow]);
+    const nextState = advanceFlow(initialState, [scoringFlow], 'Não');
+
+    expect(nextState.scores['fixture-score']).toBeUndefined();
+    expect(nextState.activeNodeId).toBe('low-result');
+    expect(nextState.transcript.map((message) => message.text)).toContain('Resultado baixo.');
   });
 });
