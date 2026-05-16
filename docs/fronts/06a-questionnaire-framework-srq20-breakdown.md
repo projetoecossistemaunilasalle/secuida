@@ -23,17 +23,16 @@ After Front 05A, SeCuida should have a generic flow schema, runtime engine, cons
 
 ## Target Shape
 
-A questionnaire is a specialized flow type.
+SRQ-20 is a regular registered JSON guided flow:
 
 ```txt
-questionnaire content
-  → generic questionnaire schema
-  → scoring and safety engine
-  → guided-flow runtime
-  → Orientation UI
+src/content/flows/srq20.json
+  -> import.meta.glob in src/content/flows/registry.ts
+  -> src/domain/flow-engine
+  -> src/features/orientation/OrientationScreen.tsx
 ```
 
-SRQ-20 proves the framework; it is not the framework itself.
+There is no SRQ-20 screen, no SRQ-20 route, no `srq20.ts` workflow file, no per-questionnaire TypeScript import, and no questionnaire-specific frontend state machine. The Orientation chatbot renders whatever the flow engine exposes: transcript messages, constrained options, score-driven results, and safety navigation.
 
 ---
 

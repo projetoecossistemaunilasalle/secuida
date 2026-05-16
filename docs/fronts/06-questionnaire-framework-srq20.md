@@ -11,25 +11,17 @@ SRQ-20 should not be treated as the only special or sensitive questionnaire. The
 
 ## Principle
 
-A questionnaire is a specialized flow type.
+A questionnaire is represented as dashboard-editable JSON guided-flow content:
 
 ```txt
-guided_conversation
-clinical_or_structured_questionnaire
-screening_questionnaire
-self_reflection_questionnaire
-````
+src/content/flows/*.json
+  -> import.meta.glob discovery
+  -> generic flow parser and validator
+  -> generic flow engine
+  -> generic chatbot UI
+```
 
-The framework should support:
-
-* consent nodes;
-* yes/no questions;
-* multiple-choice questions;
-* scoring;
-* thresholds;
-* early interruption rules;
-* result recommendations;
-* safety destinations.
+The app must not create a separate questionnaire screen, route, TypeScript workflow file, or questionnaire-specific runtime. SRQ-20 proves that the chatbot framework can execute structured, scored, interruptible flows from JSON-compatible content.
 
 ---
 
