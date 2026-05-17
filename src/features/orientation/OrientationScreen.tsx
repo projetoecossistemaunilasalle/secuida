@@ -17,6 +17,11 @@ export function OrientationScreen() {
   const options = useMemo(() => resolveOptions(state, flows), [state]);
   const visibleOptions = useMemo(() => {
     const normalizedInput = inputValue.trim().toLocaleLowerCase('pt-BR');
+    const strictMatch = options.find(
+      (option) => option.label.toLocaleLowerCase('pt-BR') === inputValue.toLocaleLowerCase('pt-BR'),
+    );
+
+    if (strictMatch) return [];
 
     if (!normalizedInput) {
       return options.filter((option) => option.kind === 'node_option');
@@ -24,6 +29,7 @@ export function OrientationScreen() {
 
     return options.filter((option) => option.label.toLocaleLowerCase('pt-BR').includes(normalizedInput));
   }, [inputValue, options]);
+
   const exactOption = options.find((option) => option.label.toLocaleLowerCase('pt-BR') === inputValue.trim().toLocaleLowerCase('pt-BR'));
 
   useEffect(() => {

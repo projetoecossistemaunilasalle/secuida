@@ -124,4 +124,44 @@ describe('OrientationScreen', () => {
     expect(screen.getByRole('option', { name: 'Dificuldade para descansar' })).toBeInTheDocument();
     expect(screen.queryByRole('option', { name: 'Muitas tarefas ao mesmo tempo' })).not.toBeInTheDocument();
   });
+
+  it('hides suggestions when input exactly matches an option label', () => {
+    render(
+      <MemoryRouter>
+        <OrientationScreen />
+      </MemoryRouter>,
+    );
+
+    const input = screen.getByPlaceholderText('Digite ou escolha uma opção');
+
+    // Initially, node_option pills are visible
+    expect(screen.getByRole('option', { name: 'Muitas tarefas ao mesmo tempo' })).toBeInTheDocument();
+
+    // Type an exact match
+    fireEvent.change(input, { target: { value: 'Muitas tarefas ao mesmo tempo' } });
+
+    // Suggestions should be hidden
+    expect(screen.queryByRole('listbox', { name: 'Sugestões de resposta' })).not.toBeInTheDocument();
+  });
+
+  it('shows suggestions when trailing space breaks strict match but send stays enabled', () => {
+    render(
+      <MemoryRouter>
+        <OrientationScreen />
+      </MemoryRouter>,
+    );
+
+    const input = screen.getByPlaceholderText('Digite ou escolha uma opção');
+    const sendButton = screen.getByRole('button', { name: 'Enviar opção selecionada' });
+
+    // Type exact match — suggestions hidden, send enabled
+    fireEvent.change(input, { target: { value: 'Dificuldade para descansar' } });
+    expect(screen.queryByRole('listbox', { name: 'Sugestões de resposta' })).not.toBeInTheDocument();
+    expect(sendButton).toBeEnabled();
+
+    // Add trailing space — strict match breaks, suggestions reappear, send stays enabled
+    fireEvent.change(input, { target: { value: 'Dificuldade para descansar ' } });
+    expect(screen.getByRole('listbox', { name: 'Sugestões de resposta' })).toBeInTheDocument();
+    expect(sendButton).toBeEnabled();
+  });
 });
