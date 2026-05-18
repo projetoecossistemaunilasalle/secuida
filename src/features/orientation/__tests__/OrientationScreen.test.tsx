@@ -38,7 +38,7 @@ describe('OrientationScreen', () => {
 
     expect(screen.getByRole('heading', { name: 'Antes de começar' })).toBeInTheDocument();
     expect(
-      screen.getByText('Conte como você está chegando agora. Você pode escolher uma sugestão ou escrever do seu jeito.'),
+      screen.getByText('Escolha uma frase para começar. Em seguida, o SeCuida te guia com perguntas simples, no seu ritmo.'),
     ).toBeInTheDocument();
     expect(screen.getByText('Pode nos contar como está se sentindo hoje?')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Me sinto um pouco cansado(a).' })).toBeInTheDocument();

@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { MessageCircle, Send, User } from 'lucide-react';
+import { MessageCircle, Send, Shield, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { flowRegistry } from '../../content/flows/registry';
 import { advanceFlow } from '../../domain/flow-engine/advanceFlow';
@@ -259,7 +259,7 @@ function OrientationIntroScreen({ onSelectStarter }: { onSelectStarter: (starter
             <div className="min-w-0">
               <h1 className="font-title-lg text-on-surface">Antes de começar</h1>
               <p className="mt-2 max-w-xl font-body-md text-on-surface-variant">
-                Conte como você está chegando agora. Você pode escolher uma sugestão ou escrever do seu jeito.
+                Escolha uma frase para começar. Em seguida, o SeCuida te guia com perguntas simples, no seu ritmo.
               </p>
             </div>
           </div>
@@ -284,9 +284,10 @@ function OrientationIntroScreen({ onSelectStarter }: { onSelectStarter: (starter
           </div>
         </div>
 
-        <p className="rounded-xl bg-[#EEF8F3] px-4 py-3 font-body-sm text-on-surface-variant">
-          Este espaço é anônimo e não salva sua conversa.
-        </p>
+        <div className="flex items-start gap-3 rounded-xl border border-outline-variant/50 bg-surface-container px-4 py-3">
+          <Shield className="mt-0.5 shrink-0 text-secondary" size={20} aria-hidden="true" />
+          <p className="font-body-sm text-on-surface-variant">Este espaço é anônimo e não salva sua conversa.</p>
+        </div>
       </div>
     </section>
   );
