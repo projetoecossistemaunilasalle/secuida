@@ -1,6 +1,6 @@
 # SeCuida — Front Status Tracker
 
-Last updated: 2026-05-16
+Last updated: 2026-05-19
 
 ## Legend
 
@@ -14,14 +14,9 @@ Last updated: 2026-05-16
 
 ## Completed Fronts
 
-### 01 — App Architecture & PWA — Partial
+### 01 — App Architecture & PWA — Done
 
-React Router with 7 routes, AppShell (TopBar + BottomNav), PWA manifest, Vite config for GitHub Pages deployment.
-
-**What's missing:**
-- Service worker for offline support and true PWA installability (manifest exists but no `vite-plugin-pwa` or custom SW)
-
-**Ready to start** — no blockers, can be implemented with `vite-plugin-pwa`.
+React Router with 7 routes, AppShell (TopBar + BottomNav), PWA manifest, Vite config for GitHub Pages deployment. Service worker via `vite-plugin-pwa` with precache for full offline support.
 
 ### 02 — Readable Folder Structure — Done
 
