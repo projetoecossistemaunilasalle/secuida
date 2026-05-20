@@ -51,6 +51,7 @@ SRQ-20 implemented as JSON guided flow (`src/content/flows/srq20.json`). Generic
 **What exists:** Breathing exercise (animated circles, 4-2-6 timing), crisis contacts (CVV 188, SAMU 192, Bombeiros 193) with `tel:` links.
 
 **What's missing:**
+
 - Grounding messages / psychoeducational content
 - Enhanced support paths beyond breathing + phone calls
 
@@ -65,11 +66,13 @@ SRQ-20 implemented as JSON guided flow (`src/content/flows/srq20.json`). Generic
 **What exists:** 3 Canoas RS services rendered as ServiceCards (CAPS II, UBS Centro, Clinica Escola Ulbra). Responsive grid layout.
 
 **What's missing:**
+
 - Filtering by service type
 - Search functionality
 - Location-based sorting
 
 **Blocker:** The client has not decided on the phone number strategy. Two options under consideration:
+
 1. Direct numbers to each service location
 2. Central numbers through the health secretary of each city
 
@@ -84,6 +87,7 @@ Cannot finalize the directory structure or filtering logic until this decision i
 **What exists:** `EducationLibraryScreen` renders resource cards. `ResourceDetailScreen` exists but is explicitly a stub (placeholder text). 1 seed resource (FEEVALE emotional regulation guide) with a fragile external Google-hosted image URL.
 
 **What's missing:**
+
 - Real curated content (multiple resources across categories)
 - Functional detail screen with actual resource rendering
 - Local asset strategy (replace remote image dependency)
@@ -122,14 +126,12 @@ Cannot finalize the directory structure or filtering logic until this decision i
 
 ### 13 — Quality, Validation & Tooling — Partial
 
-**What exists:** Vitest configured, 4 test files (55 tests passing). Content validators in domain layer. CI runs lint + test on push.
+**What exists:** Explicit TypeScript checking, ESLint, Prettier, Vitest, content/flow validation CLI, route/content/design-system smoke coverage, and a `pnpm run check` merge gate used by CI.
 
 **What's missing:**
-- ESLint configuration
-- Prettier configuration
+
 - Storybook setup
-- Accessibility testing (axe-core or similar)
-- Repo-wide content validation CLI script
+- Deeper accessibility automation beyond current smoke/accessibility-oriented tests
 
 **Blocker:** None — can be worked on now.
 
@@ -142,6 +144,7 @@ Cannot finalize the directory structure or filtering logic until this decision i
 **What exists:** Domain types as groundwork. Documentation only.
 
 **What's missing:**
+
 - Everything — this is a documentation/future-planning front
 - Data export interfaces
 - Admin-facing views
@@ -155,13 +158,13 @@ Cannot finalize the directory structure or filtering logic until this decision i
 
 ## Suggested Priority Order
 
-| Priority | Front | Rationale |
-|----------|-------|-----------|
-| 1 | 13 — Quality & Tooling | No blockers, improves everything else |
-| 2 | 14 — Dashboard Readiness | Natural follow-up to 13 |
-| 3 | 08, 09, 10 — Content-dependent fronts | Ready to implement once client provides content and decisions |
-| 4 | 11 — Privacy & LGPD | Needs legal input |
-| 5 | 12 — Analytics | Blocked by 11 |
+| Priority | Front                                 | Rationale                                                     |
+| -------- | ------------------------------------- | ------------------------------------------------------------- |
+| 1        | 13 — Quality & Tooling                | No blockers, improves everything else                         |
+| 2        | 14 — Dashboard Readiness              | Natural follow-up to 13                                       |
+| 3        | 08, 09, 10 — Content-dependent fronts | Ready to implement once client provides content and decisions |
+| 4        | 11 — Privacy & LGPD                   | Needs legal input                                             |
+| 5        | 12 — Analytics                        | Blocked by 11                                                 |
 
 ---
 

@@ -15,7 +15,8 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "validate:flows": "tsx scripts/validate-flows.ts"
+    "validate:flows": "tsx scripts/validate-flows.ts",
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run validate:flows && pnpm run test && pnpm run build"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",

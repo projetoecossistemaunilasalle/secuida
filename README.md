@@ -31,11 +31,14 @@ The dev server defaults to port `3000`.
 ```bash
 pnpm run typecheck
 pnpm run lint
+pnpm run format:check
+pnpm run validate:flows
 pnpm run test
 pnpm run build
+pnpm run check
 ```
 
-`pnpm run typecheck` currently runs TypeScript with `tsc --noEmit`. During the Front 13 tooling migration, `pnpm run lint` is being migrated from TypeScript checking to ESLint.
+`pnpm run check` is the full local quality gate and matches CI.
 
 ## Documentation
 
