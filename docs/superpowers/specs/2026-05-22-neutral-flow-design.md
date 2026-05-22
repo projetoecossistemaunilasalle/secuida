@@ -30,7 +30,7 @@ This implementation will not:
 Use normal guided flows with an optional purpose field:
 
 ```ts
-export type FlowPurpose = 'orientation_entry' | 'topic_support' | 'post_flow_routing';
+export type FlowPurpose = 'orientation_entry' | 'post_flow_routing';
 
 export interface GuidedFlow {
   id: string;
@@ -47,7 +47,7 @@ export interface GuidedFlow {
 
 The flow `type` remains `guided_conversation`. This keeps neutral flows inside the existing deterministic engine and avoids branching runtime behavior for a content distinction.
 
-The validator should accept missing `purpose` for existing flows and reject unknown purpose values when present. It should also continue validating every registered flow before runtime state is created.
+The validator should accept missing `purpose` for regular content flows and reject unknown purpose values when present. It should also continue validating every registered flow before runtime state is created.
 
 ## Initial Orientation Behavior
 
@@ -108,7 +108,7 @@ When a user selects a node option with a `flow_start` effect, the engine should 
 
 The existing `entry_phrase` switching behavior remains unchanged for autocomplete-driven flow switching. Suspending and resuming still apply to regular flow switching unless safety rules block it.
 
-When the active node is a result node from a non-neutral, non-post-flow flow, `resolveOptions` should include a runtime option:
+When the active node is a result node from a regular content flow, identified by `purpose === undefined`, `resolveOptions` should include a runtime option:
 
 ```ts
 {
@@ -119,7 +119,7 @@ When the active node is a result node from a non-neutral, non-post-flow flow, `r
 }
 ```
 
-This option should not appear while already inside `post-flow-next-step`, and it should not replace global actions. Users must always be able to end, seek support, view contacts, or view education without going through another flow.
+This option should not appear while inside orientation or post-flow neutral flows, and it should not replace global actions. Users must always be able to end, seek support, view contacts, or view education without going through another flow.
 
 ## UI Integration
 
@@ -134,6 +134,8 @@ createInitialFlowStateFromRegistry(flows, starter.flowId)
 The typing delay, accessible log, exact-match composer behavior, autocomplete suggestions, direct option click behavior, and pending navigation behavior should remain unchanged.
 
 For "Outro", the screen should start `orientation-understand-feelings` and avoid recording "Outro" as a user message, matching the current no-message behavior.
+
+Autocomplete should continue exposing entry phrases from every other flow, including neutral flows. Selecting a neutral entry phrase from inside another neutral flow is acceptable because it uses the existing deterministic flow-switch behavior and does not imply free-text understanding.
 
 ## Error Handling
 
@@ -170,3 +172,5 @@ Update content tests to include the new flow IDs and purpose metadata.
 ## Rollout
 
 The change is content/model/runtime only and stays local to the main app. No migration is required because current persisted flow state does not exist. Existing regular flows remain valid because `purpose` is optional.
+
+Scores are scoped to a newly started active flow. The existing suspend/resume model does not preserve scores in `SuspendedFlowState`; if future score-based flows must survive suspension and resume, that should be handled as a separate engine change before relying on score persistence.

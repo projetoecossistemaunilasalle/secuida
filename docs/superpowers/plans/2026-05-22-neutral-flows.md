@@ -67,7 +67,7 @@ Add these tests inside the existing `describe('validateFlow', ...)` block in `sr
     };
 
     expect(validateFlow(invalidFlow).errors).toContain(
-      'Flow fixture-flow purpose must be one of orientation_entry, topic_support, post_flow_routing.',
+      'Flow fixture-flow purpose must be one of orientation_entry, post_flow_routing.',
     );
   });
 
@@ -108,7 +108,7 @@ Update `src/domain/flow-engine/types.ts` with these additions:
 
 ```ts
 export type FlowType = 'guided_conversation';
-export type FlowPurpose = 'orientation_entry' | 'topic_support' | 'post_flow_routing';
+export type FlowPurpose = 'orientation_entry' | 'post_flow_routing';
 export type FlowNodeKind = 'choice' | 'result' | 'score_branch';
 export type ChatMessageSender = 'bot' | 'user';
 export type RuntimeOptionKind = 'node_option' | 'entry_phrase' | 'global_action' | 'resume_flow' | 'flow_start';
@@ -151,7 +151,7 @@ export type RuntimeOption =
 Update `src/domain/flow-engine/validateFlow.ts`:
 
 ```ts
-const allowedFlowPurposes = ['orientation_entry', 'topic_support', 'post_flow_routing'];
+const allowedFlowPurposes = ['orientation_entry', 'post_flow_routing'];
 ```
 
 Add this check inside `validateFlow` after the required `id` check:
@@ -229,7 +229,13 @@ Expected: FAIL because cross-flow `flow_start` targets are not validated.
 
 - [ ] **Step 3: Add registry-level target validation**
 
-Update `validateRegisteredFlows` in `src/domain/flow-engine/loadFlows.ts`:
+Update the imports in `src/domain/flow-engine/loadFlows.ts`:
+
+```ts
+import type { ChatMessage, FlowRuntimeState, FlowStartFlowEffect, GuidedFlow } from './types';
+```
+
+Update `validateRegisteredFlows`:
 
 ```ts
 export function validateRegisteredFlows(flows: GuidedFlow[]) {
@@ -250,7 +256,8 @@ function validateFlowStartTargets(flow: GuidedFlow, flowIds: Set<string>) {
 
     return node.options.flatMap((option) =>
       (option.effects ?? [])
-        .filter((effect) => effect.kind === 'flow_start' && !flowIds.has(effect.flowId))
+        .filter((effect): effect is FlowStartFlowEffect => effect.kind === 'flow_start')
+        .filter((effect) => !flowIds.has(effect.flowId))
         .map((effect) => `Flow ${flow.id} option ${option.id} starts missing flow ${effect.flowId}.`),
     );
   });
@@ -329,6 +336,7 @@ Add these tests inside `describe('flow runtime', ...)`:
     expect(nextState.activeNodeId).toBe('start');
     expect(nextState.suspendedFlows['neutral-router']).toBeUndefined();
     expect(nextState.transcript.map((message) => message.text)).toContain('Falar sobre sobrecarga');
+    // The target flow starts immediately, so its entry transition appears in the same transcript.
     expect(nextState.transcript.map((message) => message.text)).toContain(validFlow.entry.transitionMessage);
   });
 
@@ -379,6 +387,43 @@ Add these tests inside `describe('flow runtime', ...)`:
     const resultState = advanceFlow(state, [postFlowRouter, validFlow], 'Encerrar por enquanto');
 
     expect(resolveOptions(resultState, [postFlowRouter, validFlow])).not.toContainEqual(
+      expect.objectContaining({ id: 'post-flow-next-step-start' }),
+    );
+  });
+
+  it('does not offer post-flow routing from orientation neutral flow results', () => {
+    const orientationFlow: GuidedFlow = {
+      ...neutralRouterFlow,
+      nodes: {
+        start: {
+          id: 'start',
+          kind: 'choice',
+          text: 'Qual próximo passo você prefere?',
+          options: [
+            {
+              id: 'end',
+              label: 'Encerrar por enquanto',
+              next: 'done',
+            },
+          ],
+        },
+        done: {
+          id: 'done',
+          kind: 'result',
+          text: 'Tudo bem. Você pode voltar quando quiser.',
+        },
+      },
+    };
+    const postFlowRouter: GuidedFlow = {
+      ...neutralRouterFlow,
+      id: 'post-flow-next-step',
+      purpose: 'post_flow_routing',
+    };
+    const flows = [orientationFlow, postFlowRouter, validFlow];
+    const state = createInitialFlowState(orientationFlow, flows);
+    const resultState = advanceFlow(state, flows, 'Encerrar por enquanto');
+
+    expect(resolveOptions(resultState, flows)).not.toContainEqual(
       expect.objectContaining({ id: 'post-flow-next-step-start' }),
     );
   });
@@ -465,6 +510,8 @@ function startFlowWithoutSuspending(state: FlowRuntimeState, flows: GuidedFlow[]
 }
 ```
 
+This helper intentionally keeps the prior transcript, suspended flows, and safety flags while using the target flow's fresh `answers` and `scores`. The existing suspend/resume model does not persist scores in `SuspendedFlowState`; future score-based resume requirements need a separate engine change.
+
 - [ ] **Step 4: Add post-flow option resolution**
 
 Update the import in `src/domain/flow-engine/resolveOptions.ts`:
@@ -488,7 +535,7 @@ Add this block after `resumeOptions`:
 
 ```ts
   const postFlowOptions: RuntimeOption[] =
-    activeNode?.kind === 'result' && activeFlow.purpose !== 'post_flow_routing'
+    activeNode?.kind === 'result' && activeFlow.purpose === undefined
       ? flows.some((flow) => flow.id === postFlowStartOption.flowId)
         ? [postFlowStartOption]
         : []
@@ -500,6 +547,8 @@ Update the return:
 ```ts
   return [...currentNodeOptions, ...entryPhraseOptions, ...resumeOptions, ...postFlowOptions, ...globalFlowActions];
 ```
+
+Do not suppress neutral flow entry phrases in this task. Existing autocomplete flow switching should continue to expose entry phrases from every other flow, including neutral flows; this is deterministic switching, not free-text understanding.
 
 - [ ] **Step 5: Run tests to verify they pass**
 
@@ -527,8 +576,10 @@ Update the flow registry test in `src/content/__tests__/content.test.ts`:
 
 ```ts
   it('contains switchable guided conversation flows', () => {
-    expect(flowRegistry.flows.length).toBeGreaterThan(1);
-    expect(flowRegistry.flows.map((flow) => flow.id)).toEqual([
+    const flowIds = flowRegistry.flows.map((flow) => flow.id);
+
+    expect(flowRegistry.flows.length).toBeGreaterThanOrEqual(8);
+    expect(flowIds).toEqual(expect.arrayContaining([
       'orientation-understand-feelings',
       'orientation-talk-through-experience',
       'orientation-next-care-step',
@@ -537,7 +588,7 @@ Update the flow registry test in `src/content/__tests__/content.test.ts`:
       'work-stress',
       'rest-recovery',
       'srq20',
-    ]);
+    ]));
     flowRegistry.flows.forEach((flow) => {
       expect(flow.type).toBe('guided_conversation');
       expect(flow.entry.enteringPhrases.length).toBeGreaterThan(0);
@@ -556,6 +607,10 @@ Expected: FAIL because neutral flows are not registered.
 - [ ] **Step 3: Create neutral flow content**
 
 Create `src/content/flows/neutral.ts`:
+
+The `flow_start` options below still include `next` values because `FlowOption` requires a valid local node reference. Those handoff result nodes are structural fallbacks for validation; the normal runtime path starts the target flow immediately and does not display the handoff result text.
+
+Node option labels intentionally avoid exact duplicates of global action labels such as "Quero apoio agora", "Ver contatos", and "Ver materiais educativos". `advanceFlow` selects by label, so duplicate labels would make a neutral node option shadow the global action.
 
 ```ts
 import type { GuidedFlow } from '../../domain/flow-engine/types';
@@ -598,11 +653,18 @@ export const neutralFlows = [
             next: 'handoff-srq20',
             effects: [{ kind: 'flow_start', flowId: 'srq20' }],
           },
+          {
+            id: 'calm',
+            label: 'Prefiro algo mais leve agora',
+            next: 'handoff-calm',
+            effects: [{ kind: 'flow_start', flowId: 'orientation-calm-moment' }],
+          },
         ],
       },
       'handoff-work-stress': { id: 'handoff-work-stress', kind: 'result', text: 'Vou abrir um caminho sobre sobrecarga.' },
       'handoff-rest': { id: 'handoff-rest', kind: 'result', text: 'Vou abrir um caminho sobre descanso.' },
       'handoff-srq20': { id: 'handoff-srq20', kind: 'result', text: 'Vou abrir o questionário.' },
+      'handoff-calm': { id: 'handoff-calm', kind: 'result', text: 'Vou abrir um caminho mais leve.' },
     },
   },
   {
@@ -636,10 +698,23 @@ export const neutralFlows = [
             next: 'handoff-rest',
             effects: [{ kind: 'flow_start', flowId: 'rest-recovery' }],
           },
+          {
+            id: 'pressure-conflict',
+            label: 'Teve pressão ou conflito',
+            next: 'handoff-work-stress',
+            effects: [{ kind: 'flow_start', flowId: 'work-stress' }],
+          },
+          {
+            id: 'uncertain',
+            label: 'Ainda não sei nomear',
+            next: 'handoff-understand',
+            effects: [{ kind: 'flow_start', flowId: 'orientation-understand-feelings' }],
+          },
         ],
       },
       'handoff-work-stress': { id: 'handoff-work-stress', kind: 'result', text: 'Vou abrir um caminho sobre sobrecarga.' },
       'handoff-rest': { id: 'handoff-rest', kind: 'result', text: 'Vou abrir um caminho sobre descanso.' },
+      'handoff-understand': { id: 'handoff-understand', kind: 'result', text: 'Vou abrir um caminho para entender o momento.' },
     },
   },
   {
@@ -679,11 +754,41 @@ export const neutralFlows = [
             next: 'handoff-srq20',
             effects: [{ kind: 'flow_start', flowId: 'srq20' }],
           },
+          {
+            id: 'education',
+            label: 'Entender materiais educativos',
+            next: 'education-result',
+          },
+          {
+            id: 'contacts',
+            label: 'Entender contatos de apoio',
+            next: 'contacts-result',
+          },
+          {
+            id: 'support-now',
+            label: 'Organizar apoio imediato',
+            next: 'support-result',
+          },
         ],
       },
       'handoff-work-stress': { id: 'handoff-work-stress', kind: 'result', text: 'Vou abrir uma orientação guiada.' },
       'handoff-rest': { id: 'handoff-rest', kind: 'result', text: 'Vou abrir uma pausa de recuperação.' },
       'handoff-srq20': { id: 'handoff-srq20', kind: 'result', text: 'Vou abrir o questionário.' },
+      'education-result': {
+        id: 'education-result',
+        kind: 'result',
+        text: 'Você pode usar a opção "Ver materiais educativos" para abrir conteúdos de apoio.',
+      },
+      'contacts-result': {
+        id: 'contacts-result',
+        kind: 'result',
+        text: 'Você pode usar a opção "Ver contatos" para encontrar serviços e contatos de apoio.',
+      },
+      'support-result': {
+        id: 'support-result',
+        kind: 'result',
+        text: 'Se precisar de ajuda imediata, use a opção "Quero apoio agora".',
+      },
     },
   },
   {
@@ -712,6 +817,11 @@ export const neutralFlows = [
             effects: [{ kind: 'flow_start', flowId: 'rest-recovery' }],
           },
           {
+            id: 'education',
+            label: 'Entender algo educativo',
+            next: 'education-result',
+          },
+          {
             id: 'end',
             label: 'Encerrar por enquanto',
             next: 'end-result',
@@ -719,6 +829,11 @@ export const neutralFlows = [
         ],
       },
       'handoff-rest': { id: 'handoff-rest', kind: 'result', text: 'Vou abrir uma pausa curta.' },
+      'education-result': {
+        id: 'education-result',
+        kind: 'result',
+        text: 'Você pode usar a opção "Ver materiais educativos" para abrir conteúdos quando quiser.',
+      },
       'end-result': {
         id: 'end-result',
         kind: 'result',
@@ -758,6 +873,21 @@ export const neutralFlows = [
             effects: [{ kind: 'flow_start', flowId: 'rest-recovery' }],
           },
           {
+            id: 'education',
+            label: 'Entender materiais educativos',
+            next: 'education-result',
+          },
+          {
+            id: 'contacts',
+            label: 'Entender contatos de apoio',
+            next: 'contacts-result',
+          },
+          {
+            id: 'support-now',
+            label: 'Organizar apoio imediato',
+            next: 'support-result',
+          },
+          {
             id: 'end',
             label: 'Encerrar por enquanto',
             next: 'end-result',
@@ -766,6 +896,21 @@ export const neutralFlows = [
       },
       'handoff-orientation': { id: 'handoff-orientation', kind: 'result', text: 'Vou abrir outro caminho de orientação.' },
       'handoff-rest': { id: 'handoff-rest', kind: 'result', text: 'Vou abrir uma pausa de descanso.' },
+      'education-result': {
+        id: 'education-result',
+        kind: 'result',
+        text: 'Você pode seguir pela opção "Ver materiais educativos" se quiser ler algo agora.',
+      },
+      'contacts-result': {
+        id: 'contacts-result',
+        kind: 'result',
+        text: 'Você pode seguir pela opção "Ver contatos" para procurar apoio local.',
+      },
+      'support-result': {
+        id: 'support-result',
+        kind: 'result',
+        text: 'Se for urgente, use "Quero apoio agora" a qualquer momento.',
+      },
       'end-result': {
         id: 'end-result',
         kind: 'result',
@@ -992,11 +1137,19 @@ Add this test:
   });
 ```
 
-Update the "Outro" test expectation:
+Replace the "Outro" test with the complete neutral-flow version:
 
 ```ts
+  it('starts the default neutral flow from Outro without adding Outro as a conversation message', () => {
+    renderOrientation();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Outro' }));
+    advanceInitialLoad();
+
     expect(screen.queryByText(/^Outro$/)).not.toBeInTheDocument();
     expect(screen.getByText('Vamos começar de um jeito simples, sem precisar fechar uma resposta agora.')).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Parece mais sobre sobrecarga' })).toBeInTheDocument();
+  });
 ```
 
 Update the starter-recording test to use a new intro label:
@@ -1085,6 +1238,18 @@ Update initial state creation:
 
 ```ts
       const initialState = createInitialFlowStateFromRegistry(flows, selectedIntroFlowId);
+```
+
+Update the intro message fallback in the same hook:
+
+```ts
+                initialState.activeFlowId ?? selectedIntroFlowId,
+```
+
+Update the hook dependency array:
+
+```ts
+  }, [hasStarted, selectedIntroStarter, selectedIntroFlowId, state]);
 ```
 
 Update intro message logic:
