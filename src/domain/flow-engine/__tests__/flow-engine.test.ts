@@ -275,6 +275,30 @@ describe('validateFlow', () => {
       'Flow fixture-flow option bad-start navigate effect must include a supported destination.',
     );
   });
+
+  it('rejects unknown effect kinds', () => {
+    const invalidFlow = {
+      ...validFlow,
+      nodes: {
+        ...validFlow.nodes,
+        start: {
+          ...validFlow.nodes.start,
+          options: [
+            {
+              id: 'bad-kind',
+              label: 'Efeito desconhecido',
+              next: 'end',
+              effects: [{ kind: 'flow_statr', flowId: 'some-flow' }],
+            },
+          ],
+        },
+      },
+    };
+
+    expect(validateFlow(invalidFlow).errors).toContain(
+      'Flow fixture-flow option bad-kind has unsupported effect kind "flow_statr".',
+    );
+  });
 });
 
 const neutralRouterFlow: GuidedFlow = {

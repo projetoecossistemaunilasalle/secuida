@@ -155,6 +155,7 @@ function validateEffect(flowLabel: string, optionId: string, effect: FlowEffect,
         `Flow ${flowLabel} option ${optionId} safety interrupt effect must include message, destination, and blockResume.`,
       );
     }
+    return;
   }
 
   if (effect.kind === 'flow_start') {
@@ -175,5 +176,10 @@ function validateEffect(flowLabel: string, optionId: string, effect: FlowEffect,
     if (!hasText(effect.message)) {
       errors.push(`Flow ${flowLabel} option ${optionId} end_flow effect must include message.`);
     }
+    return;
   }
+
+  errors.push(
+    `Flow ${flowLabel} option ${optionId} has unsupported effect kind "${(effect as { kind: string }).kind}".`,
+  );
 }
