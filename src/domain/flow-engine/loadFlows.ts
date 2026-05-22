@@ -3,7 +3,12 @@ import { validateFlow } from './validateFlow';
 
 let messageCounter = 0;
 
-export function createMessage(sender: ChatMessage['sender'], text: string, flowId: string, nodeId?: string): ChatMessage {
+export function createMessage(
+  sender: ChatMessage['sender'],
+  text: string,
+  flowId: string,
+  nodeId?: string,
+): ChatMessage {
   messageCounter += 1;
 
   return {

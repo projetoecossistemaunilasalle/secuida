@@ -7,7 +7,7 @@ import { createInitialFlowStateFromRegistry, createMessage } from '../../domain/
 import { resolveOptions } from '../../domain/flow-engine/resolveOptions';
 import type { ChatMessage, FlowRuntimeState, RuntimeOption } from '../../domain/flow-engine/types';
 
-const TYPING_DELAY_MS = 1200
+const TYPING_DELAY_MS = 1200;
 
 const flows = flowRegistry.flows;
 
@@ -65,7 +65,9 @@ export function OrientationScreen() {
     return options.filter((option) => option.label.toLocaleLowerCase('pt-BR').includes(normalizedInput));
   }, [inputValue, options]);
 
-  const exactOption = options.find((option) => option.label.toLocaleLowerCase('pt-BR') === inputValue.trim().toLocaleLowerCase('pt-BR'));
+  const exactOption = options.find(
+    (option) => option.label.toLocaleLowerCase('pt-BR') === inputValue.trim().toLocaleLowerCase('pt-BR'),
+  );
 
   useEffect(() => {
     const log = logRef.current;
@@ -89,7 +91,14 @@ export function OrientationScreen() {
       const introMessages =
         selectedIntroStarter === null
           ? []
-          : [createMessage('user', selectedIntroStarter, initialState.activeFlowId ?? 'work-stress', initialState.activeNodeId)];
+          : [
+              createMessage(
+                'user',
+                selectedIntroStarter,
+                initialState.activeFlowId ?? 'work-stress',
+                initialState.activeNodeId,
+              ),
+            ];
       const nextState = {
         ...initialState,
         transcript: [...introMessages, ...initialState.transcript],
@@ -302,7 +311,10 @@ function MessageBubble({ message }: { message: ChatMessage }) {
       <div className={`flex max-w-[84%] flex-col gap-1 ${isUser ? 'items-end' : 'items-start'}`}>
         <span className="flex items-center gap-2 font-label-md text-on-surface-variant">
           {!isUser && (
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-fixed text-primary" aria-hidden="true">
+            <span
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-fixed text-primary"
+              aria-hidden="true"
+            >
               <MessageCircle size={17} />
             </span>
           )}
@@ -319,7 +331,10 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         </div>
       </div>
       {isUser && (
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-container-low text-secondary" aria-hidden="true">
+        <span
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-container-low text-secondary"
+          aria-hidden="true"
+        >
           <User size={18} />
         </span>
       )}
@@ -350,5 +365,5 @@ function TypingIndicator() {
         </div>
       </article>
     </>
-  )
+  );
 }

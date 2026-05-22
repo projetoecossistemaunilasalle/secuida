@@ -20,4 +20,3 @@ export interface ServicesContent extends ContentMetadata {
   description: string;
   services: ServiceDirectoryEntry[];
 }
-

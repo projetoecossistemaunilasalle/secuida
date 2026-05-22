@@ -19,7 +19,7 @@ vite.config.ts
        ├─ registerType: 'autoUpdate'
        ├─ workbox.globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}']
        ├─ manifest: merged from existing manifest.webmanifest
-       └─ devOptions: { enabled: true }
+       └─ devOptions: { enabled: false }
 ```
 
 ## Changes

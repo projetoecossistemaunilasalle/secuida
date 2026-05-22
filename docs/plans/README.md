@@ -12,13 +12,13 @@ They consolidate:
 
 ## Plan Files
 
-| Domain | File |
-|---|---|
-| Routing, app shell, and PWA foundation | [`01-routing-app-shell-pwa.md`](./01-routing-app-shell-pwa.md) |
-| Folder ownership and feature boundaries | [`02-folder-structure-feature-boundaries.md`](./02-folder-structure-feature-boundaries.md) |
-| Design system and reusable UI primitives | [`03-design-system-primitives.md`](./03-design-system-primitives.md) |
-| Typed content and data modeling | [`04-content-data-modeling.md`](./04-content-data-modeling.md) |
-| Guided flow and constrained chatbot framework | [`05-guided-flow-chatbot-framework.md`](./05-guided-flow-chatbot-framework.md) |
+| Domain                                        | File                                                                                       |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Routing, app shell, and PWA foundation        | [`01-routing-app-shell-pwa.md`](./01-routing-app-shell-pwa.md)                             |
+| Folder ownership and feature boundaries       | [`02-folder-structure-feature-boundaries.md`](./02-folder-structure-feature-boundaries.md) |
+| Design system and reusable UI primitives      | [`03-design-system-primitives.md`](./03-design-system-primitives.md)                       |
+| Typed content and data modeling               | [`04-content-data-modeling.md`](./04-content-data-modeling.md)                             |
+| Guided flow and constrained chatbot framework | [`05-guided-flow-chatbot-framework.md`](./05-guided-flow-chatbot-framework.md)             |
 
 ## Current Implementation Snapshot
 

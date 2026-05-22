@@ -12,16 +12,17 @@
 
 ## File Structure
 
-| File | Action | Purpose |
-|---|---|---|
+| File                                                            | Action | Purpose                                                       |
+| --------------------------------------------------------------- | ------ | ------------------------------------------------------------- |
 | `src/features/orientation/__tests__/OrientationScreen.test.tsx` | Modify | Add tests for strict match hiding and trailing space behavior |
-| `src/features/orientation/OrientationScreen.tsx` | Modify | Add `strictExactOption`, gate `visibleOptions` on it |
+| `src/features/orientation/OrientationScreen.tsx`                | Modify | Add `strictExactOption`, gate `visibleOptions` on it          |
 
 ---
 
 ### Task 1: Write failing tests for strict exact match behavior
 
 **Files:**
+
 - Modify: `src/features/orientation/__tests__/OrientationScreen.test.tsx`
 
 - [ ] **Step 1: Add test — suggestions hide when input exactly matches an option**
@@ -84,6 +85,7 @@ Expected: Two new tests FAIL — suggestions are still visible when exact match 
 ### Task 2: Implement strict exact match hiding
 
 **Files:**
+
 - Modify: `src/features/orientation/OrientationScreen.tsx:18-27`
 
 - [ ] **Step 1: Add `strictExactOption` and gate `visibleOptions`**
@@ -106,7 +108,9 @@ const visibleOptions = useMemo(() => {
   return options.filter((option) => option.label.toLocaleLowerCase('pt-BR').includes(normalizedInput));
 }, [inputValue, options]);
 
-const exactOption = options.find((option) => option.label.toLocaleLowerCase('pt-BR') === inputValue.trim().toLocaleLowerCase('pt-BR'));
+const exactOption = options.find(
+  (option) => option.label.toLocaleLowerCase('pt-BR') === inputValue.trim().toLocaleLowerCase('pt-BR'),
+);
 ```
 
 - [ ] **Step 2: Run tests to verify they pass**

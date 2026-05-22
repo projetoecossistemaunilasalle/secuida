@@ -21,7 +21,7 @@ flow_started
 flow_completed
 support_contact_clicked
 education_filter_used
-````
+```
 
 Only aggregate-level data should be collected.
 
@@ -54,7 +54,7 @@ Example:
 ```ts
 track('flow_completed', {
   flowId: 'srq20',
-  resultBand: 'below_threshold'
+  resultBand: 'below_threshold',
 });
 ```
 
@@ -63,7 +63,7 @@ Avoid:
 ```ts
 track('answer_submitted', {
   questionId: 'q17',
-  answer: true
+  answer: true,
 });
 ```
 
@@ -73,18 +73,18 @@ track('answer_submitted', {
 
 Acceptable provider constraints:
 
-* cookieless;
-* no advertising network;
-* no individual tracking;
-* IP anonymization;
-* self-hosting preferred if possible.
+- cookieless;
+- no advertising network;
+- no individual tracking;
+- IP anonymization;
+- self-hosting preferred if possible.
 
 ---
 
 ## Acceptance Criteria
 
-* Event taxonomy approved.
-* Privacy copy updated.
-* Analytics provider reviewed.
-* No answer-level tracking.
-* No individual session trajectory tracking.
+- Event taxonomy approved.
+- Privacy copy updated.
+- Analytics provider reviewed.
+- No answer-level tracking.
+- No individual session trajectory tracking.

@@ -1,4 +1,3 @@
-
 # Front 06 — Questionnaire Framework & SRQ-20 Test Flow
 
 ## Goal
@@ -44,15 +43,15 @@ It should be used to prove the questionnaire framework, not hardcoded as a uniqu
 
 ## SRQ-20 Required Behavior
 
-* User is told clearly they are answering SRQ-20.
-* User consents before beginning.
-* There are 20 yes/no questions.
-* Affirmative answers are scored.
-* Score of 7 or more produces a possible-distress support result.
-* Result copy must avoid diagnostic language.
-* If the suicidal ideation question is answered affirmatively, the questionnaire stops immediately.
-* The user is routed to immediate support content.
-* The interrupted questionnaire should not be offered for resumption.
+- User is told clearly they are answering SRQ-20.
+- User consents before beginning.
+- There are 20 yes/no questions.
+- Affirmative answers are scored.
+- Score of 7 or more produces a possible-distress support result.
+- Result copy must avoid diagnostic language.
+- If the suicidal ideation question is answered affirmatively, the questionnaire stops immediately.
+- The user is routed to immediate support content.
+- The interrupted questionnaire should not be offered for resumption.
 
 ---
 
@@ -110,10 +109,10 @@ result copy avoids diagnosis wording
 
 ## Acceptance Criteria
 
-* SRQ-20 is represented as JSON-compatible content.
-* Questionnaire logic is generic.
-* Scoring is not implemented inside React components.
-* Safety rules are declarative.
-* SRQ-20 validates successfully.
-* SRQ-20 tests pass.
-* The framework can support another questionnaire without major refactor.
+- SRQ-20 is represented as JSON-compatible content.
+- Questionnaire logic is generic.
+- Scoring is not implemented inside React components.
+- Safety rules are declarative.
+- SRQ-20 validates successfully.
+- SRQ-20 tests pass.
+- The framework can support another questionnaire without major refactor.

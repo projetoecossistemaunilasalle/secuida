@@ -18,7 +18,7 @@ Can I trust it?
 Is this anonymous?
 What can I do here?
 Where should I go next?
-````
+```
 
 Home should not feel like a dashboard or a clinical form.
 
@@ -81,9 +81,9 @@ Because one-time onboarding may require remembering that the user has already se
 
 Current product decision:
 
-* Use the app-style starting screen as the onboarding explanation.
-* Do not duplicate that explanation as a “Como funciona” section on Home.
-* If users need to revisit onboarding later, add an explicit route or settings/help entry instead of placing the full explanation on Home.
+- Use the app-style starting screen as the onboarding explanation.
+- Do not duplicate that explanation as a “Como funciona” section on Home.
+- If users need to revisit onboarding later, add an explicit route or settings/help entry instead of placing the full explanation on Home.
 
 ---
 
@@ -105,10 +105,10 @@ Immediate support remains available through the persistent Support tab.
 
 ## Acceptance Criteria
 
-* Home clearly explains SeCuida’s purpose.
-* Home reinforces privacy and non-diagnostic positioning.
-* Three primary paths have equal visual weight.
-* Immediate support is accessible through persistent navigation.
-* Home does not overuse alarming language.
-* Home does not include a duplicate “Como funciona” section when onboarding is present.
-* Any one-time onboarding persistence is privacy-reviewed before implementation.
+- Home clearly explains SeCuida’s purpose.
+- Home reinforces privacy and non-diagnostic positioning.
+- Three primary paths have equal visual weight.
+- Immediate support is accessible through persistent navigation.
+- Home does not overuse alarming language.
+- Home does not include a duplicate “Como funciona” section when onboarding is present.
+- Any one-time onboarding persistence is privacy-reviewed before implementation.

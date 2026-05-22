@@ -25,38 +25,64 @@
   </div>
 </div>
 
-<div class="section" style="margin-top: 2rem;">
+<div class="section" style="margin-top: 2rem">
   <h3>Live Previews</h3>
-  <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-top: 1rem;">
-
+  <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-top: 1rem">
     <!-- Option A: Bouncing -->
-    <div style="flex: 1; min-width: 200px;">
+    <div style="flex: 1; min-width: 200px">
       <p class="label">A — Bouncing</p>
-      <div style="background: #EEF8F3; border-radius: 16px 16px 16px 4px; padding: 14px 18px; display: inline-flex; gap: 5px; align-items: center;">
-        <span class="dot-bounce" style="animation-delay: 0s;"></span>
-        <span class="dot-bounce" style="animation-delay: 0.15s;"></span>
-        <span class="dot-bounce" style="animation-delay: 0.3s;"></span>
+      <div
+        style="
+          background: #eef8f3;
+          border-radius: 16px 16px 16px 4px;
+          padding: 14px 18px;
+          display: inline-flex;
+          gap: 5px;
+          align-items: center;
+        "
+      >
+        <span class="dot-bounce" style="animation-delay: 0s"></span>
+        <span class="dot-bounce" style="animation-delay: 0.15s"></span>
+        <span class="dot-bounce" style="animation-delay: 0.3s"></span>
       </div>
     </div>
 
     <!-- Option B: Fading -->
-    <div style="flex: 1; min-width: 200px;">
+    <div style="flex: 1; min-width: 200px">
       <p class="label">B — Fading</p>
-      <div style="background: #EEF8F3; border-radius: 16px 16px 16px 4px; padding: 14px 18px; display: inline-flex; gap: 5px; align-items: center;">
-        <span class="dot-fade" style="animation-delay: 0s;"></span>
-        <span class="dot-fade" style="animation-delay: 0.2s;"></span>
-        <span class="dot-fade" style="animation-delay: 0.4s;"></span>
+      <div
+        style="
+          background: #eef8f3;
+          border-radius: 16px 16px 16px 4px;
+          padding: 14px 18px;
+          display: inline-flex;
+          gap: 5px;
+          align-items: center;
+        "
+      >
+        <span class="dot-fade" style="animation-delay: 0s"></span>
+        <span class="dot-fade" style="animation-delay: 0.2s"></span>
+        <span class="dot-fade" style="animation-delay: 0.4s"></span>
       </div>
     </div>
 
     <!-- Option C: Pulsing -->
-    <div style="flex: 1; min-width: 200px;">
+    <div style="flex: 1; min-width: 200px">
       <p class="label">C — Pulsing</p>
-      <div style="background: #EEF8F3; border-radius: 16px 16px 16px 4px; padding: 14px 18px; display: inline-flex; gap: 2px; align-items: center;">
-        <span class="dot-pulse">.</span><span class="dot-pulse" style="animation-delay: 0.1s;">.</span><span class="dot-pulse" style="animation-delay: 0.2s;">.</span>
+      <div
+        style="
+          background: #eef8f3;
+          border-radius: 16px 16px 16px 4px;
+          padding: 14px 18px;
+          display: inline-flex;
+          gap: 2px;
+          align-items: center;
+        "
+      >
+        <span class="dot-pulse">.</span><span class="dot-pulse" style="animation-delay: 0.1s">.</span
+        ><span class="dot-pulse" style="animation-delay: 0.2s">.</span>
       </div>
     </div>
-
   </div>
 </div>
 
@@ -71,8 +97,14 @@
   }
 
   @keyframes bounce {
-    0%, 60%, 100% { transform: translateY(0); }
-    30% { transform: translateY(-6px); }
+    0%,
+    60%,
+    100% {
+      transform: translateY(0);
+    }
+    30% {
+      transform: translateY(-6px);
+    }
   }
 
   .dot-fade {
@@ -85,8 +117,13 @@
   }
 
   @keyframes fade {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 1; }
+    0%,
+    100% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 1;
+    }
   }
 
   .dot-pulse {
@@ -98,7 +135,12 @@
   }
 
   @keyframes pulse {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 1; }
+    0%,
+    100% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 1;
+    }
   }
 </style>

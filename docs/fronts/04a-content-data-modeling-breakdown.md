@@ -96,12 +96,12 @@ Use stable IDs. Avoid names such as `card1`, `new-resource`, or `final-copy`.
 
 Front 04A should extract currently visible content first:
 
-| Content Type | Source Screen | New Content File |
-|---|---|---|
-| Home copy and action labels | Home | `src/content/copy/home.ts` |
-| Immediate support contacts | Support | `src/content/support/contacts.ts` |
-| Local service directory | Contacts | `src/content/services/canoas-services.ts` |
-| Initial resource recommendation | Orientation result | `src/content/resources/resources.ts` |
+| Content Type                    | Source Screen      | New Content File                          |
+| ------------------------------- | ------------------ | ----------------------------------------- |
+| Home copy and action labels     | Home               | `src/content/copy/home.ts`                |
+| Immediate support contacts      | Support            | `src/content/support/contacts.ts`         |
+| Local service directory         | Contacts           | `src/content/services/canoas-services.ts` |
+| Initial resource recommendation | Orientation result | `src/content/resources/resources.ts`      |
 
 Defer complete guided flow and SRQ-20 modeling to Fronts 05 and 06. This front can prepare `src/content/flows/registry.ts`, but it should not define the full flow schema yet.
 

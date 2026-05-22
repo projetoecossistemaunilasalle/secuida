@@ -20,7 +20,8 @@ export function ResourceDetailScreen() {
         <h1 className="font-headline-lg text-on-surface">{resource.title}</h1>
         <p className="font-body-lg text-on-surface-variant">{resource.description}</p>
         <p className="font-body-md text-on-surface-variant">
-          Este detalhe ainda é uma superfície inicial. A curadoria completa do recurso pertence ao front de Biblioteca de Educação.
+          Este detalhe ainda é uma superfície inicial. A curadoria completa do recurso pertence ao front de Biblioteca
+          de Educação.
         </p>
       </Card>
     </Page>

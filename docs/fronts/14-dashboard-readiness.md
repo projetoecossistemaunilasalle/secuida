@@ -34,7 +34,7 @@ service directory
 home copy
 privacy copy
 support contacts
-````
+```
 
 ---
 
@@ -87,9 +87,9 @@ Even if `created_at` and `updated_at` are initially static, the model should ant
 
 ## Acceptance Criteria
 
-* Flow JSON requires no code changes for content edits.
-* Resource JSON requires no code changes for content edits.
-* Service JSON requires no code changes for content edits.
-* Status/review fields exist.
-* IDs are stable.
-* Conditions are declarative, not executable code.
+- Flow JSON requires no code changes for content edits.
+- Resource JSON requires no code changes for content edits.
+- Service JSON requires no code changes for content edits.
+- Status/review fields exist.
+- IDs are stable.
+- Conditions are declarative, not executable code.

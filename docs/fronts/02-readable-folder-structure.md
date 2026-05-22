@@ -142,7 +142,7 @@ src/
 
   tests/
     fixtures/
-````
+```
 
 ---
 
@@ -196,12 +196,12 @@ Business/domain logic independent from React.
 
 Examples:
 
-* flow runtime;
-* scoring;
-* safety rules;
-* questionnaire behavior;
-* resource types;
-* privacy policy rules.
+- flow runtime;
+- scoring;
+- safety rules;
+- questionnaire behavior;
+- resource types;
+- privacy policy rules.
 
 ### `content/`
 
@@ -209,11 +209,11 @@ Editable or future-dashboard data.
 
 Examples:
 
-* flow JSON;
-* services;
-* resources;
-* copy blocks;
-* support contacts.
+- flow JSON;
+- services;
+- resources;
+- copy blocks;
+- support contacts.
 
 ### `design-system/`
 
@@ -227,8 +227,8 @@ Generic utilities that are not specific to SeCuida’s domain.
 
 ## Acceptance Criteria
 
-* A new developer can find every main product area in under one minute.
-* The flow engine can be tested without rendering React.
-* Flow files can be edited without touching TypeScript.
-* Resource and service content is not embedded in JSX.
-* Privacy-sensitive logic has a clear location.
+- A new developer can find every main product area in under one minute.
+- The flow engine can be tested without rendering React.
+- Flow files can be edited without touching TypeScript.
+- Resource and service content is not embedded in JSX.
+- Privacy-sensitive logic has a clear location.

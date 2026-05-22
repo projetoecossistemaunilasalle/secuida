@@ -13,6 +13,7 @@
 ## How It Works (Background)
 
 GitHub Actions workflows are YAML files in `.github/workflows/`. Each workflow:
+
 - **Triggers** on events (push, pull_request, etc.)
 - **Runs jobs** — independent units of work on a runner (Ubuntu VM)
 - **Jobs have steps** — sequential commands or reusable actions
@@ -44,6 +45,7 @@ ci.yml (NEW)                    deploy.yml (MODIFIED)
 ## Task 1: Create `.github/workflows/ci.yml`
 
 **Files:**
+
 - Create: `.github/workflows/ci.yml`
 
 **What this does:** Runs `pnpm test` on every push (all branches) and on every pull request.
@@ -77,6 +79,7 @@ jobs:
 ```
 
 **Key details:**
+
 - `on: push:` with no branches filter = triggers on ALL branches
 - `on: pull_request:` = triggers when a PR is opened or updated
 - `pnpm install --frozen-lockfile` = installs deps without modifying lockfile (CI-safe)
@@ -101,6 +104,7 @@ git commit -m "ci: add test workflow on push and PR"
 ## Task 2: Modify `deploy.yml` to gate on tests passing
 
 **Files:**
+
 - Modify: `.github/workflows/deploy.yml`
 
 **What this does:** Makes the deploy job wait for the CI tests to pass before running. If tests fail, deploy is skipped entirely.
@@ -155,6 +159,7 @@ jobs:
 ```
 
 **Key changes:**
+
 - Added `test` job that calls `ci.yml` via `uses: ./.github/workflows/ci.yml`
 - Added `needs: test` to `build-and-deploy` — this job won't start until tests pass
 - The `test` job uses `workflow_call` trigger (implicit when called from another workflow)
@@ -205,9 +210,9 @@ git commit -m "ci: gate deploy on tests passing"
 
 ## Summary of Changes
 
-| File | Action | Purpose |
-|------|--------|---------|
-| `.github/workflows/ci.yml` | Create | Run tests on every push and PR |
+| File                           | Action | Purpose                          |
+| ------------------------------ | ------ | -------------------------------- |
+| `.github/workflows/ci.yml`     | Create | Run tests on every push and PR   |
 | `.github/workflows/deploy.yml` | Modify | Add `needs: test` to gate deploy |
 
 **Total lines changed:** ~25 lines of YAML across 2 files.

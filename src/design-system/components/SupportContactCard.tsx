@@ -30,4 +30,3 @@ export function SupportContactCard({ contact }: { contact: SupportContact }) {
     </Card>
   );
 }
-

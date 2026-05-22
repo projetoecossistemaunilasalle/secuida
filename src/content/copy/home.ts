@@ -6,8 +6,10 @@ export const homeCopy = {
   status: 'draft',
   locale: 'pt-BR',
   title: 'Como você está hoje?',
-  subtitle: 'Um espaço de orientação emocional para educadores, feito para acolher, informar e conectar sem identificar você.',
-  privacyReassurance: 'Este é um espaço seguro. O SeCuida não pede login, CPF, e-mail ou escola. O que você fizer aqui não é salvo entre sessões.',
+  subtitle:
+    'Um espaço de orientação emocional para educadores, feito para acolher, informar e conectar sem identificar você.',
+  privacyReassurance:
+    'Este é um espaço seguro. O SeCuida não pede login, CPF, e-mail ou escola. O que você fizer aqui não é salvo entre sessões.',
   actions: [
     {
       id: 'immediate-support',

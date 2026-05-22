@@ -13,6 +13,7 @@
 ### Task 1: Install vite-plugin-pwa
 
 **Files:**
+
 - Modify: `package.json`
 
 **Step 1: Install the dependency**
@@ -43,6 +44,7 @@ git commit -m "chore: add vite-plugin-pwa dependency"
 The manifest needs 192x192 and 512x512 PNG icons for Android, and a 180x180 apple-touch-icon for iOS. The existing `public/icon.svg` is the source.
 
 **Files:**
+
 - Create: `public/icon-192.png`
 - Create: `public/icon-512.png`
 - Create: `public/apple-touch-icon.png`
@@ -52,6 +54,7 @@ The manifest needs 192x192 and 512x512 PNG icons for Android, and a 180x180 appl
 Use any method available (sharp, Inkscape CLI, online tool, or a quick Node script). The icons should have the SVG rendered at the target sizes with the `#f9f9ff` background.
 
 If `sharp` is available:
+
 ```bash
 node -e "
 const sharp = require('sharp');
@@ -85,6 +88,7 @@ git commit -m "feat: add PWA icon PNGs generated from SVG"
 ### Task 3: Configure VitePWA plugin
 
 **Files:**
+
 - Modify: `vite.config.ts`
 
 **Step 1: Update vite.config.ts**
@@ -146,7 +150,7 @@ export default defineConfig({
         navigateFallbackDenylist: [/^\/__/],
       },
       devOptions: {
-        enabled: true,
+        enabled: false,
       },
     }),
   ],
@@ -159,9 +163,10 @@ export default defineConfig({
 ```
 
 Key config decisions:
+
 - `registerType: 'autoUpdate'` — SW updates silently without prompting
 - `navigateFallback: 'index.html'` — SPA routing works offline
-- `devOptions.enabled: true` — test SW in dev mode
+- `devOptions.enabled: false` — test SW in dev mode
 - Maskable icon uses the 512px PNG (sufficient for this app)
 
 **Step 2: Verify config syntax**
@@ -184,6 +189,7 @@ git commit -m "feat: configure vite-plugin-pwa with precache and manifest"
 ### Task 4: Update index.html
 
 **Files:**
+
 - Modify: `index.html`
 
 **Step 1: Remove manual manifest link and add Apple meta tags**
@@ -221,6 +227,7 @@ git commit -m "feat: add Apple PWA meta tags, remove manual manifest link"
 ### Task 5: Delete static manifest
 
 **Files:**
+
 - Delete: `public/manifest.webmanifest`
 
 **Step 1: Remove the file**
@@ -296,6 +303,7 @@ git commit -m "chore: verify PWA build output"
 ### Task 7: Update front-status-tracker
 
 **Files:**
+
 - Modify: `docs/front-status-tracker.md`
 
 **Step 1: Mark Front 01 as Done**

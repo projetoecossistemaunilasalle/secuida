@@ -7,4 +7,3 @@ export const routes = {
   educationDetail: '/educacao/:resourceId',
   privacy: '/privacidade',
 } as const;
-

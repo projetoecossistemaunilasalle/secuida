@@ -14,4 +14,3 @@ export interface SupportContactsContent extends ContentMetadata {
   description: string;
   contacts: SupportContact[];
 }
-

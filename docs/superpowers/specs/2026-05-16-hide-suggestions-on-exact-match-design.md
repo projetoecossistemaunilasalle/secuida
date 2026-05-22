@@ -9,6 +9,7 @@
 On the orientação page, when the user selects a suggestion pill or types text that exactly matches an option, the suggestion list remains visible. This creates redundant UI — the user already found their answer, but the pills still show.
 
 Specific scenario:
+
 1. User types a short answer like "Não" on SRQ-20 → exact match exists, but multiple "Não" pills still appear
 
 Note: Clicking a pill now auto-sends (clearing the input), so the old "pill fills input, suggestions remain" scenario no longer applies.
@@ -19,26 +20,28 @@ Add a strict exact-match check (no whitespace trim) that hides the suggestion li
 
 ### Behavior
 
-| User action | Suggestion list | Send button |
-|---|---|---|
-| Clicks a pill → "Não" in input | Hidden (strict exact match) | Green (trimmed match) |
-| Types "Não" | Hidden (strict exact match) | Green (trimmed match) |
-| Types "Não " (trailing space) | Shown (no strict match) | Green (trimmed match) |
-| Types "Na" (partial) | Shown (substring filter) | Disabled |
-| Types "abc" (no match) | Shown (falls back to node options) | Disabled |
+| User action                    | Suggestion list                    | Send button           |
+| ------------------------------ | ---------------------------------- | --------------------- |
+| Clicks a pill → "Não" in input | Hidden (strict exact match)        | Green (trimmed match) |
+| Types "Não"                    | Hidden (strict exact match)        | Green (trimmed match) |
+| Types "Não " (trailing space)  | Shown (no strict match)            | Green (trimmed match) |
+| Types "Na" (partial)           | Shown (substring filter)           | Disabled              |
+| Types "abc" (no match)         | Shown (falls back to node options) | Disabled              |
 
 ### Implementation
 
 In `OrientationScreen.tsx`:
 
 1. **Add `strictExactOption`** — a new computed value using the same logic as `exactOption` but without `.trim()`:
+
    ```ts
    const strictExactOption = options.find(
-     (option) => option.label.toLocaleLowerCase('pt-BR') === inputValue.toLocaleLowerCase('pt-BR')
+     (option) => option.label.toLocaleLowerCase('pt-BR') === inputValue.toLocaleLowerCase('pt-BR'),
    );
    ```
 
 2. **Modify `visibleOptions`** — return `[]` when `strictExactOption` is truthy:
+
    ```ts
    const visibleOptions = useMemo(() => {
      if (strictExactOption) return [];
@@ -46,9 +49,7 @@ In `OrientationScreen.tsx`:
      if (!normalizedInput) {
        return options.filter((option) => option.kind === 'node_option');
      }
-     return options.filter((option) =>
-       option.label.toLocaleLowerCase('pt-BR').includes(normalizedInput)
-     );
+     return options.filter((option) => option.label.toLocaleLowerCase('pt-BR').includes(normalizedInput));
    }, [inputValue, options, strictExactOption]);
    ```
 

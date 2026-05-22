@@ -28,7 +28,7 @@ type Resource = {
     reviewedAt?: string;
   };
 };
-````
+```
 
 ---
 
@@ -36,10 +36,10 @@ type Resource = {
 
 Initial sources may include:
 
-* Ministério da Saúde;
-* Feevale;
-* PROFESP;
-* other clinically approved teacher mental-health materials.
+- Ministério da Saúde;
+- Feevale;
+- PROFESP;
+- other clinically approved teacher mental-health materials.
 
 All content should be contextualized by the health/product team before publication.
 
@@ -88,8 +88,8 @@ The UI resolves that ID to a resource card.
 
 ## Acceptance Criteria
 
-* Library renders from structured resource data.
-* Resource IDs are stable.
-* Flow result recommendations can link to resources.
-* External/PDF resources are clearly labeled.
-* Clinical/editorial status is represented in the model.
+- Library renders from structured resource data.
+- Resource IDs are stable.
+- Flow result recommendations can link to resources.
+- External/PDF resources are clearly labeled.
+- Clinical/editorial status is represented in the model.

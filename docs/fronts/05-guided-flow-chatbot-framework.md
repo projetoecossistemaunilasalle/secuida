@@ -22,7 +22,7 @@ Flow JSON
   → deterministic runtime engine
   → UI adapter
   → chat screen
-````
+```
 
 ---
 
@@ -173,12 +173,12 @@ Until Privacy/LGPD verification, treat this as in-memory session state only.
 
 ## Acceptance Criteria
 
-* A new flow can be added without editing React components.
-* Flow switching works through `entering_phrases`.
-* Current node options and flow entry options appear together in autocomplete.
-* Clicking a suggestion bubble immediately sends the answer and advances the flow.
-* The composer send action is disabled unless the input exactly matches an available option/action.
-* The suggestion list hides when the input strictly matches an option label and reappears when it no longer does.
-* The engine has no React dependency.
-* Invalid flow JSON fails validation before runtime.
-* Future dashboard can edit the same shape.
+- A new flow can be added without editing React components.
+- Flow switching works through `entering_phrases`.
+- Current node options and flow entry options appear together in autocomplete.
+- Clicking a suggestion bubble immediately sends the answer and advances the flow.
+- The composer send action is disabled unless the input exactly matches an available option/action.
+- The suggestion list hides when the input strictly matches an option label and reappears when it no longer does.
+- The engine has no React dependency.
+- Invalid flow JSON fails validation before runtime.
+- Future dashboard can edit the same shape.

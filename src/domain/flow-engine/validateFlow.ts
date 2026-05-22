@@ -43,7 +43,11 @@ export function validateFlow(flow: unknown): FlowValidationResult {
     errors.push(`Flow ${flowLabel} entry points to missing node ${String(entryNodeId)}.`);
   }
 
-  if (!Array.isArray(enteringPhrases) || enteringPhrases.length === 0 || enteringPhrases.some((phrase) => !hasText(phrase))) {
+  if (
+    !Array.isArray(enteringPhrases) ||
+    enteringPhrases.length === 0 ||
+    enteringPhrases.some((phrase) => !hasText(phrase))
+  ) {
     errors.push(`Flow ${flowLabel} must define explicit entering phrases.`);
   }
 
@@ -124,7 +128,9 @@ function validateScoreBranchNode(flowLabel: string, node: ScoreBranchFlowNode, n
     }
 
     if (!nodeIds.has(branch.next)) {
-      errors.push(`Flow ${flowLabel} score branch ${node.id} branch ${branch.id} points to missing node ${branch.next}.`);
+      errors.push(
+        `Flow ${flowLabel} score branch ${node.id} branch ${branch.id} points to missing node ${branch.next}.`,
+      );
     }
   });
 }
@@ -139,7 +145,9 @@ function validateEffect(flowLabel: string, optionId: string, effect: FlowEffect,
 
   if (effect.kind === 'safety_interrupt') {
     if (!hasText(effect.message) || !hasText(effect.destination) || typeof effect.blockResume !== 'boolean') {
-      errors.push(`Flow ${flowLabel} option ${optionId} safety interrupt effect must include message, destination, and blockResume.`);
+      errors.push(
+        `Flow ${flowLabel} option ${optionId} safety interrupt effect must include message, destination, and blockResume.`,
+      );
     }
   }
 }

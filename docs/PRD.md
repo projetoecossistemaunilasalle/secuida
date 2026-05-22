@@ -83,22 +83,22 @@ The entire app should be installable and usable as a PWA.
 
 Persistent bottom navigation:
 
-| Section | Suggested Label | Route |
-|---|---|---|
-| Home | Início | `/` |
-| Orientation | Orientação | `/orientacao` |
-| Contacts | Contatos | `/contatos` |
-| Immediate Support | Apoio | `/apoio` |
+| Section           | Suggested Label | Route         |
+| ----------------- | --------------- | ------------- |
+| Home              | Início          | `/`           |
+| Orientation       | Orientação      | `/orientacao` |
+| Contacts          | Contatos        | `/contatos`   |
+| Immediate Support | Apoio           | `/apoio`      |
 
 The final visible label for the immediate support tab should be reviewed by product/design. Avoid route path `/crise`.
 
 ### Secondary Navigation
 
-| Section | Route |
-|---|---|
-| Education Library | `/educacao` |
-| Resource Detail | `/educacao/:resourceId` |
-| Privacy | `/privacidade` |
+| Section           | Route                   |
+| ----------------- | ----------------------- |
+| Education Library | `/educacao`             |
+| Resource Detail   | `/educacao/:resourceId` |
+| Privacy           | `/privacidade`          |
 
 The education library may be accessed from result screens, Home, and resource recommendations.
 
@@ -145,16 +145,16 @@ Recommended route:
 
 ```txt
 /apoio
-````
+```
 
 The screen includes:
 
-* grounding message;
-* CVV 188;
-* SAMU 192;
-* Bombeiros 193;
-* direct call actions;
-* calming breathing exercise.
+- grounding message;
+- CVV 188;
+- SAMU 192;
+- Bombeiros 193;
+- direct call actions;
+- calming breathing exercise.
 
 The screen should avoid red-first or alarmist visual language.
 
@@ -168,12 +168,12 @@ The guided chat is the core interactive feature.
 
 It should operate as a constrained guided conversation:
 
-* bot messages appear on the left;
-* user responses appear on the right;
-* the user may type into an autocomplete input;
-* only predefined options can be submitted;
-* current options are also shown as chips before typing;
-* chips hide when the input exactly matches an option label and reappear when it no longer does.
+- bot messages appear on the left;
+- user responses appear on the right;
+- the user may type into an autocomplete input;
+- only predefined options can be submitted;
+- current options are also shown as chips before typing;
+- chips hide when the input exactly matches an option label and reappear when it no longer does.
 
 The app must not pretend that this is real AI.
 
@@ -185,19 +185,19 @@ Each guided flow should be represented as a JSON-compatible document.
 
 Each flow includes:
 
-* stable ID;
-* version;
-* locale;
-* title;
-* type;
-* status;
-* entry node;
-* entering phrases;
-* transition message;
-* nodes;
-* options;
-* result rules;
-* safety rules if applicable.
+- stable ID;
+- version;
+- locale;
+- title;
+- type;
+- status;
+- entry node;
+- entering phrases;
+- transition message;
+- nodes;
+- options;
+- result rules;
+- safety rules if applicable.
 
 ### Entering Phrases
 
@@ -230,13 +230,13 @@ Questionnaires are specialized guided flows.
 
 The framework should support:
 
-* consent;
-* fixed question sets;
-* scoring;
-* thresholds;
-* result rules;
-* interruption rules;
-* recommendation mapping.
+- consent;
+- fixed question sets;
+- scoring;
+- thresholds;
+- result rules;
+- interruption rules;
+- recommendation mapping.
 
 SRQ-20 is the first questionnaire implementation and should be treated as the framework’s first major test flow.
 
@@ -248,16 +248,16 @@ The architecture should support additional structured questionnaires later.
 
 SRQ-20 requirements:
 
-* user consents before beginning;
-* user is told this is SRQ-20;
-* questionnaire is not disguised;
-* 20 yes/no questions;
-* affirmative answers are scored;
-* score of 7 or more indicates possible mental distress and leads to supportive resources;
-* result copy avoids diagnosis language;
-* suicidal ideation question interrupts immediately if affirmative;
-* immediate support is surfaced;
-* the interrupted flow is not offered for resumption.
+- user consents before beginning;
+- user is told this is SRQ-20;
+- questionnaire is not disguised;
+- 20 yes/no questions;
+- affirmative answers are scored;
+- score of 7 or more indicates possible mental distress and leads to supportive resources;
+- result copy avoids diagnosis language;
+- suicidal ideation question interrupts immediately if affirmative;
+- immediate support is surfaced;
+- the interrupted flow is not offered for resumption.
 
 SRQ-20 must have automated tests.
 
@@ -271,13 +271,13 @@ Initial content may focus on Canoas, RS, but the product model should support ot
 
 Each service card includes:
 
-* service name;
-* type badge;
-* city/state;
-* address;
-* phone number;
-* opening hours;
-* notes if needed.
+- service name;
+- type badge;
+- city/state;
+- address;
+- phone number;
+- opening hours;
+- notes if needed.
 
 ### Optional Location Sorting
 
@@ -285,11 +285,11 @@ Location permission may later be used to sort nearby services.
 
 Rules:
 
-* optional only;
-* clear explanation before permission;
-* no storage;
-* no transmission;
-* app works without permission.
+- optional only;
+- clear explanation before permission;
+- no storage;
+- no transmission;
+- app works without permission.
 
 Implementation should wait for Privacy/LGPD review.
 
@@ -301,18 +301,18 @@ The education library provides curated mental-health resources for teachers.
 
 Each resource card includes:
 
-* title;
-* source badge;
-* description;
-* tags;
-* access button.
+- title;
+- source badge;
+- description;
+- tags;
+- access button.
 
 Resources may be:
 
-* in-app articles;
-* annotated summaries;
-* PDFs;
-* external links.
+- in-app articles;
+- annotated summaries;
+- PDFs;
+- external links.
 
 All resources should have editorial/clinical review metadata.
 
@@ -326,12 +326,12 @@ SeCuida must avoid collecting personally identifiable information by default.
 
 The platform should not request:
 
-* name;
-* email;
-* CPF;
-* school ID;
-* teacher registration;
-* account login.
+- name;
+- email;
+- CPF;
+- school ID;
+- teacher registration;
+- account login.
 
 ### Session Data
 
@@ -339,11 +339,11 @@ Session and persistence policy must be verified before implementing saving featu
 
 Until verified:
 
-* no saved questionnaire answers;
-* no saved chat transcripts;
-* no localStorage for sensitive flow state;
-* no persistent progress recovery;
-* no stored location.
+- no saved questionnaire answers;
+- no saved chat transcripts;
+- no localStorage for sensitive flow state;
+- no persistent progress recovery;
+- no stored location.
 
 Runtime in-memory state is allowed for current interaction.
 
@@ -363,28 +363,28 @@ Analytics are not automatically included in MVP.
 
 If implemented, analytics must be:
 
-* aggregate only;
-* cookieless;
-* non-identifying;
-* free of advertising networks;
-* disclosed to users.
+- aggregate only;
+- cookieless;
+- non-identifying;
+- free of advertising networks;
+- disclosed to users.
 
 Allowed event categories may include:
 
-* screen views;
-* resource interactions;
-* flow starts;
-* flow completions by result band;
-* support contact clicks.
+- screen views;
+- resource interactions;
+- flow starts;
+- flow completions by result band;
+- support contact clicks.
 
 Never collect:
 
-* questionnaire answers;
-* chat transcript;
-* individual path;
-* location;
-* device identifiers;
-* IP in identifiable form.
+- questionnaire answers;
+- chat transcript;
+- individual path;
+- location;
+- device identifiers;
+- IP in identifiable form.
 
 ---
 
@@ -392,13 +392,13 @@ Never collect:
 
 SeCuida should feel:
 
-* calm;
-* safe;
-* human;
-* welcoming;
-* teacher-oriented;
-* non-clinical;
-* non-alarmist.
+- calm;
+- safe;
+- human;
+- welcoming;
+- teacher-oriented;
+- non-clinical;
+- non-alarmist.
 
 Visual hierarchy:
 
@@ -413,43 +413,43 @@ The current prototype’s visual mood is a good starting point, but the real app
 
 Avoid:
 
-* red-first crisis/support treatment;
-* heavy clinical symbols;
-* excessive forms;
-* fake-AI framing;
-* fragile remote generated images.
+- red-first crisis/support treatment;
+- heavy clinical symbols;
+- excessive forms;
+- fake-AI framing;
+- fragile remote generated images.
 
 ---
 
 ## 10. Technical Requirements
 
-* React.
-* React Router.
-* Vite.
-* TypeScript.
-* Full-app PWA.
-* JSON-compatible content models.
-* Flow validation scripts.
-* Questionnaire tests.
-* No backend required for MVP unless analytics or dashboard needs change.
-* No account system.
-* No persistence of sensitive data before privacy review.
+- React.
+- React Router.
+- Vite.
+- TypeScript.
+- Full-app PWA.
+- JSON-compatible content models.
+- Flow validation scripts.
+- Questionnaire tests.
+- No backend required for MVP unless analytics or dashboard needs change.
+- No account system.
+- No persistence of sensitive data before privacy review.
 
 ---
 
 ## 11. Out of Scope for Current Version
 
-* Real AI or NLP responses.
-* Login/accounts.
-* Cross-session memory.
-* Saved questionnaire history.
-* Push notifications.
-* Telepsychology/live support.
-* Integration with health systems.
-* Native app store distribution.
-* Admin dashboard implementation.
-* Backend-driven content editing.
-* Analytics before privacy review.
+- Real AI or NLP responses.
+- Login/accounts.
+- Cross-session memory.
+- Saved questionnaire history.
+- Push notifications.
+- Telepsychology/live support.
+- Integration with health systems.
+- Native app store distribution.
+- Admin dashboard implementation.
+- Backend-driven content editing.
+- Analytics before privacy review.
 
 ---
 
@@ -475,12 +475,12 @@ A strong MVP includes:
 
 SeCuida succeeds if a teacher can:
 
-* understand what the app is within seconds;
-* trust that they are not being identified;
-* access immediate support quickly;
-* follow a guided orientation without feeling judged;
-* receive a useful next step;
-* find professional contacts;
-* access reliable educational resources.
+- understand what the app is within seconds;
+- trust that they are not being identified;
+- access immediate support quickly;
+- follow a guided orientation without feeling judged;
+- receive a useful next step;
+- find professional contacts;
+- access reliable educational resources.
 
 The product should feel supportive without pretending to be a therapist, diagnostic system, or real AI.

@@ -73,20 +73,20 @@ src/features/
 
 Initial mapping:
 
-| Current File | New File |
-|---|---|
-| `src/views/HomeView.tsx` | `src/features/home/HomeScreen.tsx` |
+| Current File                   | New File                                         |
+| ------------------------------ | ------------------------------------------------ |
+| `src/views/HomeView.tsx`       | `src/features/home/HomeScreen.tsx`               |
 | `src/views/AssessmentView.tsx` | `src/features/orientation/OrientationScreen.tsx` |
-| `src/views/EmergencyView.tsx` | `src/features/support/SupportScreen.tsx` |
-| `src/views/NetworkView.tsx` | `src/features/contacts/ContactsScreen.tsx` |
+| `src/views/EmergencyView.tsx`  | `src/features/support/SupportScreen.tsx`         |
+| `src/views/NetworkView.tsx`    | `src/features/contacts/ContactsScreen.tsx`       |
 
 Temporary route placeholders from Front 01A should live in their future feature folders:
 
-| Route | Temporary Screen |
-|---|---|
-| `/educacao` | `src/features/education/EducationLibraryScreen.tsx` |
-| `/educacao/:resourceId` | `src/features/education/ResourceDetailScreen.tsx` |
-| `/privacidade` | `src/features/privacy/PrivacyScreen.tsx` |
+| Route                   | Temporary Screen                                    |
+| ----------------------- | --------------------------------------------------- |
+| `/educacao`             | `src/features/education/EducationLibraryScreen.tsx` |
+| `/educacao/:resourceId` | `src/features/education/ResourceDetailScreen.tsx`   |
+| `/privacidade`          | `src/features/privacy/PrivacyScreen.tsx`            |
 
 The old `src/views/` folder should be removed once imports have been updated.
 

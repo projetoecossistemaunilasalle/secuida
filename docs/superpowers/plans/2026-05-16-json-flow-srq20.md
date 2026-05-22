@@ -58,6 +58,7 @@
 ### Task 1: Enable JSON Flow Imports And Add A Typed Parser Boundary
 
 **Files:**
+
 - Modify: `tsconfig.json`
 - Create: `src/domain/flow-engine/parseFlow.ts`
 - Test: `src/domain/flow-engine/__tests__/flow-engine.test.ts`
@@ -81,9 +82,7 @@ it('parses unknown JSON-shaped flow content into a typed guided flow', () => {
 });
 
 it('rejects invalid JSON-shaped flow content at the parser boundary', () => {
-  expect(() => parseGuidedFlow({ id: 'broken-flow' })).toThrow(
-    'Flow entry is required. Flow nodes are required.',
-  );
+  expect(() => parseGuidedFlow({ id: 'broken-flow' })).toThrow('Flow entry is required. Flow nodes are required.');
 });
 ```
 
@@ -108,11 +107,7 @@ Modify `tsconfig.json` and add `resolveJsonModule` inside `compilerOptions`:
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
     "module": "ESNext",
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
     "moduleResolution": "bundler",
     "isolatedModules": true,
@@ -120,9 +115,7 @@ Modify `tsconfig.json` and add `resolveJsonModule` inside `compilerOptions`:
     "allowJs": true,
     "jsx": "react-jsx",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     },
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
@@ -172,6 +165,7 @@ git commit -m "feat: parse JSON guided flows"
 ### Task 2: Add Generic Flow Effects And Score Branch Types
 
 **Files:**
+
 - Modify: `src/domain/flow-engine/types.ts`
 - Test: `src/domain/flow-engine/__tests__/flow-engine.test.ts`
 
@@ -364,6 +358,7 @@ git commit -m "test: define generic JSON flow effects"
 ### Task 3: Validate JSON Effects And Score Branch Nodes
 
 **Files:**
+
 - Modify: `src/domain/flow-engine/validateFlow.ts`
 - Test: `src/domain/flow-engine/__tests__/flow-engine.test.ts`
 
@@ -515,7 +510,9 @@ function validateScoreBranchNode(flowLabel: string, node: ScoreBranchFlowNode, n
     }
 
     if (!nodeIds.has(branch.next)) {
-      errors.push(`Flow ${flowLabel} score branch ${node.id} branch ${branch.id} points to missing node ${branch.next}.`);
+      errors.push(
+        `Flow ${flowLabel} score branch ${node.id} branch ${branch.id} points to missing node ${branch.next}.`,
+      );
     }
   });
 }
@@ -530,7 +527,9 @@ function validateEffect(flowLabel: string, optionId: string, effect: FlowEffect,
 
   if (effect.kind === 'safety_interrupt') {
     if (!hasText(effect.message) || !hasText(effect.destination) || typeof effect.blockResume !== 'boolean') {
-      errors.push(`Flow ${flowLabel} option ${optionId} safety interrupt effect must include message, destination, and blockResume.`);
+      errors.push(
+        `Flow ${flowLabel} option ${optionId} safety interrupt effect must include message, destination, and blockResume.`,
+      );
     }
   }
 }
@@ -558,6 +557,7 @@ git commit -m "feat: validate JSON flow effects"
 ### Task 4: Execute Generic Effects And Score Branches
 
 **Files:**
+
 - Modify: `src/domain/flow-engine/advanceFlow.ts`
 - Modify: `src/domain/flow-engine/loadFlows.ts`
 - Modify: `src/domain/flow-engine/resolveOptions.ts`
@@ -620,7 +620,9 @@ it('handles safety interruption as a generic JSON option effect', () => {
   expect(nextState.activeNodeId).toBeUndefined();
   expect(nextState.safetyFlags['block-resume:safety-flow']).toBe(true);
   expect(nextState.transcript.map((message) => message.text)).toContain('Vamos te direcionar para apoio imediato.');
-  expect(nextState.transcript.map((message) => message.text)).not.toContain('Este texto não deve aparecer antes do apoio.');
+  expect(nextState.transcript.map((message) => message.text)).not.toContain(
+    'Este texto não deve aparecer antes do apoio.',
+  );
 });
 ```
 
@@ -647,19 +649,19 @@ In `src/domain/flow-engine/resolveOptions.ts`, add `effects` when mapping curren
 In `src/domain/flow-engine/loadFlows.ts`, update the `createInitialFlowState` return object:
 
 ```ts
-  return {
-    activeFlowId: flow.id,
-    activeNodeId: flow.entry.nodeId,
-    transcript: [
-      createMessage('bot', flow.entry.transitionMessage, flow.id, flow.entry.nodeId),
-      createMessage('bot', node.text, flow.id, node.id),
-    ],
-    suspendedFlows: {},
-    answers: {},
-    scores: {},
-    safetyFlags: {},
-    pendingNavigation: undefined,
-  };
+return {
+  activeFlowId: flow.id,
+  activeNodeId: flow.entry.nodeId,
+  transcript: [
+    createMessage('bot', flow.entry.transitionMessage, flow.id, flow.entry.nodeId),
+    createMessage('bot', node.text, flow.id, node.id),
+  ],
+  suspendedFlows: {},
+  answers: {},
+  scores: {},
+  safetyFlags: {},
+  pendingNavigation: undefined,
+};
 ```
 
 - [ ] **Step 5: Execute option effects and score branches**
@@ -673,48 +675,42 @@ import type { FlowEffect, FlowNode, FlowRuntimeState, GuidedFlow, RuntimeOption 
 Replace the final node-option handling block with:
 
 ```ts
-  const activeFlow = getActiveFlow(state, flows);
-  const currentNodeId = state.activeNodeId ?? activeFlow.entry.nodeId;
-  const currentNode = activeFlow.nodes[currentNodeId];
-  const matchingOption =
-    currentNode.kind === 'choice'
-      ? currentNode.options.find((option) => option.id === selectedOption.id)
-      : undefined;
+const activeFlow = getActiveFlow(state, flows);
+const currentNodeId = state.activeNodeId ?? activeFlow.entry.nodeId;
+const currentNode = activeFlow.nodes[currentNodeId];
+const matchingOption =
+  currentNode.kind === 'choice' ? currentNode.options.find((option) => option.id === selectedOption.id) : undefined;
 
-  if (!matchingOption) {
-    throw new Error(`Selection ${selectedLabel} is not available for node ${currentNodeId}.`);
-  }
+if (!matchingOption) {
+  throw new Error(`Selection ${selectedLabel} is not available for node ${currentNodeId}.`);
+}
 
-  const userMessage = createMessage('user', selectedOption.label, activeFlow.id, currentNodeId);
-  const effectedState = applyOptionEffects(
-    {
-      ...state,
-      transcript: [...state.transcript, userMessage],
-      answers: {
-        ...state.answers,
-        [currentNodeId]: selectedOption.id,
-      },
-      pendingNavigation: undefined,
+const userMessage = createMessage('user', selectedOption.label, activeFlow.id, currentNodeId);
+const effectedState = applyOptionEffects(
+  {
+    ...state,
+    transcript: [...state.transcript, userMessage],
+    answers: {
+      ...state.answers,
+      [currentNodeId]: selectedOption.id,
     },
-    activeFlow.id,
-    matchingOption.effects ?? [],
-  );
+    pendingNavigation: undefined,
+  },
+  activeFlow.id,
+  matchingOption.effects ?? [],
+);
 
-  if (effectedState.pendingNavigation) {
-    return effectedState;
-  }
+if (effectedState.pendingNavigation) {
+  return effectedState;
+}
 
-  return advanceToNode(effectedState, activeFlow, matchingOption.next);
+return advanceToNode(effectedState, activeFlow, matchingOption.next);
 ```
 
 Add these helpers at the bottom of the file:
 
 ```ts
-function applyOptionEffects(
-  state: FlowRuntimeState,
-  flowId: string,
-  effects: FlowEffect[],
-): FlowRuntimeState {
+function applyOptionEffects(state: FlowRuntimeState, flowId: string, effects: FlowEffect[]): FlowRuntimeState {
   return effects.reduce((nextState, effect) => {
     if (effect.kind === 'score') {
       return {
@@ -735,10 +731,7 @@ function applyOptionEffects(
         ...nextState.safetyFlags,
         ...(effect.blockResume ? { [`block-resume:${flowId}`]: true } : {}),
       },
-      transcript: [
-        ...nextState.transcript,
-        createMessage('bot', effect.message, flowId, nextState.activeNodeId),
-      ],
+      transcript: [...nextState.transcript, createMessage('bot', effect.message, flowId, nextState.activeNodeId)],
     };
   }, state);
 }
@@ -791,6 +784,7 @@ git commit -m "feat: execute JSON flow effects"
 ### Task 5: Add Dynamic JSON Flow Discovery And SRQ-20 Content
 
 **Files:**
+
 - Create: `src/content/flows/srq20.json`
 - Modify: `src/content/flows/registry.ts`
 - Test: `src/domain/flow-engine/__tests__/flow-engine.test.ts`
@@ -892,26 +886,293 @@ Create `src/content/flows/srq20.json` with explicit JSON content:
         { "id": "decline", "label": "Agora não", "next": "declined-result" }
       ]
     },
-    "q1": { "id": "q1", "kind": "choice", "text": "Você tem se sentido nervoso(a), tenso(a) ou preocupado(a) sem motivo claro?", "options": [{ "id": "yes", "label": "Sim", "next": "q2", "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }] }, { "id": "no", "label": "Não", "next": "q2" }] },
-    "q2": { "id": "q2", "kind": "choice", "text": "Você tem tido dificuldade para dormir — demora para conseguir dormir ou acorda no meio da noite?", "options": [{ "id": "yes", "label": "Sim", "next": "q3", "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }] }, { "id": "no", "label": "Não", "next": "q3" }] },
-    "q3": { "id": "q3", "kind": "choice", "text": "Você tem sentido medo ou receio de algo, mesmo sem saber bem o que é?", "options": [{ "id": "yes", "label": "Sim", "next": "q4", "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }] }, { "id": "no", "label": "Não", "next": "q4" }] },
-    "q4": { "id": "q4", "kind": "choice", "text": "Você tem sentido o estômago ruim, com dor ou mal-estar, mesmo sem ter comido nada estranho?", "options": [{ "id": "yes", "label": "Sim", "next": "q5", "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }] }, { "id": "no", "label": "Não", "next": "q5" }] },
-    "q5": { "id": "q5", "kind": "choice", "text": "Você tem tido tonturas ou sensação de cabeça leve?", "options": [{ "id": "yes", "label": "Sim", "next": "q6", "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }] }, { "id": "no", "label": "Não", "next": "q6" }] },
-    "q6": { "id": "q6", "kind": "choice", "text": "Suas mãos tremem mesmo quando você não está fazendo esforço?", "options": [{ "id": "yes", "label": "Sim", "next": "q7", "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }] }, { "id": "no", "label": "Não", "next": "q7" }] },
-    "q7": { "id": "q7", "kind": "choice", "text": "Você tem tido menos vontade de comer, mesmo quando é hora da refeição?", "options": [{ "id": "yes", "label": "Sim", "next": "q8", "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }] }, { "id": "no", "label": "Não", "next": "q8" }] },
-    "q8": { "id": "q8", "kind": "choice", "text": "Você tem chorado com mais facilidade do que antes, mesmo por coisas pequenas?", "options": [{ "id": "yes", "label": "Sim", "next": "q9", "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }] }, { "id": "no", "label": "Não", "next": "q9" }] },
-    "q9": { "id": "q9", "kind": "choice", "text": "Tem sido difícil sentir prazer ou alegria nas coisas que antes te faziam bem?", "options": [{ "id": "yes", "label": "Sim", "next": "q10", "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }] }, { "id": "no", "label": "Não", "next": "q10" }] },
-    "q10": { "id": "q10", "kind": "choice", "text": "Você tem tido dificuldade para tomar decisões, mesmo as do dia a dia?", "options": [{ "id": "yes", "label": "Sim", "next": "q11", "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }] }, { "id": "no", "label": "Não", "next": "q11" }] },
-    "q11": { "id": "q11", "kind": "choice", "text": "As tarefas do dia a dia — em casa ou no trabalho — têm parecido mais difíceis do que o normal?", "options": [{ "id": "yes", "label": "Sim", "next": "q12", "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }] }, { "id": "no", "label": "Não", "next": "q12" }] },
-    "q12": { "id": "q12", "kind": "choice", "text": "Você sente que seu trabalho não está fazendo diferença ou que não está sendo útil?", "options": [{ "id": "yes", "label": "Sim", "next": "q13", "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }] }, { "id": "no", "label": "Não", "next": "q13" }] },
-    "q13": { "id": "q13", "kind": "choice", "text": "Você tem perdido o interesse por coisas que antes considerava importantes?", "options": [{ "id": "yes", "label": "Sim", "next": "q14", "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }] }, { "id": "no", "label": "Não", "next": "q14" }] },
-    "q14": { "id": "q14", "kind": "choice", "text": "Você tem se sentido sem valor ou como se não fosse capaz?", "options": [{ "id": "yes", "label": "Sim", "next": "q15", "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }] }, { "id": "no", "label": "Não", "next": "q15" }] },
-    "q15": { "id": "q15", "kind": "choice", "text": "Você tem se sentido exausto(a), sem energia nem para as coisas básicas?", "options": [{ "id": "yes", "label": "Sim", "next": "q16", "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }] }, { "id": "no", "label": "Não", "next": "q16" }] },
-    "q16": { "id": "q16", "kind": "choice", "text": "Você tem sentido alguma sensação desagradável no estômago, como aperto, queimação ou nojo?", "options": [{ "id": "yes", "label": "Sim", "next": "q17", "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }] }, { "id": "no", "label": "Não", "next": "q17" }] },
-    "q17": { "id": "q17", "kind": "choice", "text": "Você já teve pensamentos de que seria melhor estar morto(a) ou de se machucar?", "options": [{ "id": "yes", "label": "Sim", "next": "q18", "effects": [{ "kind": "safety_interrupt", "message": "Agradecemos sua coragem em responder com sinceridade. Pensamentos assim merecem atenção e acolhimento profissional. Vamos te direcionar para recursos de apoio imediato. Você não está sozinho(a).", "destination": "/apoio", "blockResume": true }] }, { "id": "no", "label": "Não", "next": "q18" }] },
-    "q18": { "id": "q18", "kind": "choice", "text": "Você tem dormido mal — acorda cansado(a) mesmo depois de ter dormido?", "options": [{ "id": "yes", "label": "Sim", "next": "q19", "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }] }, { "id": "no", "label": "Não", "next": "q19" }] },
-    "q19": { "id": "q19", "kind": "choice", "text": "Você tem se sentido preocupado(a) com coisas do dia a dia de um jeito que não consegue controlar?", "options": [{ "id": "yes", "label": "Sim", "next": "q20", "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }] }, { "id": "no", "label": "Não", "next": "q20" }] },
-    "q20": { "id": "q20", "kind": "choice", "text": "Você se cansa com facilidade, mesmo com atividades que antes não te cansavam?", "options": [{ "id": "yes", "label": "Sim", "next": "srq20-score", "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }] }, { "id": "no", "label": "Não", "next": "srq20-score" }] },
+    "q1": {
+      "id": "q1",
+      "kind": "choice",
+      "text": "Você tem se sentido nervoso(a), tenso(a) ou preocupado(a) sem motivo claro?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Sim",
+          "next": "q2",
+          "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }]
+        },
+        { "id": "no", "label": "Não", "next": "q2" }
+      ]
+    },
+    "q2": {
+      "id": "q2",
+      "kind": "choice",
+      "text": "Você tem tido dificuldade para dormir — demora para conseguir dormir ou acorda no meio da noite?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Sim",
+          "next": "q3",
+          "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }]
+        },
+        { "id": "no", "label": "Não", "next": "q3" }
+      ]
+    },
+    "q3": {
+      "id": "q3",
+      "kind": "choice",
+      "text": "Você tem sentido medo ou receio de algo, mesmo sem saber bem o que é?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Sim",
+          "next": "q4",
+          "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }]
+        },
+        { "id": "no", "label": "Não", "next": "q4" }
+      ]
+    },
+    "q4": {
+      "id": "q4",
+      "kind": "choice",
+      "text": "Você tem sentido o estômago ruim, com dor ou mal-estar, mesmo sem ter comido nada estranho?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Sim",
+          "next": "q5",
+          "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }]
+        },
+        { "id": "no", "label": "Não", "next": "q5" }
+      ]
+    },
+    "q5": {
+      "id": "q5",
+      "kind": "choice",
+      "text": "Você tem tido tonturas ou sensação de cabeça leve?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Sim",
+          "next": "q6",
+          "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }]
+        },
+        { "id": "no", "label": "Não", "next": "q6" }
+      ]
+    },
+    "q6": {
+      "id": "q6",
+      "kind": "choice",
+      "text": "Suas mãos tremem mesmo quando você não está fazendo esforço?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Sim",
+          "next": "q7",
+          "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }]
+        },
+        { "id": "no", "label": "Não", "next": "q7" }
+      ]
+    },
+    "q7": {
+      "id": "q7",
+      "kind": "choice",
+      "text": "Você tem tido menos vontade de comer, mesmo quando é hora da refeição?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Sim",
+          "next": "q8",
+          "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }]
+        },
+        { "id": "no", "label": "Não", "next": "q8" }
+      ]
+    },
+    "q8": {
+      "id": "q8",
+      "kind": "choice",
+      "text": "Você tem chorado com mais facilidade do que antes, mesmo por coisas pequenas?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Sim",
+          "next": "q9",
+          "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }]
+        },
+        { "id": "no", "label": "Não", "next": "q9" }
+      ]
+    },
+    "q9": {
+      "id": "q9",
+      "kind": "choice",
+      "text": "Tem sido difícil sentir prazer ou alegria nas coisas que antes te faziam bem?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Sim",
+          "next": "q10",
+          "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }]
+        },
+        { "id": "no", "label": "Não", "next": "q10" }
+      ]
+    },
+    "q10": {
+      "id": "q10",
+      "kind": "choice",
+      "text": "Você tem tido dificuldade para tomar decisões, mesmo as do dia a dia?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Sim",
+          "next": "q11",
+          "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }]
+        },
+        { "id": "no", "label": "Não", "next": "q11" }
+      ]
+    },
+    "q11": {
+      "id": "q11",
+      "kind": "choice",
+      "text": "As tarefas do dia a dia — em casa ou no trabalho — têm parecido mais difíceis do que o normal?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Sim",
+          "next": "q12",
+          "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }]
+        },
+        { "id": "no", "label": "Não", "next": "q12" }
+      ]
+    },
+    "q12": {
+      "id": "q12",
+      "kind": "choice",
+      "text": "Você sente que seu trabalho não está fazendo diferença ou que não está sendo útil?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Sim",
+          "next": "q13",
+          "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }]
+        },
+        { "id": "no", "label": "Não", "next": "q13" }
+      ]
+    },
+    "q13": {
+      "id": "q13",
+      "kind": "choice",
+      "text": "Você tem perdido o interesse por coisas que antes considerava importantes?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Sim",
+          "next": "q14",
+          "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }]
+        },
+        { "id": "no", "label": "Não", "next": "q14" }
+      ]
+    },
+    "q14": {
+      "id": "q14",
+      "kind": "choice",
+      "text": "Você tem se sentido sem valor ou como se não fosse capaz?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Sim",
+          "next": "q15",
+          "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }]
+        },
+        { "id": "no", "label": "Não", "next": "q15" }
+      ]
+    },
+    "q15": {
+      "id": "q15",
+      "kind": "choice",
+      "text": "Você tem se sentido exausto(a), sem energia nem para as coisas básicas?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Sim",
+          "next": "q16",
+          "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }]
+        },
+        { "id": "no", "label": "Não", "next": "q16" }
+      ]
+    },
+    "q16": {
+      "id": "q16",
+      "kind": "choice",
+      "text": "Você tem sentido alguma sensação desagradável no estômago, como aperto, queimação ou nojo?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Sim",
+          "next": "q17",
+          "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }]
+        },
+        { "id": "no", "label": "Não", "next": "q17" }
+      ]
+    },
+    "q17": {
+      "id": "q17",
+      "kind": "choice",
+      "text": "Você já teve pensamentos de que seria melhor estar morto(a) ou de se machucar?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Sim",
+          "next": "q18",
+          "effects": [
+            {
+              "kind": "safety_interrupt",
+              "message": "Agradecemos sua coragem em responder com sinceridade. Pensamentos assim merecem atenção e acolhimento profissional. Vamos te direcionar para recursos de apoio imediato. Você não está sozinho(a).",
+              "destination": "/apoio",
+              "blockResume": true
+            }
+          ]
+        },
+        { "id": "no", "label": "Não", "next": "q18" }
+      ]
+    },
+    "q18": {
+      "id": "q18",
+      "kind": "choice",
+      "text": "Você tem dormido mal — acorda cansado(a) mesmo depois de ter dormido?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Sim",
+          "next": "q19",
+          "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }]
+        },
+        { "id": "no", "label": "Não", "next": "q19" }
+      ]
+    },
+    "q19": {
+      "id": "q19",
+      "kind": "choice",
+      "text": "Você tem se sentido preocupado(a) com coisas do dia a dia de um jeito que não consegue controlar?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Sim",
+          "next": "q20",
+          "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }]
+        },
+        { "id": "no", "label": "Não", "next": "q20" }
+      ]
+    },
+    "q20": {
+      "id": "q20",
+      "kind": "choice",
+      "text": "Você se cansa com facilidade, mesmo com atividades que antes não te cansavam?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Sim",
+          "next": "srq20-score",
+          "effects": [{ "kind": "score", "scoreKey": "srq20", "value": 1 }]
+        },
+        { "id": "no", "label": "Não", "next": "srq20-score" }
+      ]
+    },
     "srq20-score": {
       "id": "srq20-score",
       "kind": "score_branch",
@@ -1000,6 +1261,7 @@ git commit -m "feat: discover JSON guided flows"
 ### Task 6: Keep Orientation Generic While Consuming JSON SRQ-20
 
 **Files:**
+
 - Modify: `src/features/orientation/OrientationScreen.tsx`
 - Modify: `src/features/orientation/__tests__/OrientationScreen.test.tsx`
 
@@ -1053,11 +1315,11 @@ Expected: first test may PASS after Task 5; pending safety navigation is not han
 In `src/features/orientation/OrientationScreen.tsx`, add this effect after the existing scroll effect:
 
 ```tsx
-  useEffect(() => {
-    if (state.pendingNavigation) {
-      navigate(state.pendingNavigation);
-    }
-  }, [navigate, state.pendingNavigation]);
+useEffect(() => {
+  if (state.pendingNavigation) {
+    navigate(state.pendingNavigation);
+  }
+}, [navigate, state.pendingNavigation]);
 ```
 
 No SRQ-20-specific JSX should be added.
@@ -1084,6 +1346,7 @@ git commit -m "feat: consume JSON SRQ-20 in chatbot"
 ### Task 7: Remove The Separate Questionnaire Path
 
 **Files:**
+
 - Delete: `src/content/questionnaires/registry.ts`
 - Delete: `src/content/questionnaires/srq20.ts`
 - Delete: `src/domain/questionnaires/checkSafetyInterruption.ts`
@@ -1163,6 +1426,7 @@ git commit -m "refactor: remove separate questionnaire runtime"
 ### Task 8: Sync Documentation With JSON-Editable Flow Architecture
 
 **Files:**
+
 - Modify: `docs/fronts/06-questionnaire-framework-srq20.md`
 - Modify: `docs/fronts/06a-questionnaire-framework-srq20-breakdown.md`
 
@@ -1227,6 +1491,7 @@ git commit -m "docs: require JSON SRQ-20 flow content"
 ### Task 9: Final Verification
 
 **Files:**
+
 - No direct source edits expected.
 
 - [ ] **Step 1: Run full verification**

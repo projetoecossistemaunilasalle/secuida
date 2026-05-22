@@ -52,22 +52,22 @@ The project is divided into the following fronts:
 
 Each front has a corresponding `A` breakdown document with implementation slices, risks, expected files, validation commands, and definition of done:
 
-| Front | Parent Plan | Breakdown |
-|---|---|---|
-| 01 | [`01-app-architecture-pwa.md`](./01-app-architecture-pwa.md) | [`01a-app-architecture-breakdown.md`](./01a-app-architecture-breakdown.md) |
-| 02 | [`02-readable-folder-structure.md`](./02-readable-folder-structure.md) | [`02a-folder-structure-breakdown.md`](./02a-folder-structure-breakdown.md) |
-| 03 | [`03-design-system-ui.md`](./03-design-system-ui.md) | [`03a-design-system-breakdown.md`](./03a-design-system-breakdown.md) |
-| 04 | [`04-content-data-modeling.md`](./04-content-data-modeling.md) | [`04a-content-data-modeling-breakdown.md`](./04a-content-data-modeling-breakdown.md) |
-| 05 | [`05-guided-flow-chatbot-framework.md`](./05-guided-flow-chatbot-framework.md) | [`05a-guided-flow-chatbot-framework-breakdown.md`](./05a-guided-flow-chatbot-framework-breakdown.md) |
-| 06 | [`06-questionnaire-framework-srq20.md`](./06-questionnaire-framework-srq20.md) | [`06a-questionnaire-framework-srq20-breakdown.md`](./06a-questionnaire-framework-srq20-breakdown.md) |
-| 07 | [`07-home-philosophy-onboarding.md`](./07-home-philosophy-onboarding.md) | [`07a-home-philosophy-onboarding-breakdown.md`](./07a-home-philosophy-onboarding-breakdown.md) |
-| 08 | [`08-immediate-support.md`](./08-immediate-support.md) | [`08a-immediate-support-breakdown.md`](./08a-immediate-support-breakdown.md) |
-| 09 | [`09-contacts-directory.md`](./09-contacts-directory.md) | [`09a-contacts-directory-breakdown.md`](./09a-contacts-directory-breakdown.md) |
-| 10 | [`10-education-library.md`](./10-education-library.md) | [`10a-education-library-breakdown.md`](./10a-education-library-breakdown.md) |
-| 11 | [`11-privacy-lgpd-session.md`](./11-privacy-lgpd-session.md) | [`11a-privacy-lgpd-session-breakdown.md`](./11a-privacy-lgpd-session-breakdown.md) |
-| 12 | [`12-anonymous-analytics.md`](./12-anonymous-analytics.md) | [`12a-anonymous-analytics-breakdown.md`](./12a-anonymous-analytics-breakdown.md) |
-| 13 | [`13-quality-validation-tooling.md`](./13-quality-validation-tooling.md) | [`13a-quality-validation-tooling-breakdown.md`](./13a-quality-validation-tooling-breakdown.md) |
-| 14 | [`14-dashboard-readiness.md`](./14-dashboard-readiness.md) | [`14a-dashboard-readiness-breakdown.md`](./14a-dashboard-readiness-breakdown.md) |
+| Front | Parent Plan                                                                    | Breakdown                                                                                            |
+| ----- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| 01    | [`01-app-architecture-pwa.md`](./01-app-architecture-pwa.md)                   | [`01a-app-architecture-breakdown.md`](./01a-app-architecture-breakdown.md)                           |
+| 02    | [`02-readable-folder-structure.md`](./02-readable-folder-structure.md)         | [`02a-folder-structure-breakdown.md`](./02a-folder-structure-breakdown.md)                           |
+| 03    | [`03-design-system-ui.md`](./03-design-system-ui.md)                           | [`03a-design-system-breakdown.md`](./03a-design-system-breakdown.md)                                 |
+| 04    | [`04-content-data-modeling.md`](./04-content-data-modeling.md)                 | [`04a-content-data-modeling-breakdown.md`](./04a-content-data-modeling-breakdown.md)                 |
+| 05    | [`05-guided-flow-chatbot-framework.md`](./05-guided-flow-chatbot-framework.md) | [`05a-guided-flow-chatbot-framework-breakdown.md`](./05a-guided-flow-chatbot-framework-breakdown.md) |
+| 06    | [`06-questionnaire-framework-srq20.md`](./06-questionnaire-framework-srq20.md) | [`06a-questionnaire-framework-srq20-breakdown.md`](./06a-questionnaire-framework-srq20-breakdown.md) |
+| 07    | [`07-home-philosophy-onboarding.md`](./07-home-philosophy-onboarding.md)       | [`07a-home-philosophy-onboarding-breakdown.md`](./07a-home-philosophy-onboarding-breakdown.md)       |
+| 08    | [`08-immediate-support.md`](./08-immediate-support.md)                         | [`08a-immediate-support-breakdown.md`](./08a-immediate-support-breakdown.md)                         |
+| 09    | [`09-contacts-directory.md`](./09-contacts-directory.md)                       | [`09a-contacts-directory-breakdown.md`](./09a-contacts-directory-breakdown.md)                       |
+| 10    | [`10-education-library.md`](./10-education-library.md)                         | [`10a-education-library-breakdown.md`](./10a-education-library-breakdown.md)                         |
+| 11    | [`11-privacy-lgpd-session.md`](./11-privacy-lgpd-session.md)                   | [`11a-privacy-lgpd-session-breakdown.md`](./11a-privacy-lgpd-session-breakdown.md)                   |
+| 12    | [`12-anonymous-analytics.md`](./12-anonymous-analytics.md)                     | [`12a-anonymous-analytics-breakdown.md`](./12a-anonymous-analytics-breakdown.md)                     |
+| 13    | [`13-quality-validation-tooling.md`](./13-quality-validation-tooling.md)       | [`13a-quality-validation-tooling-breakdown.md`](./13a-quality-validation-tooling-breakdown.md)       |
+| 14    | [`14-dashboard-readiness.md`](./14-dashboard-readiness.md)                     | [`14a-dashboard-readiness-breakdown.md`](./14a-dashboard-readiness-breakdown.md)                     |
 
 Additional Privacy/LGPD decision note:
 
@@ -93,7 +93,7 @@ App Architecture & PWA
 Anonymous Analytics depends on Privacy/LGPD.
 Dashboard Readiness depends on Content/Data Modeling.
 Quality/Tooling supports every front.
-````
+```
 
 ---
 
@@ -101,49 +101,49 @@ Quality/Tooling supports every front.
 
 ### Milestone 1 — Real App Foundation
 
-* Preserve official name: SeCuida.
-* Introduce React Router.
-* Define full-app PWA setup.
-* Replace local `currentView` navigation with routes.
-* Create app shell and persistent bottom navigation.
-* Define readable folder structure.
-* Set document language to `pt-BR`.
-* Establish base design primitives.
+- Preserve official name: SeCuida.
+- Introduce React Router.
+- Define full-app PWA setup.
+- Replace local `currentView` navigation with routes.
+- Create app shell and persistent bottom navigation.
+- Define readable folder structure.
+- Set document language to `pt-BR`.
+- Establish base design primitives.
 
 ### Milestone 2 — Static Product Surfaces
 
-* Rebuild Home as a trust/philosophy entry point.
-* Build Immediate Support screen under a calmer route name.
-* Build Contacts Directory from data files.
-* Build Education Library from data files.
-* Extract crisis contacts, support services, resources, and copy from JSX.
+- Rebuild Home as a trust/philosophy entry point.
+- Build Immediate Support screen under a calmer route name.
+- Build Contacts Directory from data files.
+- Build Education Library from data files.
+- Extract crisis contacts, support services, resources, and copy from JSX.
 
 ### Milestone 3 — Guided Flow Framework
 
-* Define JSON flow schema.
-* Create flow registry.
-* Build flow validator.
-* Build deterministic runtime engine.
-* Build constrained chat UI.
-* Support `entering_phrases` for flow switching.
-* Implement one non-questionnaire guided flow.
+- Define JSON flow schema.
+- Create flow registry.
+- Build flow validator.
+- Build deterministic runtime engine.
+- Build constrained chat UI.
+- Support `entering_phrases` for flow switching.
+- Implement one non-questionnaire guided flow.
 
 ### Milestone 4 — Questionnaire Framework + SRQ-20
 
-* Treat SRQ-20 as the first validation/test case of a generic questionnaire framework.
-* Add consent handling.
-* Add scoring.
-* Add interruption/safety rules.
-* Add tests.
-* Validate that the framework can later support other structured questionnaires.
+- Treat SRQ-20 as the first validation/test case of a generic questionnaire framework.
+- Add consent handling.
+- Add scoring.
+- Add interruption/safety rules.
+- Add tests.
+- Validate that the framework can later support other structured questionnaires.
 
 ### Milestone 5 — Privacy-Sensitive Enhancements
 
-* Evaluate session policy.
-* Decide whether any saving/persistence is allowed.
-* Postpone saving features until Privacy/LGPD verification is complete.
-* Add optional location sorting for contacts only after privacy review.
-* Add anonymous analytics only after taxonomy and disclosure review.
+- Evaluate session policy.
+- Decide whether any saving/persistence is allowed.
+- Postpone saving features until Privacy/LGPD verification is complete.
+- Add optional location sorting for contacts only after privacy review.
+- Add anonymous analytics only after taxonomy and disclosure review.
 
 ---
 
@@ -164,9 +164,9 @@ Recommended public routes:
 
 Where:
 
-* `/apoio` is the immediate support screen.
-* The bottom navigation label may still be carefully chosen through design/copy review.
-* Avoid `/crise` as the route path because the route itself can leak or reinforce a word the product may intentionally avoid surfacing.
+- `/apoio` is the immediate support screen.
+- The bottom navigation label may still be carefully chosen through design/copy review.
+- Avoid `/crise` as the route path because the route itself can leak or reinforce a word the product may intentionally avoid surfacing.
 
 ---
 

@@ -20,7 +20,8 @@ export const supportContacts = {
       name: 'CVV',
       phoneDisplay: '188',
       phoneHref: 'tel:188',
-      description: 'Centro de Valorização da Vida. Atendimento 24h, gratuito e sigiloso para apoio emocional e prevenção ao suicídio.',
+      description:
+        'Centro de Valorização da Vida. Atendimento 24h, gratuito e sigiloso para apoio emocional e prevenção ao suicídio.',
       review: pendingReview,
     },
     {
@@ -28,7 +29,8 @@ export const supportContacts = {
       name: 'SAMU',
       phoneDisplay: '192',
       phoneHref: 'tel:192',
-      description: 'Serviço de Atendimento Móvel de Urgência. Para emergências médicas que necessitem de intervenção imediata.',
+      description:
+        'Serviço de Atendimento Móvel de Urgência. Para emergências médicas que necessitem de intervenção imediata.',
       review: pendingReview,
     },
     {
@@ -36,7 +38,8 @@ export const supportContacts = {
       name: 'Bombeiros',
       phoneDisplay: '193',
       phoneHref: 'tel:193',
-      description: 'Corpo de Bombeiros. Para resgates, tentativas de suicídio em andamento ou situações de risco iminente à vida.',
+      description:
+        'Corpo de Bombeiros. Para resgates, tentativas de suicídio em andamento ou situações de risco iminente à vida.',
       review: pendingReview,
     },
   ],

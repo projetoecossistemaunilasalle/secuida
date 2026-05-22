@@ -146,4 +146,3 @@ npm run build
 ## Definition of Done
 
 Front 12A is done when analytics has an approved taxonomy, provider, privacy disclosure, and safe typed implementation that collects only aggregate non-identifying events and excludes answers, transcripts, location, and individual journeys.
-

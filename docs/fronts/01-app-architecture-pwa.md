@@ -35,7 +35,7 @@ The prototype currently has core views for home, orientation, emergency support,
  /contatos
  /educacao
  /educacao/:resourceId
-````
+```
 
 Optional later routes:
 
@@ -51,13 +51,13 @@ Optional later routes:
 
 The app shell should own:
 
-* persistent bottom navigation;
-* optional top header;
-* safe-area padding for mobile;
-* route transition wrapper;
-* app-wide layout width;
-* PWA install behavior if used;
-* global providers.
+- persistent bottom navigation;
+- optional top header;
+- safe-area padding for mobile;
+- route transition wrapper;
+- app-wide layout width;
+- PWA install behavior if used;
+- global providers.
 
 Suggested structure:
 
@@ -91,20 +91,20 @@ public/
 
 Add:
 
-* app name: SeCuida;
-* short name: SeCuida;
-* theme color aligned with primary green;
-* background color white or app background;
-* display: standalone;
-* start URL: `/`;
-* scope: full app.
+- app name: SeCuida;
+- short name: SeCuida;
+- theme color aligned with primary green;
+- background color white or app background;
+- display: standalone;
+- start URL: `/`;
+- scope: full app.
 
 Service worker strategy should be conservative at first:
 
-* cache app shell and static assets;
-* avoid caching sensitive session state;
-* avoid caching questionnaire answers;
-* avoid offline behavior that implies saved progress unless privacy allows it.
+- cache app shell and static assets;
+- avoid caching sensitive session state;
+- avoid caching questionnaire answers;
+- avoid offline behavior that implies saved progress unless privacy allows it.
 
 ---
 
@@ -130,19 +130,19 @@ export const routes = {
 
 ## Risks
 
-* PWA caching can accidentally preserve more than intended.
-* Offline behavior can imply persistence.
-* Route names can affect user perception.
-* Browser history can expose screen names.
+- PWA caching can accidentally preserve more than intended.
+- Offline behavior can imply persistence.
+- Route names can affect user perception.
+- Browser history can expose screen names.
 
 ---
 
 ## Acceptance Criteria
 
-* App has React Router.
-* Bottom nav reflects current route.
-* PWA manifest exists.
-* App can be installed as a standalone PWA.
-* No sensitive user answers are cached or persisted.
-* `/apoio` or another neutral support route is used instead of `/crise`.
-* `html lang` is set to `pt-BR`.
+- App has React Router.
+- Bottom nav reflects current route.
+- PWA manifest exists.
+- App can be installed as a standalone PWA.
+- No sensitive user answers are cached or persisted.
+- `/apoio` or another neutral support route is used instead of `/crise`.
+- `html lang` is set to `pt-BR`.

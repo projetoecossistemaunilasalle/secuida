@@ -22,6 +22,7 @@
 The current component initializes state synchronously. After the change, `state` starts as `null` and messages appear after `TYPING_DELAY_MS`. Existing tests must advance past the initial timer.
 
 **Files:**
+
 - Modify: `src/features/orientation/__tests__/OrientationScreen.test.tsx`
 
 - [ ] **Step 1: Add fake timers setup to all tests**
@@ -201,6 +202,7 @@ git commit -m "test: update orientation tests for async initial load with fake t
 ### Task 2: Add TypingIndicator component and staged rendering state
 
 **Files:**
+
 - Modify: `src/features/orientation/OrientationScreen.tsx`
 
 This task introduces nullable state and reveal tracking. Continue directly into Task 3 before running tests or committing, because `submitOption`, `pendingNavigation`, and auto-scroll must also become null-safe in the same implementation slice.
@@ -241,7 +243,7 @@ function TypingIndicator() {
         </div>
       </div>
     </article>
-  )
+  );
 }
 ```
 
@@ -286,10 +288,12 @@ Keep `visibleOptions` and `exactOption` after this memo so they derive from the 
 Replace the transcript `.map()` (lines 81-83):
 
 ```tsx
-{state?.transcript.slice(0, visibleCount).map((message) => (
-  <MessageBubble key={message.id} message={message} />
-))}
-{isRevealing && <TypingIndicator />}
+{
+  state?.transcript.slice(0, visibleCount).map((message) => <MessageBubble key={message.id} message={message} />);
+}
+{
+  isRevealing && <TypingIndicator />;
+}
 ```
 
 - [ ] **Step 6: Add initial load useEffect**
@@ -339,6 +343,7 @@ Commit after Task 3, when the component is runnable and type-safe.
 ### Task 3: Implement staged rendering for user selections
 
 **Files:**
+
 - Modify: `src/features/orientation/OrientationScreen.tsx`
 
 - [ ] **Step 1: Update submitOption with staged rendering**
@@ -441,6 +446,7 @@ git commit -m "feat: stage orientation bot messages with typing indicator"
 ### Task 4: Add typing indicator test coverage
 
 **Files:**
+
 - Modify: `src/features/orientation/__tests__/OrientationScreen.test.tsx`
 
 - [ ] **Step 1: Add test for initial load typing indicator**
@@ -531,6 +537,7 @@ git commit -m "test: add typing indicator behavior coverage"
 ### Task 5: Final verification and cleanup
 
 **Files:**
+
 - None (verification only)
 
 - [ ] **Step 1: Run full test suite**

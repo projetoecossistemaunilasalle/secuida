@@ -1,4 +1,3 @@
-
 # Front 13 — Quality, Validation & Tooling
 
 ## Goal
@@ -19,7 +18,7 @@ Vitest
 React Testing Library
 Zod or Valibot
 tsx for scripts
-````
+```
 
 ---
 
@@ -82,8 +81,8 @@ support screen actions
 
 ## Acceptance Criteria
 
-* `npm run check` exists.
-* Flow validation blocks invalid content.
-* SRQ-20 test flow has automated tests.
-* App builds successfully.
-* Design-system components have basic render/accessibility tests.
+- `npm run check` exists.
+- Flow validation blocks invalid content.
+- SRQ-20 test flow has automated tests.
+- App builds successfully.
+- Design-system components have basic render/accessibility tests.

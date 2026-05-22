@@ -27,20 +27,20 @@ Privacy caveat: first-visit onboarding completion is currently remembered with `
 
 ## 2. Runtime and Tooling
 
-| Concern | Current shape |
-|---|---|
-| App framework | React with Vite |
-| Language | TypeScript/TSX |
-| Routing | React Router |
-| Styling | Tailwind CSS v4 through `@tailwindcss/vite`, plus custom design tokens |
-| Animation | `motion/react` |
-| Icons | `lucide-react` |
-| Unit/component tests | Vitest, Testing Library, jsdom |
-| Entry command | `pnpm run dev` |
-| Type/lint command | `pnpm run lint`, implemented as `tsc --noEmit` |
-| Test command | `pnpm run test` |
-| Build command | `pnpm run build` |
-| Deployment hint | Vite `base` is `/SeCuida-Prototipo/`, suggesting GitHub Pages/subpath deployment |
+| Concern              | Current shape                                                                    |
+| -------------------- | -------------------------------------------------------------------------------- |
+| App framework        | React with Vite                                                                  |
+| Language             | TypeScript/TSX                                                                   |
+| Routing              | React Router                                                                     |
+| Styling              | Tailwind CSS v4 through `@tailwindcss/vite`, plus custom design tokens           |
+| Animation            | `motion/react`                                                                   |
+| Icons                | `lucide-react`                                                                   |
+| Unit/component tests | Vitest, Testing Library, jsdom                                                   |
+| Entry command        | `pnpm run dev`                                                                   |
+| Type/lint command    | `pnpm run lint`, implemented as `tsc --noEmit`                                   |
+| Test command         | `pnpm run test`                                                                  |
+| Build command        | `pnpm run build`                                                                 |
+| Deployment hint      | Vite `base` is `/SeCuida-Prototipo/`, suggesting GitHub Pages/subpath deployment |
 
 The package is private, named `react-example`, and uses pnpm. A GitHub Pages deployment workflow exists under `.github/workflows/deploy.yml`.
 
@@ -75,30 +75,30 @@ The package is private, named `react-example`, and uses pnpm. A GitHub Pages dep
 
 ### Root files
 
-| File | Role |
-|---|---|
-| `README.md` | Product summary, current architecture summary, and local commands. |
-| `package.json` | Scripts and dependency surface. |
-| `vite.config.ts` | Vite config, React plugin, Tailwind plugin, root alias, and subpath base. |
-| `vitest.config.ts` | Vitest/jsdom test configuration. |
-| `tsconfig.json` | TypeScript compiler behavior. Uses bundler resolution, JSX React transform, no emit, and root alias mapping. |
-| `index.html` | Root HTML shell with `#root`, `lang="pt-BR"`, theme color, and manifest link. |
-| `public/manifest.webmanifest` | Basic PWA manifest scoped to `/SeCuida-Prototipo/`. |
+| File                          | Role                                                                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `README.md`                   | Product summary, current architecture summary, and local commands.                                           |
+| `package.json`                | Scripts and dependency surface.                                                                              |
+| `vite.config.ts`              | Vite config, React plugin, Tailwind plugin, root alias, and subpath base.                                    |
+| `vitest.config.ts`            | Vitest/jsdom test configuration.                                                                             |
+| `tsconfig.json`               | TypeScript compiler behavior. Uses bundler resolution, JSX React transform, no emit, and root alias mapping. |
+| `index.html`                  | Root HTML shell with `#root`, `lang="pt-BR"`, theme color, and manifest link.                                |
+| `public/manifest.webmanifest` | Basic PWA manifest scoped to `/SeCuida-Prototipo/`.                                                          |
 
 ---
 
 ## 4. Source Structure
 
-| Folder | Role |
-|---|---|
-| `src/app` | App providers, error boundary, route constants, router, and shell. |
-| `src/app/shell` | Top bar, bottom navigation, route transition, scroll restoration, shell layout. |
-| `src/features` | Product screens grouped by feature: home, orientation, support, contacts, education, privacy. |
-| `src/content` | Structured product content for copy, flows, questionnaires, resources, services, and support contacts. |
-| `src/domain` | React-independent domain types and logic. |
-| `src/design-system` | Reusable UI primitives and design-system styles. |
-| `src/lib` | Reserved/shared utilities such as geo and validation notes. |
-| `src/test` | Test setup. |
+| Folder              | Role                                                                                                   |
+| ------------------- | ------------------------------------------------------------------------------------------------------ |
+| `src/app`           | App providers, error boundary, route constants, router, and shell.                                     |
+| `src/app/shell`     | Top bar, bottom navigation, route transition, scroll restoration, shell layout.                        |
+| `src/features`      | Product screens grouped by feature: home, orientation, support, contacts, education, privacy.          |
+| `src/content`       | Structured product content for copy, flows, questionnaires, resources, services, and support contacts. |
+| `src/domain`        | React-independent domain types and logic.                                                              |
+| `src/design-system` | Reusable UI primitives and design-system styles.                                                       |
+| `src/lib`           | Reserved/shared utilities such as geo and validation notes.                                            |
+| `src/test`          | Test setup.                                                                                            |
 
 Current public routes are centralized in `src/app/routes.ts`:
 
@@ -215,14 +215,14 @@ Primary role: explain current session/privacy stance. The displayed claim that t
 
 Content is no longer hidden primarily inside JSX. The repository now has typed content collections:
 
-| Content type | Current location |
-|---|---|
-| Home copy | `src/content/copy/home.ts` |
-| Emergency/support contacts | `src/content/support/contacts.ts` |
-| Local services | `src/content/services/canoas-services.ts` |
-| Education resources | `src/content/resources/resources.ts` |
-| Guided flows | `src/content/flows/*` |
-| SRQ-20 questionnaire | `src/content/flows/srq20.json` |
+| Content type               | Current location                          |
+| -------------------------- | ----------------------------------------- |
+| Home copy                  | `src/content/copy/home.ts`                |
+| Emergency/support contacts | `src/content/support/contacts.ts`         |
+| Local services             | `src/content/services/canoas-services.ts` |
+| Education resources        | `src/content/resources/resources.ts`      |
+| Guided flows               | `src/content/flows/*`                     |
+| SRQ-20 questionnaire       | `src/content/flows/srq20.json`            |
 
 Shared metadata appears through `src/domain/content/types.ts`, including locale, status, version, and review metadata.
 
@@ -328,7 +328,7 @@ Areas to inspect carefully when changing related code:
 `vite.config.ts` sets:
 
 ```ts
-base: '/SeCuida-Prototipo/'
+base: '/SeCuida-Prototipo/';
 ```
 
 The manifest also uses `/SeCuida-Prototipo/` for `start_url`, `scope`, and icon path.
@@ -395,19 +395,19 @@ Analytics policy note: `docs/fronts/12b-anonymous-analytics-lgpd-policy.md` docu
 
 Before editing, classify the change by layer:
 
-| Change type | First files to inspect |
-|---|---|
-| New route/top-level screen | `src/app/routes.ts`, `src/app/router.tsx`, `src/app/shell/*`, relevant `src/features/*` |
-| Navigation wording or route behavior | `src/app/shell/*`, `src/app/routes.ts` |
-| Home/onboarding behavior | `src/features/home/*`, `src/content/copy/home.ts` |
-| Support contact or crisis copy | `src/features/support/*`, `src/content/support/contacts.ts` |
-| Guided orientation flow | `src/features/orientation/*`, `src/domain/flow-engine/*`, `src/content/flows/*` |
-| Questionnaire/SRQ-20 behavior | `src/domain/flow-engine/*`, `src/content/flows/srq20.json` |
-| Local directory data | `src/content/services/canoas-services.ts`, `src/domain/services/types.ts` |
-| Education resources | `src/content/resources/resources.ts`, `src/features/education/*` |
-| Color/spacing/type changes | `src/index.css`, `src/design-system/*`, then affected JSX |
-| Build/deploy path | `vite.config.ts`, `public/manifest.webmanifest`, `.github/workflows/deploy.yml` |
-| Privacy/session behavior | `src/features/privacy/*`, `src/features/home/firstVisit.ts`, `src/domain/privacy/README.md` |
+| Change type                          | First files to inspect                                                                      |
+| ------------------------------------ | ------------------------------------------------------------------------------------------- |
+| New route/top-level screen           | `src/app/routes.ts`, `src/app/router.tsx`, `src/app/shell/*`, relevant `src/features/*`     |
+| Navigation wording or route behavior | `src/app/shell/*`, `src/app/routes.ts`                                                      |
+| Home/onboarding behavior             | `src/features/home/*`, `src/content/copy/home.ts`                                           |
+| Support contact or crisis copy       | `src/features/support/*`, `src/content/support/contacts.ts`                                 |
+| Guided orientation flow              | `src/features/orientation/*`, `src/domain/flow-engine/*`, `src/content/flows/*`             |
+| Questionnaire/SRQ-20 behavior        | `src/domain/flow-engine/*`, `src/content/flows/srq20.json`                                  |
+| Local directory data                 | `src/content/services/canoas-services.ts`, `src/domain/services/types.ts`                   |
+| Education resources                  | `src/content/resources/resources.ts`, `src/features/education/*`                            |
+| Color/spacing/type changes           | `src/index.css`, `src/design-system/*`, then affected JSX                                   |
+| Build/deploy path                    | `vite.config.ts`, `public/manifest.webmanifest`, `.github/workflows/deploy.yml`             |
+| Privacy/session behavior             | `src/features/privacy/*`, `src/features/home/firstVisit.ts`, `src/domain/privacy/README.md` |
 
 Before merging a change, compare it against these contracts:
 

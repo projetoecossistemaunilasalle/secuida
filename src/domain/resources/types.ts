@@ -14,4 +14,3 @@ export interface EducationResource {
 export interface ResourcesContent extends ContentMetadata {
   resources: EducationResource[];
 }
-

@@ -24,15 +24,15 @@ Allowed analytics should be stored as aggregate counters only.
 
 Examples:
 
-| Metric | Allowed shape |
-|---|---|
-| Page views | Count visits per route per day |
-| Resource engagement | Count clicks/openings per resource ID |
-| Support engagement | Count support contact clicks by contact ID |
-| Flow starts | Count starts per guided-flow ID |
-| Flow completions | Count completions per guided-flow ID |
+| Metric                     | Allowed shape                                               |
+| -------------------------- | ----------------------------------------------------------- |
+| Page views                 | Count visits per route per day                              |
+| Resource engagement        | Count clicks/openings per resource ID                       |
+| Support engagement         | Count support contact clicks by contact ID                  |
+| Flow starts                | Count starts per guided-flow ID                             |
+| Flow completions           | Count completions per guided-flow ID                        |
 | Questionnaire result bands | Count broad result bands only, with small-count suppression |
-| Device category | Coarse category such as mobile, tablet, desktop |
+| Device category            | Coarse category such as mobile, tablet, desktop             |
 
 Allowed records should look like:
 

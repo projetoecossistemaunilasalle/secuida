@@ -12,9 +12,7 @@ export function SupportScreen() {
         <div className="w-32 h-32 mb-4 bg-surface-container rounded-full flex items-center justify-center overflow-hidden shadow-sm">
           <img alt="Apoio" className="w-full h-full object-cover" src={heroImage} />
         </div>
-        <h1 className="font-display-lg text-primary flex items-center gap-3 justify-center">
-          {supportContacts.title}
-        </h1>
+        <h1 className="font-display-lg text-primary flex items-center gap-3 justify-center">{supportContacts.title}</h1>
         <p className="font-body-lg text-on-surface-variant max-w-md mx-auto">{supportContacts.description}</p>
       </section>
 

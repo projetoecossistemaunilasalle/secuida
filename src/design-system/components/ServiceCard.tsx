@@ -42,4 +42,3 @@ export function ServiceCard({ service }: { service: ServiceDirectoryEntry }) {
     </Card>
   );
 }
-

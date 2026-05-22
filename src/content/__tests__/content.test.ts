@@ -22,7 +22,6 @@ describe('Home copy', () => {
       expect(action.description).toBeTruthy();
     });
   });
-
 });
 
 describe('Support contacts', () => {

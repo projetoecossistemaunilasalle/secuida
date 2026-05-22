@@ -15,7 +15,8 @@ export function PrivacyScreen() {
       <Card className="p-6">
         <h2 className="font-headline-sm text-on-surface mb-3">Política de sessão atual</h2>
         <p className="font-body-md text-on-surface-variant">
-          Nesta fase, o app usa apenas estado em memória para a interação atual. Não há login, identificação pessoal, analytics ou persistência de dados sensíveis.
+          Nesta fase, o app usa apenas estado em memória para a interação atual. Não há login, identificação pessoal,
+          analytics ou persistência de dados sensíveis.
         </p>
       </Card>
     </Page>

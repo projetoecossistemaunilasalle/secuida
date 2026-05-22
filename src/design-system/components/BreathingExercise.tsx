@@ -62,9 +62,7 @@ export function BreathingExercise() {
           animate={{ scale: active ? scale : 1 }}
           transition={{ duration: PHASES[phase].duration, ease: 'easeInOut', delay: 0.2 }}
         >
-          {active && (
-            <span className="font-display-lg text-primary">{countdown}</span>
-          )}
+          {active && <span className="font-display-lg text-primary">{countdown}</span>}
         </motion.div>
       </div>
 

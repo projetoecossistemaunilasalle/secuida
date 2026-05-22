@@ -14,7 +14,7 @@ Recommended route:
 
 ```txt
 /apoio
-````
+```
 
 Avoid:
 
@@ -30,13 +30,13 @@ The goal is to avoid reinforcing a distressing word while still giving users a c
 
 The screen should include:
 
-* grounding message;
-* CVV 188;
-* SAMU 192;
-* Bombeiros 193;
-* breathing exercise;
-* calm explanation;
-* direct call buttons.
+- grounding message;
+- CVV 188;
+- SAMU 192;
+- Bombeiros 193;
+- breathing exercise;
+- calm explanation;
+- direct call buttons.
 
 ---
 
@@ -77,20 +77,20 @@ global action “Quero apoio agora” → /apoio
 
 ## Design Rules
 
-* No red-first visual language.
-* No alarmist animation.
-* No shame-based language.
-* Use calm green/blue surfaces.
-* Phone numbers should be large and tappable.
-* The breathing exercise should have equal dignity with phone cards.
+- No red-first visual language.
+- No alarmist animation.
+- No shame-based language.
+- Use calm green/blue surfaces.
+- Phone numbers should be large and tappable.
+- The breathing exercise should have equal dignity with phone cards.
 
 ---
 
 ## Acceptance Criteria
 
-* Support route exists at `/apoio` or another calm approved route.
-* Persistent nav can reach it from anywhere.
-* CVV/SAMU/Bombeiros cards are present.
-* Breathing exercise is present.
-* Flow safety rules can route here.
-* Screen avoids alarmist treatment.
+- Support route exists at `/apoio` or another calm approved route.
+- Persistent nav can reach it from anywhere.
+- CVV/SAMU/Bombeiros cards are present.
+- Breathing exercise is present.
+- Flow safety rules can route here.
+- Screen avoids alarmist treatment.

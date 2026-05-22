@@ -32,6 +32,7 @@
 ### Task 1: Flow Types, Registry, And Validator
 
 **Files:**
+
 - Create: `src/domain/flow-engine/types.ts`
 - Create: `src/domain/flow-engine/validateFlow.ts`
 - Create: `src/content/flows/work-stress.ts`
@@ -120,6 +121,7 @@ Expected: PASS for validation tests.
 ### Task 2: Runtime Engine
 
 **Files:**
+
 - Create: `src/domain/flow-engine/loadFlows.ts`
 - Create: `src/domain/flow-engine/resolveOptions.ts`
 - Create: `src/domain/flow-engine/advanceFlow.ts`
@@ -198,6 +200,7 @@ Expected: PASS for validation and runtime tests.
 ### Task 3: Constrained Orientation UI
 
 **Files:**
+
 - Modify: `src/features/orientation/OrientationScreen.tsx`
 - Test: `src/features/orientation/__tests__/OrientationScreen.test.tsx`
 
@@ -235,7 +238,9 @@ describe('OrientationScreen', () => {
 
     await user.click(screen.getByRole('button', { name: 'Muitas tarefas ao mesmo tempo' }));
 
-    expect(screen.getByText('Quando tudo parece urgente, ajuda separar o que precisa de atenção agora do que pode esperar.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Quando tudo parece urgente, ajuda separar o que precisa de atenção agora do que pode esperar.'),
+    ).toBeInTheDocument();
   });
 });
 ```
@@ -261,6 +266,7 @@ Expected: PASS for constrained UI behavior.
 ### Task 4: Browser Verification And Full Checks
 
 **Files:**
+
 - Modify only files surfaced by test or browser feedback.
 
 - [ ] **Step 1: Run full automated verification**

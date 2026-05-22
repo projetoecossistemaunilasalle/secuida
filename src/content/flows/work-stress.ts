@@ -14,7 +14,8 @@ export const workStressFlow = {
       'Tenho muito estresse na escola',
       'Não estou dando conta das demandas',
     ],
-    transitionMessage: 'Vamos olhar para essa sobrecarga com calma. Escolha a opção que mais se aproxima do seu momento.',
+    transitionMessage:
+      'Vamos olhar para essa sobrecarga com calma. Escolha a opção que mais se aproxima do seu momento.',
   },
   nodes: {
     start: {

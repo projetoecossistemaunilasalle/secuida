@@ -53,7 +53,7 @@ ChatTranscript
 OptionChip
 Combobox
 BreathingExerciseCard
-````
+```
 
 ---
 
@@ -110,10 +110,10 @@ Use semantic names, not emotion-heavy names like `danger`, unless strictly requi
 
 Use motion gently:
 
-* route fade/slide;
-* chat bubble entrance;
-* breathing exercise animation;
-* bottom nav active transition.
+- route fade/slide;
+- chat bubble entrance;
+- breathing exercise animation;
+- bottom nav active transition.
 
 Avoid heavy animation on serious support screens.
 
@@ -121,20 +121,20 @@ Avoid heavy animation on serious support screens.
 
 ## Accessibility Rules
 
-* Minimum touch target: 44px.
-* Buttons must have visible focus states.
-* Icons should not carry meaning alone.
-* Chat options must be keyboard-selectable.
-* Combobox must follow accessible combobox behavior.
-* Breathing animation must not rely only on animation; text steps must be visible.
-* Support phone links must be clear and large.
+- Minimum touch target: 44px.
+- Buttons must have visible focus states.
+- Icons should not carry meaning alone.
+- Chat options must be keyboard-selectable.
+- Combobox must follow accessible combobox behavior.
+- Breathing animation must not rely only on animation; text steps must be visible.
+- Support phone links must be clear and large.
 
 ---
 
 ## Acceptance Criteria
 
-* Repeated cards are componentized.
-* New screens can be built mostly from design-system primitives.
-* No new screen should need to invent its own button/card pattern.
-* Components support accessible labels and focus states.
-* Design tokens cover the common visual cases.
+- Repeated cards are componentized.
+- New screens can be built mostly from design-system primitives.
+- No new screen should need to invent its own button/card pattern.
+- Components support accessible labels and focus states.
+- Design tokens cover the common visual cases.

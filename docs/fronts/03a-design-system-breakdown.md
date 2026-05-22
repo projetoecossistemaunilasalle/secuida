@@ -110,16 +110,16 @@ Do not create `src/design-system/chat/` in this front unless chat primitives are
 
 ## Component Responsibilities
 
-| Component | Responsibility |
-|---|---|
-| `Button` | Shared button variants, sizes, focus states, disabled state |
-| `Card` | Common surface, border, radius, and shadow treatment |
-| `Badge` | Small labels such as CAPS, UBS, FEEVALE |
-| `Page` | Consistent page padding, max width, and mobile bottom spacing |
-| `PageHeader` | Reusable heading/subheading pattern |
-| `ActionCard` | Home entry path buttons/cards |
-| `SupportContactCard` | CVV/SAMU/Bombeiros support cards |
-| `ServiceCard` | Contact directory service cards |
+| Component            | Responsibility                                                |
+| -------------------- | ------------------------------------------------------------- |
+| `Button`             | Shared button variants, sizes, focus states, disabled state   |
+| `Card`               | Common surface, border, radius, and shadow treatment          |
+| `Badge`              | Small labels such as CAPS, UBS, FEEVALE                       |
+| `Page`               | Consistent page padding, max width, and mobile bottom spacing |
+| `PageHeader`         | Reusable heading/subheading pattern                           |
+| `ActionCard`         | Home entry path buttons/cards                                 |
+| `SupportContactCard` | CVV/SAMU/Bombeiros support cards                              |
+| `ServiceCard`        | Contact directory service cards                               |
 
 Components should accept plain React children where practical and avoid encoding product content directly.
 

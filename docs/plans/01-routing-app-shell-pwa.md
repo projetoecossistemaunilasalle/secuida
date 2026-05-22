@@ -87,4 +87,3 @@ public/icon.svg
 - `index.html` uses `pt-BR`.
 - PWA manifest exists and names the app `SeCuida`.
 - No persistence, analytics, or backend behavior is introduced.
-

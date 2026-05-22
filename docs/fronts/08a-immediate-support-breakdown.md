@@ -153,4 +153,3 @@ npm run build
 ## Definition of Done
 
 Front 08A is done when `/apoio` is a content-driven, calm, accessible support destination with direct contacts, breathing guidance, and integration with navigation and flow safety rules.
-

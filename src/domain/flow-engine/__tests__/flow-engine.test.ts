@@ -145,11 +145,7 @@ describe('validateFlow', () => {
   it('returns validation errors for malformed JSON-shaped content instead of throwing', () => {
     expect(validateFlow({})).toEqual({
       valid: false,
-      errors: [
-        'Flow id is required.',
-        'Flow entry is required.',
-        'Flow nodes are required.',
-      ],
+      errors: ['Flow id is required.', 'Flow entry is required.', 'Flow nodes are required.'],
     });
   });
 
@@ -165,7 +161,9 @@ describe('validateFlow', () => {
       },
     };
 
-    expect(validateFlow(invalidFlow).errors).toContain('Flow fixture-flow node key start must match node id different-start.');
+    expect(validateFlow(invalidFlow).errors).toContain(
+      'Flow fixture-flow node key start must match node id different-start.',
+    );
   });
 
   it('parses unknown JSON-shaped flow content into a typed guided flow', () => {
@@ -176,9 +174,7 @@ describe('validateFlow', () => {
   });
 
   it('rejects invalid JSON-shaped flow content at the parser boundary', () => {
-    expect(() => parseGuidedFlow({ id: 'broken-flow' })).toThrow(
-      'Flow entry is required. Flow nodes are required.',
-    );
+    expect(() => parseGuidedFlow({ id: 'broken-flow' })).toThrow('Flow entry is required. Flow nodes are required.');
   });
 
   it('rejects score branch nodes with broken next references', () => {
@@ -282,7 +278,11 @@ describe('flow runtime', () => {
   });
 
   it('switches flows through another flow entry phrase without merging answers', () => {
-    const answeredState = advanceFlow(createInitialFlowState(validFlow, [validFlow, secondFlow]), [validFlow, secondFlow], 'Continuar');
+    const answeredState = advanceFlow(
+      createInitialFlowState(validFlow, [validFlow, secondFlow]),
+      [validFlow, secondFlow],
+      'Continuar',
+    );
     const switchedState = advanceFlow(answeredState, [validFlow, secondFlow], 'Quero trocar de assunto');
 
     expect(switchedState.activeFlowId).toBe('second-flow');
@@ -296,17 +296,25 @@ describe('flow runtime', () => {
   });
 
   it('offers resume only from result nodes when safety rules allow it', () => {
-    const switchedState = advanceFlow(createInitialFlowState(validFlow, [validFlow, secondFlow]), [validFlow, secondFlow], 'Quero trocar de assunto');
+    const switchedState = advanceFlow(
+      createInitialFlowState(validFlow, [validFlow, secondFlow]),
+      [validFlow, secondFlow],
+      'Quero trocar de assunto',
+    );
     const finishedSecondFlow = advanceFlow(switchedState, [validFlow, secondFlow], 'Finalizar este caminho');
 
-    expect(resolveOptions(finishedSecondFlow, [validFlow, secondFlow]).map((option) => option.label)).toContain('Retomar Fluxo de teste');
+    expect(resolveOptions(finishedSecondFlow, [validFlow, secondFlow]).map((option) => option.label)).toContain(
+      'Retomar Fluxo de teste',
+    );
 
     const safetyBlockedState = {
       ...finishedSecondFlow,
       safetyFlags: { 'block-resume:fixture-flow': true },
     };
 
-    expect(resolveOptions(safetyBlockedState, [validFlow, secondFlow]).map((option) => option.label)).not.toContain('Retomar Fluxo de teste');
+    expect(resolveOptions(safetyBlockedState, [validFlow, secondFlow]).map((option) => option.label)).not.toContain(
+      'Retomar Fluxo de teste',
+    );
   });
 
   it('ends the active flow when the end action is selected', () => {
@@ -398,7 +406,9 @@ describe('flow runtime', () => {
     expect(nextState.activeNodeId).toBeUndefined();
     expect(nextState.safetyFlags['block-resume:safety-flow']).toBe(true);
     expect(nextState.transcript.map((message) => message.text)).toContain('Vamos te direcionar para apoio imediato.');
-    expect(nextState.transcript.map((message) => message.text)).not.toContain('Este texto não deve aparecer antes do apoio.');
+    expect(nextState.transcript.map((message) => message.text)).not.toContain(
+      'Este texto não deve aparecer antes do apoio.',
+    );
   });
 
   it('discovers JSON flows from the content folder without per-flow imports', () => {

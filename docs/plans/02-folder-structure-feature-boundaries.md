@@ -83,4 +83,3 @@ src/
 - `src/views` is no longer referenced.
 - Domain and content boundaries are present but not overbuilt.
 - Analytics and persistence folders are not introduced early.
-

@@ -166,4 +166,3 @@ npm run build
 ## Definition of Done
 
 Front 10A is done when `/educacao` and `/educacao/:resourceId` render structured resource content, resources include source/review metadata, and guided-flow recommendations resolve through stable resource IDs instead of embedded JSX copy.
-

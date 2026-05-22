@@ -12,16 +12,17 @@
 
 ## File Structure
 
-| File | Action | Purpose |
-|---|---|---|
+| File                                                            | Action | Purpose                                                                                                |
+| --------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------ |
 | `src/features/orientation/__tests__/OrientationScreen.test.tsx` | Modify | Update existing chat tests to pass through the intro gate and add coverage for the new pre-chat screen |
-| `src/features/orientation/OrientationScreen.tsx` | Modify | Add starter constants, intro state, intro screen component, and delayed flow startup behavior |
+| `src/features/orientation/OrientationScreen.tsx`                | Modify | Add starter constants, intro state, intro screen component, and delayed flow startup behavior          |
 
 ---
 
 ### Task 1: Add failing tests for the pre-chat gate
 
 **Files:**
+
 - Modify: `src/features/orientation/__tests__/OrientationScreen.test.tsx`
 
 - [ ] **Step 1: Add a helper that starts the chat from the intro screen**
@@ -220,6 +221,7 @@ git commit -m "test: cover orientation pre-chat screen"
 ### Task 2: Add intro state and delayed flow startup
 
 **Files:**
+
 - Modify: `src/features/orientation/OrientationScreen.tsx`
 
 - [ ] **Step 1: Update imports**
@@ -301,7 +303,14 @@ useEffect(() => {
     const introMessages =
       selectedIntroStarter === null
         ? []
-        : [createMessage('user', selectedIntroStarter, initialState.activeFlowId ?? 'work-stress', initialState.activeNodeId)];
+        : [
+            createMessage(
+              'user',
+              selectedIntroStarter,
+              initialState.activeFlowId ?? 'work-stress',
+              initialState.activeNodeId,
+            ),
+          ];
     const nextState = {
       ...initialState,
       transcript: [...introMessages, ...initialState.transcript],
@@ -340,6 +349,7 @@ Expected: FAIL because the component now has intro state, but the intro screen U
 ### Task 3: Render the pre-chat screen using the current theme
 
 **Files:**
+
 - Modify: `src/features/orientation/OrientationScreen.tsx`
 
 - [ ] **Step 1: Add a conditional render before the chat section**
@@ -347,17 +357,21 @@ Expected: FAIL because the component now has intro state, but the intro screen U
 Inside the `return`, keep the existing `<main ...>` wrapper and add this before the existing chatbot `<section ...>`:
 
 ```tsx
-{!hasStarted && <OrientationIntroScreen onSelectStarter={startConversation} />}
+{
+  !hasStarted && <OrientationIntroScreen onSelectStarter={startConversation} />;
+}
 ```
 
 Then wrap the current chatbot `<section ...>` with:
 
 ```tsx
-{hasStarted && (
-  <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-outline-variant/50 bg-surface-container-lowest shadow-[0_16px_48px_rgba(17,28,44,0.08)]">
-    {/* existing chatbot content stays here */}
-  </section>
-)}
+{
+  hasStarted && (
+    <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-outline-variant/50 bg-surface-container-lowest shadow-[0_16px_48px_rgba(17,28,44,0.08)]">
+      {/* existing chatbot content stays here */}
+    </section>
+  );
+}
 ```
 
 The resulting return shape should be:
@@ -446,6 +460,7 @@ git commit -m "feat: add orientation pre-chat starter screen"
 ### Task 4: Verify the full app and review in browser
 
 **Files:**
+
 - No source edits expected unless verification finds a defect
 
 - [ ] **Step 1: Run the full test suite**

@@ -41,7 +41,13 @@ export function OnboardingScreen({ onContinue }: { onContinue: () => void }) {
     >
       {/* Wave decoration */}
       <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
-        <svg viewBox="0 0 1440 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full" preserveAspectRatio="none">
+        <svg
+          viewBox="0 0 1440 200"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-full"
+          preserveAspectRatio="none"
+        >
           <path d="M0 120C240 40 480 160 720 120C960 80 1200 160 1440 120V200H0V120Z" fill="rgba(255,255,255,0.08)" />
           <path d="M0 140C240 80 480 180 720 140C960 100 1200 180 1440 140V200H0V140Z" fill="rgba(255,255,255,0.05)" />
         </svg>
@@ -70,9 +76,7 @@ export function OnboardingScreen({ onContinue }: { onContinue: () => void }) {
           {steps.map((_, i) => (
             <div
               key={i}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                i === step ? 'bg-on-primary' : 'bg-on-primary/30'
-              }`}
+              className={`w-2 h-2 rounded-full transition-colors ${i === step ? 'bg-on-primary' : 'bg-on-primary/30'}`}
             />
           ))}
         </div>

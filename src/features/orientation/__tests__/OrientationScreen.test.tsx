@@ -38,7 +38,9 @@ describe('OrientationScreen', () => {
 
     expect(screen.getByRole('heading', { name: 'Antes de começar' })).toBeInTheDocument();
     expect(
-      screen.getByText('Escolha uma frase para começar. Em seguida, o SeCuida te guia com perguntas simples, no seu ritmo.'),
+      screen.getByText(
+        'Escolha uma frase para começar. Em seguida, o SeCuida te guia com perguntas simples, no seu ritmo.',
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText('Pode nos contar como está se sentindo hoje?')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Me sinto um pouco cansado(a).' })).toBeInTheDocument();
@@ -230,7 +232,9 @@ describe('OrientationScreen', () => {
 
     // Bot response not yet visible, typing indicator shown
     expect(
-      screen.queryByText('Quando tudo parece urgente, ajuda separar o que precisa de atenção agora do que pode esperar.'),
+      screen.queryByText(
+        'Quando tudo parece urgente, ajuda separar o que precisa de atenção agora do que pode esperar.',
+      ),
     ).not.toBeInTheDocument();
 
     // Options hidden during reveal

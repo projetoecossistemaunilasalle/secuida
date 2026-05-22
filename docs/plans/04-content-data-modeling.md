@@ -73,4 +73,3 @@ src/content/flows/registry.ts
 - Review metadata exists for support, service, and resource entries.
 - Flow registry exists only as a placeholder for Front 05.
 - No backend, analytics, persistence, flow engine, or questionnaire logic is introduced.
-

@@ -177,4 +177,3 @@ npm run build
 ## Definition of Done
 
 Front 06A is done when SRQ-20 runs as structured questionnaire content through generic domain logic, has automated tests for validation, scoring, thresholds, consent, and safety interruption, and preserves SeCuida's privacy and non-diagnostic product commitments.
-

@@ -24,7 +24,7 @@ type SupportService = {
   lng?: number;
   notes?: string;
 };
-````
+```
 
 ---
 
@@ -52,12 +52,12 @@ Location-aware sorting is optional and should not be part of the first version u
 
 Rules:
 
-* Ask permission only after explaining why.
-* Full directory must work without permission.
-* Location is processed on-device.
-* Location is not stored.
-* Location is not transmitted.
-* No map SDK unless specifically required.
+- Ask permission only after explaining why.
+- Full directory must work without permission.
+- Location is processed on-device.
+- Location is not stored.
+- Location is not transmitted.
+- No map SDK unless specifically required.
 
 ---
 
@@ -88,8 +88,8 @@ filter by city
 
 ## Acceptance Criteria
 
-* Directory renders from data, not JSX.
-* Services include city/state fields.
-* Canoas is supported without making the architecture Canoas-only.
-* App works without location permission.
-* Optional location sorting is privacy-reviewed.
+- Directory renders from data, not JSX.
+- Services include city/state fields.
+- Canoas is supported without making the architecture Canoas-only.
+- App works without location permission.
+- Optional location sorting is privacy-reviewed.

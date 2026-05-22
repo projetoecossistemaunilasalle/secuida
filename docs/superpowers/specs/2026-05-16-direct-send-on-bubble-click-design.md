@@ -41,6 +41,7 @@ function selectOption(option: RuntimeOption) {
 ```
 
 `submitOption` already handles all three paths:
+
 - `global_action` with non-end target → navigates (e.g., `/apoio`)
 - All other options → calls `advanceFlow`, clears input
 - Input is cleared via `setInputValue('')` inside `submitOption`
@@ -56,6 +57,7 @@ function selectOption(option: RuntimeOption) {
 ### Test updates
 
 The existing test "fills the input when the user chooses an available option and only advances after send" must be updated:
+
 - Assert that clicking a bubble immediately advances the flow (bot message appears)
 - Assert that the input is cleared after clicking
 - Remove assertions about input being filled with the option label

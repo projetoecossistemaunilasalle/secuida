@@ -21,7 +21,7 @@ education resources
 home/onboarding copy
 privacy copy
 navigation labels
-````
+```
 
 ---
 
@@ -117,8 +117,8 @@ flow-v2-final
 
 ## Acceptance Criteria
 
-* Flow, resource, service, and support content is not embedded directly inside React screens.
-* Content files are JSON-compatible.
-* Content files can be validated by scripts.
-* Each content item has a stable ID.
-* Future dashboard needs are considered in the schema.
+- Flow, resource, service, and support content is not embedded directly inside React screens.
+- Content files are JSON-compatible.
+- Content files can be validated by scripts.
+- Each content item has a stable ID.
+- Future dashboard needs are considered in the schema.

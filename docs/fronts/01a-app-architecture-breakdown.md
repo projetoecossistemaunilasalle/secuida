@@ -36,7 +36,7 @@ It currently has:
 The app currently uses a single local state variable in `src/App.tsx` to switch between views:
 
 ```ts
-'HOME' | 'EMERGENCY' | 'ASSESSMENT' | 'NETWORK'
+'HOME' | 'EMERGENCY' | 'ASSESSMENT' | 'NETWORK';
 ```
 
 This works for a prototype, but it prevents stable URLs, browser navigation, deep linking, route-level organization, and clean expansion into future product screens.
@@ -82,15 +82,15 @@ Recommended public routes:
 
 Initial implementation should add all public routes listed above. Existing screens should be wired where they already exist, and the remaining routes can use simple temporary placeholder screens until their dedicated fronts are implemented.
 
-| Route | Existing View | Purpose |
-|---|---|---|
-| `/` | `HomeView` | Home, trust-building, entry actions |
-| `/orientacao` | `AssessmentView` | Current guided orientation prototype |
-| `/apoio` | `EmergencyView` | Immediate support screen |
-| `/contatos` | `NetworkView` | Local support directory |
-| `/educacao` | Temporary placeholder | Education library route reserved for Front 10 |
-| `/educacao/:resourceId` | Temporary placeholder | Resource detail route reserved for Front 10 |
-| `/privacidade` | Temporary placeholder | Privacy route reserved for Front 11 |
+| Route                   | Existing View         | Purpose                                       |
+| ----------------------- | --------------------- | --------------------------------------------- |
+| `/`                     | `HomeView`            | Home, trust-building, entry actions           |
+| `/orientacao`           | `AssessmentView`      | Current guided orientation prototype          |
+| `/apoio`                | `EmergencyView`       | Immediate support screen                      |
+| `/contatos`             | `NetworkView`         | Local support directory                       |
+| `/educacao`             | Temporary placeholder | Education library route reserved for Front 10 |
+| `/educacao/:resourceId` | Temporary placeholder | Resource detail route reserved for Front 10   |
+| `/privacidade`          | Temporary placeholder | Privacy route reserved for Front 11           |
 
 Important: avoid `/crise` as a public route. Use `/apoio` for the immediate support path.
 
@@ -115,16 +115,16 @@ src/app/
 
 Recommended meaning of each file:
 
-| File | Responsibility |
-|---|---|
-| `src/app/App.tsx` | App-level composition and provider/router entry |
-| `src/app/router.tsx` | Route definitions and route-to-view mapping |
-| `src/app/routes.ts` | Shared route constants |
-| `src/app/providers.tsx` | Future global providers; can be minimal at first |
-| `src/app/shell/AppShell.tsx` | Persistent app layout around routed screens |
-| `src/app/shell/TopBar.tsx` | Desktop/top navigation and brand entry |
-| `src/app/shell/BottomNav.tsx` | Mobile persistent bottom navigation |
-| `src/app/shell/RouteTransition.tsx` | Optional route transition wrapper |
+| File                                | Responsibility                                   |
+| ----------------------------------- | ------------------------------------------------ |
+| `src/app/App.tsx`                   | App-level composition and provider/router entry  |
+| `src/app/router.tsx`                | Route definitions and route-to-view mapping      |
+| `src/app/routes.ts`                 | Shared route constants                           |
+| `src/app/providers.tsx`             | Future global providers; can be minimal at first |
+| `src/app/shell/AppShell.tsx`        | Persistent app layout around routed screens      |
+| `src/app/shell/TopBar.tsx`          | Desktop/top navigation and brand entry           |
+| `src/app/shell/BottomNav.tsx`       | Mobile persistent bottom navigation              |
+| `src/app/shell/RouteTransition.tsx` | Optional route transition wrapper                |
 
 The current `src/views/*` files can remain in place during this first architecture step.
 
@@ -178,13 +178,13 @@ The app should not mix route state with custom `currentView` state.
 
 Current callback-style navigation should be replaced with route navigation.
 
-| Current Action | Current Target | New Route |
-|---|---|---|
-| Home: “Não estou bem agora” | `EMERGENCY` | `/apoio` |
-| Home: “Preciso de orientação” | `ASSESSMENT` | `/orientacao` |
-| Home: “Ver rede de apoio local” | `NETWORK` | `/contatos` |
-| Assessment handoff to network | `NETWORK` | `/contatos` |
-| Brand/home button | `HOME` | `/` |
+| Current Action                  | Current Target | New Route     |
+| ------------------------------- | -------------- | ------------- |
+| Home: “Não estou bem agora”     | `EMERGENCY`    | `/apoio`      |
+| Home: “Preciso de orientação”   | `ASSESSMENT`   | `/orientacao` |
+| Home: “Ver rede de apoio local” | `NETWORK`      | `/contatos`   |
+| Assessment handoff to network   | `NETWORK`      | `/contatos`   |
+| Brand/home button               | `HOME`         | `/`           |
 
 This means `HomeView` and `AssessmentView` should no longer receive `setView` props.
 
@@ -245,7 +245,7 @@ Use the current app icon direction for the PWA icons. The icon files should not 
 Because `vite.config.ts` currently sets:
 
 ```ts
-base: '/SeCuida-Prototipo/'
+base: '/SeCuida-Prototipo/';
 ```
 
 PWA paths should respect GitHub Pages/subpath deployment.
@@ -259,14 +259,13 @@ Production fallback behavior for deep links is intentionally out of scope for th
 Update `index.html`:
 
 ```html
-<html lang="pt-BR">
+<html lang="pt-BR"></html>
 ```
 
 Add basic PWA metadata:
 
 ```html
-<meta name="theme-color" content="#006a43" />
-<link rel="manifest" href="%BASE_URL%manifest.webmanifest" />
+<meta name="theme-color" content="#006a43" /> <link rel="manifest" href="%BASE_URL%manifest.webmanifest" />
 ```
 
 Keep:

@@ -14,4 +14,3 @@ export interface ContentMetadata {
   status: ContentStatus;
   locale: ContentLocale;
 }
-

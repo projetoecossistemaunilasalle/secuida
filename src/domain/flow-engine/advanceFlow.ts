@@ -39,9 +39,7 @@ export function advanceFlow(state: FlowRuntimeState, flows: GuidedFlow[], select
   const currentNodeId = state.activeNodeId ?? activeFlow.entry.nodeId;
   const currentNode = activeFlow.nodes[currentNodeId];
   const matchingOption =
-    currentNode.kind === 'choice'
-      ? currentNode.options.find((option) => option.id === selectedOption.id)
-      : undefined;
+    currentNode.kind === 'choice' ? currentNode.options.find((option) => option.id === selectedOption.id) : undefined;
 
   if (!matchingOption) {
     throw new Error(`Selection ${selectedLabel} is not available for node ${currentNodeId}.`);
@@ -91,11 +89,7 @@ function appendUserMessage(state: FlowRuntimeState, selectedOption: RuntimeOptio
   };
 }
 
-function applyOptionEffects(
-  state: FlowRuntimeState,
-  flowId: string,
-  effects: FlowEffect[],
-): FlowRuntimeState {
+function applyOptionEffects(state: FlowRuntimeState, flowId: string, effects: FlowEffect[]): FlowRuntimeState {
   return effects.reduce((nextState, effect) => {
     if (effect.kind === 'score') {
       return {
@@ -116,10 +110,7 @@ function applyOptionEffects(
         ...nextState.safetyFlags,
         ...(effect.blockResume ? { [`block-resume:${flowId}`]: true } : {}),
       },
-      transcript: [
-        ...nextState.transcript,
-        createMessage('bot', effect.message, flowId, nextState.activeNodeId),
-      ],
+      transcript: [...nextState.transcript, createMessage('bot', effect.message, flowId, nextState.activeNodeId)],
     };
   }, state);
 }

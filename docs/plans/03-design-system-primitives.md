@@ -63,4 +63,3 @@ src/design-system/styles/tokens.css
 - Components expose accessible native elements.
 - New screens do not need to invent basic card or button styling.
 - The existing green/blue/soft-surface visual direction remains recognizable.
-

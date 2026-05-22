@@ -2,7 +2,8 @@ import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'reac
 
 const variants = {
   primary: 'bg-primary text-on-primary hover:bg-surface-tint',
-  secondary: 'bg-surface-container-lowest text-on-surface border border-outline-variant hover:bg-surface-container-low hover:border-secondary',
+  secondary:
+    'bg-surface-container-lowest text-on-surface border border-outline-variant hover:bg-surface-container-low hover:border-secondary',
   ghost: 'text-primary hover:bg-surface-container-low',
 } as const;
 
@@ -43,4 +44,3 @@ export function LinkButton({ children, variant = 'primary', size = 'md', classNa
     </a>
   );
 }
-

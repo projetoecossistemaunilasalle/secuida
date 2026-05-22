@@ -6,17 +6,17 @@ Add a "..." typing indicator with bouncing-dot animation to the Orientação cha
 
 ## Decisions
 
-| Aspect | Decision |
-|---|---|
-| Approach | Staged rendering — engine runs immediately, component controls message visibility |
-| Delay | `TYPING_DELAY_MS = 1200` constant |
-| Animation | Bouncing dots (3 dots, sequential bounce) |
-| Batching | One typing indicator per batch, all bot messages appear together |
-| Initial load | Typing indicator shows before first greeting |
-| User messages | Instant (no delay) |
-| Flow engine | Unchanged |
+| Aspect        | Decision                                                                                |
+| ------------- | --------------------------------------------------------------------------------------- |
+| Approach      | Staged rendering — engine runs immediately, component controls message visibility       |
+| Delay         | `TYPING_DELAY_MS = 1200` constant                                                       |
+| Animation     | Bouncing dots (3 dots, sequential bounce)                                               |
+| Batching      | One typing indicator per batch, all bot messages appear together                        |
+| Initial load  | Typing indicator shows before first greeting                                            |
+| User messages | Instant (no delay)                                                                      |
+| Flow engine   | Unchanged                                                                               |
 | Accessibility | `aria-hidden` on indicator, existing `aria-live="polite"` handles message announcements |
-| Auto-scroll | Scrolls on both transcript changes and `visibleCount` changes |
+| Auto-scroll   | Scrolls on both transcript changes and `visibleCount` changes                           |
 
 ## Architecture
 
@@ -61,15 +61,15 @@ Component mounts
 ### New constant
 
 ```ts
-const TYPING_DELAY_MS = 1200
+const TYPING_DELAY_MS = 1200;
 ```
 
 ### New state
 
 ```ts
-const [state, setState] = useState<FlowRuntimeState | null>(null)
-const [visibleCount, setVisibleCount] = useState(0)
-const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+const [state, setState] = useState<FlowRuntimeState | null>(null);
+const [visibleCount, setVisibleCount] = useState(0);
+const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 ```
 
 `state` starts as `null` until the initial typing delay completes. `visibleCount` tracks how many messages from `state.transcript` are currently visible.
@@ -77,10 +77,11 @@ const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 ### Derived blocking flag
 
 ```ts
-const isRevealing = state === null || visibleCount < state.transcript.length
+const isRevealing = state === null || visibleCount < state.transcript.length;
 ```
 
 When `isRevealing` is true:
+
 - Typing indicator is shown
 - Suggestions are hidden
 - Input and send button are disabled
@@ -157,11 +158,11 @@ Navigation only fires after all messages are revealed.
 ```ts
 useEffect(() => {
   typingTimerRef.current = setTimeout(() => {
-    const initialState = createInitialFlowStateFromRegistry(flows, 'work-stress')
-    setState(initialState)
-    setVisibleCount(initialState.transcript.length)
-  }, TYPING_DELAY_MS)
-}, [])
+    const initialState = createInitialFlowStateFromRegistry(flows, 'work-stress');
+    setState(initialState);
+    setVisibleCount(initialState.transcript.length);
+  }, TYPING_DELAY_MS);
+}, []);
 ```
 
 No cleanup return — the unmount effect handles clearing `typingTimerRef`.
@@ -174,46 +175,46 @@ Different option kinds produce different state transitions. The `visibleCount` m
 
 ```ts
 function submitOption(option: RuntimeOption) {
-  if (!state) return
+  if (!state) return;
 
   if (option.kind === 'global_action' && option.target !== 'end') {
     navigate(option.target);
     return;
   }
 
-  if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
-  setInputValue('')
+  if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
+  setInputValue('');
 
   // Capture pre-advance count from current render state
-  const preAdvanceCount = state.transcript.length
+  const preAdvanceCount = state.transcript.length;
 
   // Run the engine — pure synchronous call
-  const newState = advanceFlow(state, flows, option.label)
+  const newState = advanceFlow(state, flows, option.label);
 
   // Determine how many messages to show immediately
-  let immediateCount: number
+  let immediateCount: number;
   if (option.kind === 'entry_phrase') {
     // New flow replaces transcript — show nothing until reveal (same as initial load)
-    immediateCount = 0
+    immediateCount = 0;
   } else if (option.kind === 'resume_flow') {
     // Suspended transcript is restored — show all old messages immediately
     // The suspended transcript was already visible before suspension
-    immediateCount = newState.transcript.length
+    immediateCount = newState.transcript.length;
   } else {
     // node_option: user message was appended, show it
-    immediateCount = preAdvanceCount + 1
+    immediateCount = preAdvanceCount + 1;
   }
 
   // Update state
-  setState(newState)
-  setVisibleCount(immediateCount)
+  setState(newState);
+  setVisibleCount(immediateCount);
 
   // Schedule reveal if there are hidden messages
-  const totalMessages = newState.transcript.length
+  const totalMessages = newState.transcript.length;
   if (immediateCount < totalMessages) {
     typingTimerRef.current = setTimeout(() => {
-      setVisibleCount(totalMessages)
-    }, TYPING_DELAY_MS)
+      setVisibleCount(totalMessages);
+    }, TYPING_DELAY_MS);
   }
 }
 ```
@@ -231,9 +232,9 @@ Single cleanup effect — the initial-load effect does NOT return its own cleanu
 ```ts
 useEffect(() => {
   return () => {
-    if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
-  }
-}, [])
+    if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
+  };
+}, []);
 ```
 
 ### Auto-scroll useEffect
@@ -242,9 +243,9 @@ Add `visibleCount` to the dependency array so the view scrolls down to show the 
 
 ```ts
 useEffect(() => {
-  const log = logRef.current
-  if (log) log.scrollTop = log.scrollHeight
-}, [state?.transcript, visibleOptions.length, visibleCount])
+  const log = logRef.current;
+  if (log) log.scrollTop = log.scrollHeight;
+}, [state?.transcript, visibleOptions.length, visibleCount]);
 ```
 
 ### Loading state for options resolve
@@ -292,7 +293,7 @@ function TypingIndicator() {
         </div>
       </div>
     </article>
-  )
+  );
 }
 ```
 
@@ -301,6 +302,7 @@ function TypingIndicator() {
 Existing orientation screen tests assume the initial transcript and options render synchronously. Update them to use fake timers or async waits around `TYPING_DELAY_MS`.
 
 Recommended coverage:
+
 - Initial load shows the typing indicator first, hides suggestions, disables input/send, then reveals the greeting and options after the timer.
 - Selecting a normal node option shows the user message immediately, hides next options during the delay, then reveals the bot response and options.
 - `entry_phrase` transitions hide the replaced transcript until the new flow greeting is revealed.

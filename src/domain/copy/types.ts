@@ -12,4 +12,3 @@ export interface HomeCopy extends ContentMetadata {
   privacyReassurance: string;
   actions: HomeActionCopy[];
 }
-
