@@ -6,4 +6,5 @@ export const routes = {
   education: '/educacao',
   educationDetail: '/educacao/:resourceId',
   privacy: '/privacidade',
+  dashboard: '/dashboard',
 } as const;

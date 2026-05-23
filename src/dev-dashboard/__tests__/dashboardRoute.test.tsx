@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DashboardRoute } from '../DashboardRoute';
@@ -24,6 +25,7 @@ vi.mock('../content/shippedContent', () => ({
               {
                 id: 'handoff',
                 label: 'Ir para outro fluxo',
+                next: 'done',
                 effects: [{ kind: 'flow_start', flowId: 'mock-flow-two' }],
               },
             ],
@@ -81,6 +83,36 @@ describe('DashboardRoute', () => {
     expect(screen.getByText('Este é outro fluxo.')).toBeInTheDocument();
   });
 
+  it('explains flow usage, transition message, and first step in pt-BR', () => {
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+
+    expect(
+      screen.getByText('Conversa principal: começa quando a pessoa digita ou escolhe uma frase'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Define onde este fluxo aparece no app e como ele pode ser iniciado.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Aparece no chat logo antes da primeira etapa, quando o app está abrindo este fluxo.'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Escolha qual etapa aparece primeiro para a pessoa. Os códigos técnicos ficam escondidos aqui.'),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole('option', { name: 'Etapa 1 - Como você quer continuar?' }).length).toBeGreaterThan(0);
+  });
+
+  it('shows full entry phrases in multiline fields', () => {
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByLabelText('Frase de entrada 1').tagName).toBe('TEXTAREA');
+  });
+
   it('renders pt-BR education helper text', async () => {
     render(
       <MemoryRouter>
@@ -121,6 +153,41 @@ describe('DashboardRoute', () => {
     expect(screen.getByDisplayValue('Fluxo editado localmente')).toBeInTheDocument();
   });
 
+  it('edits and expands a flow locally', () => {
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+
+    fireEvent.change(screen.getByLabelText('Texto da etapa 1'), {
+      target: { value: 'Texto editado da etapa inicial' },
+    });
+    fireEvent.change(screen.getByLabelText('Texto da opção 1'), {
+      target: { value: 'Continuar editado' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar etapa final' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar opção nesta etapa' }));
+
+    expect(screen.getByDisplayValue('Texto editado da etapa inicial')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Continuar editado')).toBeInTheDocument();
+    expect(screen.getAllByText('Etapa 3').length).toBeGreaterThan(0);
+    expect(screen.getByDisplayValue('Nova opção')).toBeInTheDocument();
+  });
+
+  it('renders a visual flow map with readable step names and connections', () => {
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getAllByText('Etapa 1').length).toBeGreaterThan(0);
+    expect(screen.getByText('Se escolher "Continuar"')).toBeInTheDocument();
+    expect(screen.getByText('vai para Etapa 2')).toBeInTheDocument();
+    expect(screen.getByText('começa o fluxo "Segundo fluxo"')).toBeInTheDocument();
+  });
+
   it('updates a local education title draft', () => {
     render(
       <MemoryRouter>
@@ -134,6 +201,20 @@ describe('DashboardRoute', () => {
     fireEvent.change(titleInput, { target: { value: 'Material editado localmente' } });
 
     expect(screen.getByDisplayValue('Material editado localmente')).toBeInTheDocument();
+  });
+
+  it('adds a new local education material', () => {
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Materiais' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Novo material' }));
+
+    expect(screen.getByDisplayValue('Novo material')).toBeInTheDocument();
+    expect(screen.getByText('Material editável apenas neste navegador.')).toBeInTheDocument();
   });
 
   it('updates required education metadata drafts', () => {
@@ -170,5 +251,39 @@ describe('DashboardRoute', () => {
     });
 
     expect(screen.getByDisplayValue('https://example.com/material.pdf')).toBeInTheDocument();
+  });
+
+  it('adds, edits, and removes education tags', () => {
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Materiais' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar tag' }));
+    fireEvent.change(screen.getByLabelText('Tag 2'), { target: { value: 'acolhimento' } });
+    fireEvent.click(screen.getAllByRole('button', { name: 'Remover tag' })[0]);
+
+    expect(screen.getByDisplayValue('acolhimento')).toBeInTheDocument();
+    expect(screen.queryByDisplayValue('teste')).not.toBeInTheDocument();
+  });
+
+  it('keeps focus while editing an education tag', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Materiais' }));
+
+    const tagInput = screen.getByLabelText('Tag 1');
+    await user.click(tagInput);
+    await user.keyboard('s');
+
+    expect(screen.getByLabelText('Tag 1')).toHaveFocus();
   });
 });

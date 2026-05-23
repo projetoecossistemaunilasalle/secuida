@@ -1,4 +1,6 @@
+import { Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
+import { canShowDevDashboard, createDevDashboardRoute } from './devDashboard';
 import { routes } from './routes';
 import { AppShell } from './shell/AppShell';
 import { ContactsScreen } from '../features/contacts/ContactsScreen';
@@ -8,11 +10,8 @@ import { HomeScreen } from '../features/home/HomeScreen';
 import { OrientationScreen } from '../features/orientation/OrientationScreen';
 import { PrivacyScreen } from '../features/privacy/PrivacyScreen';
 import { SupportScreen } from '../features/support/SupportScreen';
-import { DashboardRoute } from '../dev-dashboard/DashboardRoute';
 
-function isDevDashboardEnabled() {
-  return import.meta.env.VITE_ENABLE_DEV_DASHBOARD === 'true';
-}
+const DevDashboardRoute = createDevDashboardRoute();
 
 export function Router() {
   return (
@@ -25,7 +24,16 @@ export function Router() {
         <Route path={routes.education} element={<EducationLibraryScreen />} />
         <Route path={routes.educationDetail} element={<ResourceDetailScreen />} />
         <Route path={routes.privacy} element={<PrivacyScreen />} />
-        {isDevDashboardEnabled() && <Route path={routes.dashboard} element={<DashboardRoute />} />}
+        {canShowDevDashboard() && DevDashboardRoute && (
+          <Route
+            path={routes.dashboard}
+            element={
+              <Suspense fallback={null}>
+                <DevDashboardRoute />
+              </Suspense>
+            }
+          />
+        )}
       </Route>
     </Routes>
   );

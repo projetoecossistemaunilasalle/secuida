@@ -42,7 +42,9 @@ export function FlowDashboard({
               type="button"
               onClick={() => setSelectedFlowIndex(flowIndex)}
               className={`rounded-lg px-3 py-2 text-left font-label-md ${
-                selectedFlow.id === flow.id ? 'bg-primary text-on-primary' : 'bg-surface-container-low text-on-surface'
+                selectedFlowIndex === flowIndex
+                  ? 'bg-primary text-on-primary'
+                  : 'bg-surface-container-low text-on-surface'
               }`}
             >
               {flow.title}
@@ -51,9 +53,13 @@ export function FlowDashboard({
         </div>
       </aside>
       <div className="flex flex-col gap-stack-md">
-        <FlowEditor flow={selectedFlow} onChange={(patch) => onFlowChange(selectedFlowIndex, selectedFlow.id, patch)} />
-        <FlowMap flow={selectedFlow} />
-        <FlowPreview key={selectedFlow.id} flow={selectedFlow} flows={flows} />
+        <FlowEditor
+          flow={selectedFlow}
+          flows={flows}
+          onChange={(patch) => onFlowChange(selectedFlowIndex, selectedFlow.id, patch)}
+        />
+        <FlowMap flow={selectedFlow} flows={flows} />
+        <FlowPreview key={`${selectedFlow.id}-${selectedFlowIndex}`} flow={selectedFlow} flows={flows} />
         <ValidationSummary result={validation} />
       </div>
     </section>

@@ -8,13 +8,36 @@ import { validateDashboardEducation } from './educationValidation';
 export function EducationDashboard({
   resources,
   onResourceChange,
+  onResourceAdd,
 }: {
   resources: EducationResource[];
   onResourceChange: (resourceIndex: number, resourceId: string, patch: Partial<EducationResource>) => void;
+  onResourceAdd: () => void;
 }) {
   const [selectedResourceIndex, setSelectedResourceIndex] = useState(0);
   const selectedResource = resources[selectedResourceIndex] ?? resources[0];
   const validation = useMemo(() => validateDashboardEducation(resources), [resources]);
+
+  function addResource() {
+    onResourceAdd();
+    setSelectedResourceIndex(resources.length);
+  }
+
+  function updateTags(tags: string[]) {
+    onResourceChange(selectedResourceIndex, selectedResource.id, { tags });
+  }
+
+  function addTag() {
+    updateTags([...selectedResource.tags, 'nova-tag']);
+  }
+
+  function updateTag(tagIndex: number, value: string) {
+    updateTags(selectedResource.tags.map((tag, index) => (index === tagIndex ? value : tag)));
+  }
+
+  function removeTag(tagIndex: number) {
+    updateTags(selectedResource.tags.filter((_, index) => index !== tagIndex));
+  }
 
   if (!selectedResource) {
     return <p className="font-body-md text-on-surface-variant">Nenhum material disponível.</p>;
@@ -24,6 +47,13 @@ export function EducationDashboard({
     <section className="grid gap-stack-md lg:grid-cols-[280px_1fr]">
       <aside className="rounded-lg border border-outline-variant/50 bg-surface-container-lowest p-4">
         <h2 className="font-headline-sm text-on-surface">Materiais</h2>
+        <button
+          type="button"
+          onClick={addResource}
+          className="mt-3 min-h-11 w-full rounded-full bg-primary px-4 font-label-md text-on-primary"
+        >
+          Novo material
+        </button>
         <div className="mt-3 flex flex-col gap-2">
           {resources.map((resource, resourceIndex) => (
             <button
@@ -31,7 +61,7 @@ export function EducationDashboard({
               type="button"
               onClick={() => setSelectedResourceIndex(resourceIndex)}
               className={`rounded-lg px-3 py-2 text-left font-label-md ${
-                selectedResource.id === resource.id
+                selectedResourceIndex === resourceIndex
                   ? 'bg-primary text-on-primary'
                   : 'bg-surface-container-low text-on-surface'
               }`}
@@ -51,7 +81,9 @@ export function EducationDashboard({
               aria-label="Título do material"
               className="min-h-11 rounded-lg border border-outline-variant bg-surface px-3"
               value={selectedResource.title}
-              onChange={(event) => onResourceChange(selectedResourceIndex, selectedResource.id, { title: event.target.value })}
+              onChange={(event) =>
+                onResourceChange(selectedResourceIndex, selectedResource.id, { title: event.target.value })
+              }
             />
           </label>
           <label className="flex flex-col gap-2">
@@ -72,7 +104,9 @@ export function EducationDashboard({
               aria-label="Fonte do material"
               className="min-h-11 rounded-lg border border-outline-variant bg-surface px-3"
               value={selectedResource.source}
-              onChange={(event) => onResourceChange(selectedResourceIndex, selectedResource.id, { source: event.target.value })}
+              onChange={(event) =>
+                onResourceChange(selectedResourceIndex, selectedResource.id, { source: event.target.value })
+              }
             />
             <FieldHint>Nome da organização, autora ou referência principal do material.</FieldHint>
           </label>
@@ -116,13 +150,35 @@ export function EducationDashboard({
           <div>
             <h3 className="font-headline-sm text-on-surface">Tags</h3>
             <FieldHint>Use palavras curtas para ajudar professores a encontrar o material.</FieldHint>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {selectedResource.tags.map((tag) => (
-                <span key={tag} className="rounded-full bg-primary-fixed px-3 py-1 font-label-sm text-on-surface">
-                  {tag}
-                </span>
+            <div className="mt-3 flex flex-col gap-2">
+              {selectedResource.tags.map((tag, tagIndex) => (
+                <div key={tagIndex} className="grid gap-2 md:grid-cols-[1fr_auto]">
+                  <label className="flex flex-col gap-1">
+                    <span className="font-label-sm text-on-surface">Tag {tagIndex + 1}</span>
+                    <input
+                      aria-label={`Tag ${tagIndex + 1}`}
+                      className="min-h-10 rounded-lg border border-outline-variant bg-surface px-3"
+                      value={tag}
+                      onChange={(event) => updateTag(tagIndex, event.target.value)}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tagIndex)}
+                    className="self-end rounded-full bg-error-container px-4 py-2 font-label-md text-on-error-container"
+                  >
+                    Remover tag
+                  </button>
+                </div>
               ))}
             </div>
+            <button
+              type="button"
+              onClick={addTag}
+              className="mt-3 min-h-11 rounded-full bg-secondary-container px-4 font-label-md text-on-secondary-container"
+            >
+              Adicionar tag
+            </button>
           </div>
         </section>
         <ValidationSummary result={validation} />

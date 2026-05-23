@@ -7,6 +7,7 @@ export const DASHBOARD_DRAFT_SCHEMA_VERSION = '1.0.0' as const;
 
 export interface DashboardRecordPatch<T extends { id: string }> {
   id: string;
+  sourceIndex?: number;
   patch: Partial<T>;
 }
 
@@ -63,6 +64,29 @@ export function mergeDashboardDrafts(shipped: DashboardShippedContent, drafts: D
 }
 
 function mergeRecords<T extends { id: string }>(shipped: T[], patches: Array<DashboardRecordPatch<T>>, additions: T[]) {
-  const patchesById = new Map(patches.map((record) => [record.id, record.patch]));
-  return [...shipped.map((record) => ({ ...record, ...patchesById.get(record.id) })), ...additions];
+  const patchesBySource = new Map(
+    patches
+      .filter((record) => typeof record.sourceIndex === 'number')
+      .map((record) => [`${record.id}:${record.sourceIndex}`, record.patch]),
+  );
+  const legacyPatchesById = new Map(
+    patches.filter((record) => typeof record.sourceIndex !== 'number').map((record) => [record.id, record.patch]),
+  );
+  const usedLegacyPatchIds = new Set<string>();
+
+  return [
+    ...shipped.map((record, sourceIndex) => {
+      const sourcePatch = patchesBySource.get(`${record.id}:${sourceIndex}`);
+      const legacyPatch =
+        sourcePatch || usedLegacyPatchIds.has(record.id) ? undefined : legacyPatchesById.get(record.id);
+
+      if (legacyPatch) usedLegacyPatchIds.add(record.id);
+
+      return {
+        ...record,
+        ...(sourcePatch ?? legacyPatch),
+      };
+    }),
+    ...additions,
+  ];
 }

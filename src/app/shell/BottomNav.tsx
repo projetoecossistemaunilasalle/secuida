@@ -1,19 +1,26 @@
-import { Compass, GraduationCap, HeartHandshake, Home, Users } from 'lucide-react';
+import { Compass, Gauge, GraduationCap, HeartHandshake, Home, Users } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+import { canShowDevDashboard } from '../devDashboard';
 import { routes } from '../routes';
 
-const navItems = [
-  { to: routes.home, label: 'Início', Icon: Home },
-  { to: routes.orientation, label: 'Orientação', Icon: Compass },
-  { to: routes.education, label: 'Estudos', Icon: GraduationCap },
-  { to: routes.contacts, label: 'Contatos', Icon: Users },
-  { to: routes.support, label: 'Apoio', Icon: HeartHandshake },
-];
+function getNavItems() {
+  return [
+    { to: routes.home, label: 'Início', Icon: Home },
+    { to: routes.orientation, label: 'Orientação', Icon: Compass },
+    { to: routes.education, label: 'Estudos', Icon: GraduationCap },
+    { to: routes.contacts, label: 'Contatos', Icon: Users },
+    { to: routes.support, label: 'Apoio', Icon: HeartHandshake },
+    ...(canShowDevDashboard() ? [{ to: routes.dashboard, label: 'Dashboard', Icon: Gauge }] : []),
+  ];
+}
 
 export function BottomNav() {
+  const navItems = getNavItems();
+
   return (
     <nav
-      className="fixed bottom-0 w-full z-50 grid grid-cols-5 items-center px-2 py-2 bg-surface shadow-[0_-4px_12px_0_rgba(27,58,107,0.1)] rounded-t-xl md:hidden"
+      className="fixed bottom-0 w-full z-50 grid items-center px-2 py-2 bg-surface shadow-[0_-4px_12px_0_rgba(27,58,107,0.1)] rounded-t-xl md:hidden"
+      style={{ gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))` }}
       aria-label="Navegação principal"
     >
       {navItems.map(({ to, label, Icon }) => (

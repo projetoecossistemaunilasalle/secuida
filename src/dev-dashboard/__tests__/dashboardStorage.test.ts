@@ -53,12 +53,40 @@ describe('dashboardStorage', () => {
     const shippedMaterial = { id: 'material-one', title: 'Shipped material' } as EducationResource;
     const draft = {
       ...emptyDraft,
-      flowPatches: [{ id: 'flow-one', patch: { title: 'Edited flow' } }],
+      flowPatches: [{ id: 'flow-one', sourceIndex: 0, patch: { title: 'Edited flow' } }],
     };
 
     expect(mergeDashboardDrafts({ flows: [shippedFlow], educationMaterials: [shippedMaterial] }, draft)).toEqual({
       flows: [{ ...shippedFlow, title: 'Edited flow' }],
       educationMaterials: [shippedMaterial],
     });
+  });
+
+  it('keeps duplicate IDs isolated by source index while editing', () => {
+    const firstFlow = { id: 'duplicate-flow', title: 'First flow' } as GuidedFlow;
+    const secondFlow = { id: 'duplicate-flow', title: 'Second flow' } as GuidedFlow;
+    const draft = {
+      ...emptyDraft,
+      flowPatches: [{ id: 'duplicate-flow', sourceIndex: 1, patch: { title: 'Edited second flow' } }],
+    };
+
+    expect(mergeDashboardDrafts({ flows: [firstFlow, secondFlow], educationMaterials: [] }, draft).flows).toEqual([
+      firstFlow,
+      { ...secondFlow, title: 'Edited second flow' },
+    ]);
+  });
+
+  it('applies legacy patches without source index to the first matching shipped record', () => {
+    const firstFlow = { id: 'legacy-flow', title: 'First flow' } as GuidedFlow;
+    const secondFlow = { id: 'legacy-flow', title: 'Second flow' } as GuidedFlow;
+    const draft = {
+      ...emptyDraft,
+      flowPatches: [{ id: 'legacy-flow', patch: { title: 'Legacy edited flow' } }],
+    };
+
+    expect(mergeDashboardDrafts({ flows: [firstFlow, secondFlow], educationMaterials: [] }, draft).flows).toEqual([
+      { ...firstFlow, title: 'Legacy edited flow' },
+      secondFlow,
+    ]);
   });
 });

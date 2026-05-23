@@ -1,4 +1,5 @@
 import { Brain, Compass, Gauge, GraduationCap, HeartHandshake, Home, Users } from 'lucide-react';
+import { canShowDevDashboard } from '../devDashboard';
 import { Link, NavLink } from 'react-router-dom';
 import { routes } from '../routes';
 
@@ -9,9 +10,7 @@ function getNavItems() {
     { to: routes.education, label: 'Estudos', Icon: GraduationCap },
     { to: routes.contacts, label: 'Contatos', Icon: Users },
     { to: routes.support, label: 'Apoio', Icon: HeartHandshake },
-    ...(import.meta.env.VITE_ENABLE_DEV_DASHBOARD === 'true'
-      ? [{ to: routes.dashboard, label: 'Dashboard', Icon: Gauge }]
-      : []),
+    ...(canShowDevDashboard() ? [{ to: routes.dashboard, label: 'Dashboard', Icon: Gauge }] : []),
   ];
 }
 

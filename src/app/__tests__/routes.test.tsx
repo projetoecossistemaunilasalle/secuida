@@ -1,7 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Router } from '../router';
+
+beforeEach(() => {
+  vi.stubEnv('VITE_ENABLE_DEV_DASHBOARD', 'false');
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
 function renderRoute(initialEntry: string) {
   render(
@@ -46,5 +54,27 @@ describe('Router', () => {
     renderRoute('/privacidade');
 
     expect(screen.getByRole('heading', { name: /privacidade/i })).toBeInTheDocument();
+  });
+
+  it('does not render the dashboard route by default', () => {
+    renderRoute('/dashboard');
+
+    expect(screen.queryByRole('heading', { name: /dashboard/i })).not.toBeInTheDocument();
+  });
+
+  it('renders the dashboard route when the dev flag is enabled', async () => {
+    vi.stubEnv('VITE_ENABLE_DEV_DASHBOARD', 'true');
+
+    renderRoute('/dashboard');
+
+    expect(await screen.findByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
+  });
+
+  it('shows dashboard navigation when the dev flag is enabled', () => {
+    vi.stubEnv('VITE_ENABLE_DEV_DASHBOARD', 'true');
+
+    renderRoute('/');
+
+    expect(screen.getAllByRole('link', { name: /dashboard/i }).length).toBeGreaterThan(0);
   });
 });

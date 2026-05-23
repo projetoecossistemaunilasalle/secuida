@@ -4,6 +4,7 @@ import { PageHeader } from '../design-system/components/PageHeader';
 import { DashboardShell, type DashboardTab } from './components/DashboardShell';
 import { getShippedDashboardContent } from './content/shippedContent';
 import {
+  type DashboardRecordPatch,
   loadDashboardDrafts,
   mergeDashboardDrafts,
   saveDashboardDrafts,
@@ -15,16 +16,37 @@ import { FlowDashboard } from './flows/FlowDashboard';
 import { validateDashboardFlows } from './flows/flowValidation';
 
 function upsertPatchById<T extends { id: string }>(
-  records: Array<{ id: string; patch: Partial<T> }>,
+  records: Array<DashboardRecordPatch<T>>,
   id: string,
+  sourceIndex: number,
   patch: Partial<T>,
 ) {
-  const existingIndex = records.findIndex((record) => record.id === id);
-  if (existingIndex === -1) return [...records, { id, patch }];
+  const existingIndex = records.findIndex((record) => record.id === id && record.sourceIndex === sourceIndex);
+  if (existingIndex === -1) return [...records, { id, sourceIndex, patch }];
 
   return records.map((record, index) =>
-    index === existingIndex ? { id, patch: { ...record.patch, ...patch } } : record,
+    index === existingIndex ? { id, sourceIndex, patch: { ...record.patch, ...patch } } : record,
   );
+}
+
+function createLocalEducationMaterial(existingCount: number) {
+  const suffix = existingCount + 1;
+
+  return {
+    id: `material-local-${suffix}`,
+    title: 'Novo material',
+    source: 'Equipe SeCuida',
+    description: 'Material editável apenas neste navegador.',
+    tags: ['novo'],
+    audience: 'teachers' as const,
+    contentType: 'external_link' as const,
+    externalUrl: 'https://example.com',
+    review: { status: 'pending_review' as const, reviewedBy: null, reviewedAt: null, notes: '' },
+  };
+}
+
+function updateRecordAtIndex<T>(records: T[], index: number, patch: Partial<T>) {
+  return records.map((record, recordIndex) => (recordIndex === index ? { ...record, ...patch } : record));
 }
 
 export function DashboardRoute() {
@@ -73,7 +95,7 @@ export function DashboardRoute() {
             onFlowChange={(flowIndex, flowId, patch) =>
               updateDraftState((current) => ({
                 ...current,
-                flowPatches: upsertPatchById(current.flowPatches, flowId, patch),
+                flowPatches: upsertPatchById(current.flowPatches, flowId, flowIndex, patch),
               }))
             }
           />
@@ -82,9 +104,36 @@ export function DashboardRoute() {
           <EducationDashboard
             resources={mergedDrafts.educationMaterials}
             onResourceChange={(resourceIndex, resourceId, patch) =>
+              updateDraftState((current) => {
+                const addedIndex = resourceIndex - shipped.educationMaterials.length;
+
+                if (addedIndex >= 0) {
+                  return {
+                    ...current,
+                    addedEducationMaterials: updateRecordAtIndex(current.addedEducationMaterials, addedIndex, patch),
+                  };
+                }
+
+                return {
+                  ...current,
+                  educationMaterialPatches: upsertPatchById(
+                    current.educationMaterialPatches,
+                    resourceId,
+                    resourceIndex,
+                    patch,
+                  ),
+                };
+              })
+            }
+            onResourceAdd={() =>
               updateDraftState((current) => ({
                 ...current,
-                educationMaterialPatches: upsertPatchById(current.educationMaterialPatches, resourceId, patch),
+                addedEducationMaterials: [
+                  ...current.addedEducationMaterials,
+                  createLocalEducationMaterial(
+                    shipped.educationMaterials.length + current.addedEducationMaterials.length,
+                  ),
+                ],
               }))
             }
           />
