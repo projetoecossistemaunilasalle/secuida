@@ -28,11 +28,6 @@ export interface NavigateFlowEffect {
   kind: 'navigate';
   destination: '/apoio' | '/contatos' | '/educacao';
 }
-
-export interface EndFlowEffect {
-  kind: 'end_flow';
-  message: string;
-}
 ```
 
 If those types are missing, stop and merge the neutral-flow branch first.
@@ -329,6 +324,7 @@ import { flowRegistry } from '../../content/flows/registry';
 import { resourcesContent } from '../../content/resources/resources';
 import type { GuidedFlow } from '../../domain/flow-engine/types';
 import type { EducationResource } from '../../domain/resources/types';
+import type { DashboardShippedContent } from '../content/shippedContent';
 
 export interface DashboardShippedContent {
   flows: GuidedFlow[];
@@ -342,6 +338,8 @@ export function getShippedDashboardContent(): DashboardShippedContent {
   };
 }
 ```
+
+Because `flowRegistry` may be backed by `import.meta.glob` JSON loading, route/component tests should mock `getShippedDashboardContent` instead of depending on bundler registry behavior. The mock must provide at least one flow and one education resource so UI smoke tests never fail because a test environment returned an empty registry.
 
 - [ ] **Step 4: Add stable normalization helper**
 
@@ -1109,12 +1107,20 @@ Create `src/dev-dashboard/__tests__/dashboardStorage.test.ts`:
 ```ts
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { DashboardDraftState } from '../draft-storage/dashboardStorage';
-import { clearDashboardDrafts, loadDashboardDrafts, saveDashboardDrafts } from '../draft-storage/dashboardStorage';
+import {
+  DASHBOARD_DRAFT_SCHEMA_VERSION,
+  clearDashboardDrafts,
+  loadDashboardDrafts,
+  mergeDashboardDrafts,
+  saveDashboardDrafts,
+} from '../draft-storage/dashboardStorage';
 
 const emptyDraft: DashboardDraftState = {
-  schemaVersion: '1.0.0',
-  flows: [],
-  educationMaterials: [],
+  schemaVersion: DASHBOARD_DRAFT_SCHEMA_VERSION,
+  flowPatches: [],
+  educationMaterialPatches: [],
+  addedFlows: [],
+  addedEducationMaterials: [],
   updatedAt: '2026-05-22T00:00:00.000Z',
 };
 
@@ -1125,9 +1131,11 @@ describe('dashboardStorage', () => {
 
   it('returns an empty draft when storage is empty', () => {
     expect(loadDashboardDrafts()).toEqual({
-      schemaVersion: '1.0.0',
-      flows: [],
-      educationMaterials: [],
+      schemaVersion: DASHBOARD_DRAFT_SCHEMA_VERSION,
+      flowPatches: [],
+      educationMaterialPatches: [],
+      addedFlows: [],
+      addedEducationMaterials: [],
       updatedAt: null,
     });
   });
@@ -1143,6 +1151,20 @@ describe('dashboardStorage', () => {
     clearDashboardDrafts();
 
     expect(loadDashboardDrafts().updatedAt).toBeNull();
+  });
+
+  it('merges sparse overrides onto current shipped content', () => {
+    const shippedFlow = { id: 'flow-one', title: 'Shipped flow' } as never;
+    const shippedMaterial = { id: 'material-one', title: 'Shipped material' } as never;
+    const draft = {
+      ...emptyDraft,
+      flowPatches: [{ id: 'flow-one', patch: { title: 'Edited flow' } }],
+    };
+
+    expect(mergeDashboardDrafts({ flows: [shippedFlow], educationMaterials: [shippedMaterial] }, draft)).toEqual({
+      flows: [{ ...shippedFlow, title: 'Edited flow' }],
+      educationMaterials: [shippedMaterial],
+    });
   });
 });
 ```
@@ -1164,21 +1186,32 @@ Create `src/dev-dashboard/draft-storage/dashboardStorage.ts`:
 ```ts
 import type { GuidedFlow } from '../../domain/flow-engine/types';
 import type { EducationResource } from '../../domain/resources/types';
+import type { DashboardShippedContent } from '../content/shippedContent';
 
 const STORAGE_KEY = 'secuida:dev-dashboard:drafts:v1';
+export const DASHBOARD_DRAFT_SCHEMA_VERSION = '1.0.0' as const;
+
+export interface DashboardRecordPatch<T extends { id: string }> {
+  id: string;
+  patch: Partial<T>;
+}
 
 export interface DashboardDraftState {
-  schemaVersion: '1.0.0';
-  flows: GuidedFlow[];
-  educationMaterials: EducationResource[];
+  schemaVersion: typeof DASHBOARD_DRAFT_SCHEMA_VERSION;
+  flowPatches: Array<DashboardRecordPatch<GuidedFlow>>;
+  educationMaterialPatches: Array<DashboardRecordPatch<EducationResource>>;
+  addedFlows: GuidedFlow[];
+  addedEducationMaterials: EducationResource[];
   updatedAt: string | null;
 }
 
 export function createEmptyDashboardDraftState(): DashboardDraftState {
   return {
-    schemaVersion: '1.0.0',
-    flows: [],
-    educationMaterials: [],
+    schemaVersion: DASHBOARD_DRAFT_SCHEMA_VERSION,
+    flowPatches: [],
+    educationMaterialPatches: [],
+    addedFlows: [],
+    addedEducationMaterials: [],
     updatedAt: null,
   };
 }
@@ -1189,7 +1222,7 @@ export function loadDashboardDrafts(storage: Storage = localStorage): DashboardD
 
   try {
     const parsed = JSON.parse(raw) as DashboardDraftState;
-    if (parsed.schemaVersion !== '1.0.0') return createEmptyDashboardDraftState();
+    if (parsed.schemaVersion !== DASHBOARD_DRAFT_SCHEMA_VERSION) return createEmptyDashboardDraftState();
     return parsed;
   } catch {
     return createEmptyDashboardDraftState();
@@ -1203,7 +1236,25 @@ export function saveDashboardDrafts(state: DashboardDraftState, storage: Storage
 export function clearDashboardDrafts(storage: Storage = localStorage) {
   storage.removeItem(STORAGE_KEY);
 }
+
+export function mergeDashboardDrafts(shipped: DashboardShippedContent, drafts: DashboardDraftState) {
+  return {
+    flows: mergeRecords(shipped.flows, drafts.flowPatches, drafts.addedFlows),
+    educationMaterials: mergeRecords(
+      shipped.educationMaterials,
+      drafts.educationMaterialPatches,
+      drafts.addedEducationMaterials,
+    ),
+  };
+}
+
+function mergeRecords<T extends { id: string }>(shipped: T[], patches: Array<DashboardRecordPatch<T>>, additions: T[]) {
+  const patchesById = new Map(patches.map((record) => [record.id, record.patch]));
+  return [...shipped.map((record) => ({ ...record, ...patchesById.get(record.id) })), ...additions];
+}
 ```
+
+This storage is intentionally sparse. Never write the complete shipped flow/resource arrays to localStorage. Store only explicitly edited fields in `flowPatches` and `educationMaterialPatches`, plus newly created full records in `addedFlows` and `addedEducationMaterials`, then merge those sparse drafts over the current codebase content at render time. This lets editors keep their local work while still receiving future shipped typo fixes, new materials, and code-level content updates to fields they did not edit.
 
 - [ ] **Step 4: Run storage tests**
 
@@ -1312,13 +1363,15 @@ import { normalizeForComparison } from '../content/normalize';
 import type { DashboardShippedContent } from '../content/shippedContent';
 import type { DashboardValidationResult } from '../validation/validationTypes';
 
+export const DASHBOARD_EXPORT_SCHEMA_VERSION = '1.0.0' as const;
+
 export interface DashboardDraftContent {
   flows: GuidedFlow[];
   educationMaterials: EducationResource[];
 }
 
 export interface DashboardExportBundle {
-  schemaVersion: '1.0.0';
+  schemaVersion: typeof DASHBOARD_EXPORT_SCHEMA_VERSION;
   exportedAt: string;
   source: 'secuida-dev-dashboard';
   changes: DashboardDraftContent;
@@ -1337,7 +1390,7 @@ export function buildExportBundle({
   exportedAt: string;
 }): DashboardExportBundle {
   return {
-    schemaVersion: '1.0.0',
+    schemaVersion: DASHBOARD_EXPORT_SCHEMA_VERSION,
     exportedAt,
     source: 'secuida-dev-dashboard',
     changes: {
@@ -1391,10 +1444,67 @@ git commit -m "feat: build dashboard export bundles"
 Create `src/dev-dashboard/__tests__/dashboardRoute.test.tsx`:
 
 ```tsx
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DashboardRoute } from '../DashboardRoute';
+
+vi.mock('../content/shippedContent', () => ({
+  getShippedDashboardContent: () => ({
+    flows: [
+      {
+        id: 'mock-flow',
+        version: '1.0.0',
+        locale: 'pt-BR',
+        title: 'Fluxo de teste',
+        type: 'guided_conversation',
+        status: 'draft',
+        entry: { nodeId: 'start', enteringPhrases: ['Começar'], transitionMessage: 'Olá.' },
+        nodes: {
+          start: {
+            id: 'start',
+            kind: 'choice',
+            text: 'Como você quer continuar?',
+            options: [
+              { id: 'next', label: 'Continuar', next: 'done' },
+              {
+                id: 'handoff',
+                label: 'Ir para outro fluxo',
+                effects: [{ kind: 'flow_start', flowId: 'mock-flow-two' }],
+              },
+            ],
+          },
+          done: { id: 'done', kind: 'result', text: 'Finalizado.' },
+        },
+      },
+      {
+        id: 'mock-flow-two',
+        version: '1.0.0',
+        locale: 'pt-BR',
+        title: 'Segundo fluxo',
+        type: 'guided_conversation',
+        status: 'draft',
+        entry: { nodeId: 'start', enteringPhrases: ['Segundo'], transitionMessage: 'Entrando no segundo fluxo.' },
+        nodes: {
+          start: { id: 'start', kind: 'result', text: 'Este é outro fluxo.' },
+        },
+      },
+    ],
+    educationMaterials: [
+      {
+        id: 'mock-material',
+        title: 'Material de teste',
+        source: 'Equipe SeCuida',
+        description: 'Descrição do material.',
+        tags: ['teste'],
+        audience: 'teachers',
+        contentType: 'external_link',
+        externalUrl: 'https://example.com',
+        review: { status: 'pending_review', reviewedBy: null, reviewedAt: null, notes: '' },
+      },
+    ],
+  }),
+}));
 
 describe('DashboardRoute', () => {
   beforeEach(() => {
@@ -1413,6 +1523,8 @@ describe('DashboardRoute', () => {
     expect(screen.getByText('São frases que uma pessoa pode escolher para começar este fluxo.')).toBeInTheDocument();
     expect(screen.getByText('Mapa visual')).toBeInTheDocument();
     expect(screen.getByText('Testar conversa')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Ir para outro fluxo' }));
+    expect(screen.getByText('Este é outro fluxo.')).toBeInTheDocument();
   });
 });
 ```
@@ -1544,24 +1656,106 @@ export function FlowMap({ flow }: { flow: GuidedFlow }) {
 Create `src/dev-dashboard/flows/FlowPreview.tsx`:
 
 ```tsx
+import { useEffect, useState } from 'react';
 import type { GuidedFlow } from '../../domain/flow-engine/types';
 
-export function FlowPreview({ flow }: { flow: GuidedFlow }) {
-  const firstNode = flow.nodes[flow.entry.nodeId];
+interface PreviewMessage {
+  id: string;
+  author: 'bot' | 'user';
+  text: string;
+}
+
+interface PreviewOption {
+  id: string;
+  label: string;
+  next?: string;
+  effects?: Array<{ kind: string; flowId?: string }>;
+}
+
+export function FlowPreview({ flow, flows }: { flow: GuidedFlow; flows: GuidedFlow[] }) {
+  const [activeFlowId, setActiveFlowId] = useState(flow.id);
+  const [activeNodeId, setActiveNodeId] = useState(flow.entry.nodeId);
+  const [messages, setMessages] = useState<PreviewMessage[]>(() => createInitialMessages(flow));
+
+  const activeFlow = flows.find((item) => item.id === activeFlowId) ?? flow;
+  const activeNode = activeFlow.nodes[activeNodeId];
+
+  useEffect(() => {
+    setActiveFlowId(flow.id);
+    setActiveNodeId(flow.entry.nodeId);
+    setMessages(createInitialMessages(flow));
+  }, [flow]);
+
+  function chooseOption(option: PreviewOption) {
+    const flowStart = option.effects?.find((effect) => effect.kind === 'flow_start');
+    const nextFlow = flowStart ? flows.find((item) => item.id === flowStart.flowId) : null;
+    const nextNodeId = nextFlow?.entry.nodeId ?? option.next;
+    const nextFlowForNode = nextFlow ?? activeFlow;
+    const nextNode = nextNodeId ? nextFlowForNode.nodes[nextNodeId] : null;
+
+    setMessages((current) => [
+      ...current,
+      { id: `user-${current.length}`, author: 'user', text: option.label },
+      ...(nextFlow
+        ? [{ id: `transition-${current.length}`, author: 'bot' as const, text: nextFlow.entry.transitionMessage }]
+        : []),
+      {
+        id: `bot-${current.length}`,
+        author: 'bot',
+        text: nextNode?.text ?? 'Este caminho ainda precisa ser corrigido.',
+      },
+    ]);
+
+    if (nextFlow) setActiveFlowId(nextFlow.id);
+    if (nextNodeId) setActiveNodeId(nextNodeId);
+  }
 
   return (
     <section className="flex flex-col gap-stack-sm rounded-lg border border-outline-variant/50 bg-surface-container-lowest p-5">
       <h2 className="font-headline-sm text-on-surface">Testar conversa</h2>
-      <div className="rounded-2xl rounded-bl-sm bg-[#EEF8F3] px-4 py-3">
-        <p className="font-body-md text-on-surface">{flow.entry.transitionMessage}</p>
+      <div className="flex max-h-[420px] flex-col gap-3 overflow-auto">
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`rounded-2xl px-4 py-3 ${
+              message.author === 'bot'
+                ? 'self-start rounded-bl-sm bg-[#EEF8F3]'
+                : 'self-end rounded-br-sm bg-primary text-on-primary'
+            }`}
+          >
+            <p className="font-body-md">{message.text}</p>
+          </div>
+        ))}
       </div>
-      <div className="rounded-2xl rounded-bl-sm bg-[#EEF8F3] px-4 py-3">
-        <p className="font-body-md text-on-surface">
-          {firstNode?.text ?? 'A etapa inicial deste fluxo ainda precisa ser corrigida.'}
-        </p>
-      </div>
+      {activeNode?.kind === 'choice' && (
+        <div className="flex flex-wrap gap-2">
+          {activeNode.options.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              onClick={() => chooseOption(option)}
+              className="min-h-11 rounded-full bg-secondary-container px-4 font-label-md text-on-secondary-container"
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
     </section>
   );
+}
+
+function createInitialMessages(flow: GuidedFlow): PreviewMessage[] {
+  const firstNode = flow.nodes[flow.entry.nodeId];
+
+  return [
+    { id: 'transition', author: 'bot', text: flow.entry.transitionMessage },
+    {
+      id: 'first-node',
+      author: 'bot',
+      text: firstNode?.text ?? 'A etapa inicial deste fluxo ainda precisa ser corrigida.',
+    },
+  ];
 }
 ```
 
@@ -1617,7 +1811,7 @@ export function FlowDashboard({ flows, resources }: { flows: GuidedFlow[]; resou
       <div className="flex flex-col gap-stack-md">
         <FlowEditor flow={selectedFlow} />
         <FlowMap flow={selectedFlow} />
-        <FlowPreview flow={selectedFlow} />
+        <FlowPreview flow={selectedFlow} flows={flows} />
         <ValidationSummary result={validation} />
       </div>
     </section>
@@ -1728,7 +1922,7 @@ import { useMemo, useState } from 'react';
 import type { EducationResource } from '../../domain/resources/types';
 import { FieldHint } from '../components/FieldHint';
 import { ValidationSummary } from '../components/ValidationSummary';
-import { educationContentTypeLabels } from './educationTypes';
+import { educationContentTypeLabels, educationTypesRequiringUrl } from './educationTypes';
 import { validateDashboardEducation } from './educationValidation';
 
 export function EducationDashboard({ resources }: { resources: EducationResource[] }) {
@@ -1806,6 +2000,19 @@ export function EducationDashboard({ resources }: { resources: EducationResource
             </select>
             <FieldHint>Escolha como este material será aberto no app.</FieldHint>
           </label>
+          {educationTypesRequiringUrl.includes(selectedResource.contentType) && (
+            <label className="flex flex-col gap-2">
+              <span className="font-label-md text-on-surface">Link público</span>
+              <input
+                className="min-h-11 rounded-lg border border-outline-variant bg-surface px-3"
+                value={selectedResource.externalUrl ?? ''}
+                readOnly
+              />
+              <FieldHint>
+                Use um link público de vídeo, áudio, PDF ou página externa. Uploads não são aceitos.
+              </FieldHint>
+            </label>
+          )}
           <div>
             <h3 className="font-headline-sm text-on-surface">Tags</h3>
             <FieldHint>Use palavras curtas para ajudar professores a encontrar o material.</FieldHint>
@@ -2042,8 +2249,6 @@ git commit -m "feat: add dashboard export UI"
 Append this test:
 
 ```tsx
-import { fireEvent } from '@testing-library/react';
-
 it('updates a local flow title draft', () => {
   render(
     <MemoryRouter>
@@ -2091,6 +2296,22 @@ it('updates required education metadata drafts', () => {
   expect(screen.getByDisplayValue('Descrição editada localmente')).toBeInTheDocument();
   expect(screen.getByDisplayValue('Fonte editada localmente')).toBeInTheDocument();
 });
+
+it('updates a link-based education URL draft', () => {
+  render(
+    <MemoryRouter>
+      <DashboardRoute />
+    </MemoryRouter>,
+  );
+
+  screen.getByRole('tab', { name: 'Materiais' }).click();
+
+  fireEvent.change(screen.getByLabelText('Link público do material'), {
+    target: { value: 'https://example.com/material.pdf' },
+  });
+
+  expect(screen.getByDisplayValue('https://example.com/material.pdf')).toBeInTheDocument();
+});
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -2112,6 +2333,7 @@ import { useMemo, useState } from 'react';
 import {
   createEmptyDashboardDraftState,
   loadDashboardDrafts,
+  mergeDashboardDrafts,
   saveDashboardDrafts,
 } from './draft-storage/dashboardStorage';
 ```
@@ -2120,16 +2342,8 @@ Inside component:
 
 ```tsx
 const shipped = useMemo(() => getShippedDashboardContent(), []);
-const [draftState, setDraftState] = useState(() => {
-  const loaded = loadDashboardDrafts();
-  if (loaded.updatedAt) return loaded;
-
-  return {
-    ...createEmptyDashboardDraftState(),
-    flows: shipped.flows,
-    educationMaterials: shipped.educationMaterials,
-  };
-});
+const [draftState, setDraftState] = useState(() => loadDashboardDrafts());
+const mergedDrafts = useMemo(() => mergeDashboardDrafts(shipped, draftState), [draftState, shipped]);
 
 function updateDraftState(updater: (current: typeof draftState) => typeof draftState) {
   setDraftState((current) => {
@@ -2144,14 +2358,14 @@ function updateDraftState(updater: (current: typeof draftState) => typeof draftS
 }
 ```
 
-Use `draftState.flows` and `draftState.educationMaterials` instead of `shipped` records for dashboard tabs, export drafts, and the existing memoized validation block. Do not call `saveDashboardDrafts` from a mount-time `useEffect`; saving shipped content immediately would lock the browser to stale copies of future code-level content changes before the editor has made any draft edits.
+Use `mergedDrafts.flows` and `mergedDrafts.educationMaterials` instead of `shipped` records for dashboard tabs, export drafts, and the existing memoized validation block. Do not seed localStorage with shipped content and do not call `saveDashboardDrafts` from a mount-time `useEffect`; either approach would lock the browser to stale copies of future code-level content changes.
 
 - [ ] **Step 4: Make flow editor editable**
 
 Change `FlowEditor` props:
 
 ```tsx
-export function FlowEditor({ flow, onChange }: { flow: GuidedFlow; onChange: (flow: GuidedFlow) => void }) {
+export function FlowEditor({ flow, onChange }: { flow: GuidedFlow; onChange: (patch: Partial<GuidedFlow>) => void }) {
 ```
 
 Change title field:
@@ -2163,7 +2377,7 @@ Change title field:
     aria-label="Título do fluxo"
     className="min-h-11 rounded-lg border border-outline-variant bg-surface px-3"
     value={flow.title}
-    onChange={(event) => onChange({ ...flow, title: event.target.value })}
+    onChange={(event) => onChange({ title: event.target.value })}
   />
 </label>
 ```
@@ -2176,7 +2390,6 @@ Change purpose select:
   value={flow.purpose ?? 'common'}
   onChange={(event) =>
     onChange({
-      ...flow,
       purpose: event.target.value === 'common' ? undefined : (event.target.value as GuidedFlow['purpose']),
     })
   }
@@ -2195,7 +2408,7 @@ export function FlowDashboard({
 }: {
   flows: GuidedFlow[];
   resources: EducationResource[];
-  onFlowChange: (flowIndex: number, flow: GuidedFlow) => void;
+  onFlowChange: (flowIndex: number, flowId: string, patch: Partial<GuidedFlow>) => void;
 }) {
 ```
 
@@ -2221,23 +2434,25 @@ Change each sidebar button handler to use the mapped index:
 Pass to editor:
 
 ```tsx
-<FlowEditor flow={selectedFlow} onChange={(flow) => onFlowChange(selectedFlowIndex, flow)} />
+<FlowEditor flow={selectedFlow} onChange={(patch) => onFlowChange(selectedFlowIndex, selectedFlow.id, patch)} />
 ```
 
 In `DashboardRoute`, pass:
 
 ```tsx
 <FlowDashboard
-  flows={draftState.flows}
-  resources={draftState.educationMaterials}
-  onFlowChange={(flowIndex, flow) =>
+  flows={mergedDrafts.flows}
+  resources={mergedDrafts.educationMaterials}
+  onFlowChange={(flowIndex, flowId, patch) =>
     updateDraftState((current) => ({
       ...current,
-      flows: current.flows.map((item, index) => (index === flowIndex ? flow : item)),
+      flowPatches: upsertPatchById(current.flowPatches, flowId, patch),
     }))
   }
 />
 ```
+
+If the edited flow is a newly added local-only flow, update `addedFlows` with the complete merged record instead of `flowPatches`. For the first implementation, shipped rows can be detected with `shipped.flows.some((item) => item.id === flowId)`.
 
 - [ ] **Step 6: Make education editor editable**
 
@@ -2249,7 +2464,7 @@ export function EducationDashboard({
   onResourceChange,
 }: {
   resources: EducationResource[];
-  onResourceChange: (resourceIndex: number, resource: EducationResource) => void;
+  onResourceChange: (resourceIndex: number, resourceId: string, patch: Partial<EducationResource>) => void;
 }) {
 ```
 
@@ -2285,7 +2500,7 @@ Change the title field:
     aria-label="Título do material"
     className="min-h-11 rounded-lg border border-outline-variant bg-surface px-3"
     value={selectedResource.title}
-    onChange={(event) => onResourceChange(selectedResourceIndex, { ...selectedResource, title: event.target.value })}
+    onChange={(event) => onResourceChange(selectedResourceIndex, selectedResource.id, { title: event.target.value })}
   />
 </label>
 ```
@@ -2300,7 +2515,7 @@ Add editable required fields for the properties enforced by validation:
     className="min-h-24 rounded-lg border border-outline-variant bg-surface px-3 py-2"
     value={selectedResource.description}
     onChange={(event) =>
-      onResourceChange(selectedResourceIndex, { ...selectedResource, description: event.target.value })
+      onResourceChange(selectedResourceIndex, selectedResource.id, { description: event.target.value })
     }
   />
   <FieldHint>Resumo curto que aparece na lista de materiais.</FieldHint>
@@ -2312,10 +2527,31 @@ Add editable required fields for the properties enforced by validation:
     aria-label="Fonte do material"
     className="min-h-11 rounded-lg border border-outline-variant bg-surface px-3"
     value={selectedResource.source}
-    onChange={(event) => onResourceChange(selectedResourceIndex, { ...selectedResource, source: event.target.value })}
+    onChange={(event) => onResourceChange(selectedResourceIndex, selectedResource.id, { source: event.target.value })}
   />
   <FieldHint>Nome da organização, autora ou referência principal do material.</FieldHint>
 </label>
+```
+
+Add an editable URL field for link-based material types:
+
+```tsx
+<>
+  {educationTypesRequiringUrl.includes(selectedResource.contentType) && (
+    <label className="flex flex-col gap-2">
+      <span className="font-label-md text-on-surface">Link público</span>
+      <input
+        aria-label="Link público do material"
+        className="min-h-11 rounded-lg border border-outline-variant bg-surface px-3"
+        value={selectedResource.externalUrl ?? ''}
+        onChange={(event) =>
+          onResourceChange(selectedResourceIndex, selectedResource.id, { externalUrl: event.target.value })
+        }
+      />
+      <FieldHint>Use um link público de vídeo, áudio, PDF ou página externa. Uploads não são aceitos.</FieldHint>
+    </label>
+  )}
+</>
 ```
 
 Change the content-type select from `readOnly` to an editable `onChange` handler:
@@ -2325,8 +2561,7 @@ Change the content-type select from `readOnly` to an editable `onChange` handler
   className="min-h-11 rounded-lg border border-outline-variant bg-surface px-3"
   value={selectedResource.contentType}
   onChange={(event) =>
-    onResourceChange(selectedResourceIndex, {
-      ...selectedResource,
+    onResourceChange(selectedResourceIndex, selectedResource.id, {
       contentType: event.target.value as EducationResource['contentType'],
     })
   }
@@ -2337,14 +2572,33 @@ In `DashboardRoute`, pass:
 
 ```tsx
 <EducationDashboard
-  resources={draftState.educationMaterials}
-  onResourceChange={(resourceIndex, resource) =>
+  resources={mergedDrafts.educationMaterials}
+  onResourceChange={(resourceIndex, resourceId, patch) =>
     updateDraftState((current) => ({
       ...current,
-      educationMaterials: current.educationMaterials.map((item, index) => (index === resourceIndex ? resource : item)),
+      educationMaterialPatches: upsertPatchById(current.educationMaterialPatches, resourceId, patch),
     }))
   }
 />
+```
+
+If the edited material is newly added locally, update `addedEducationMaterials` with the complete merged record instead of `educationMaterialPatches`. Use the same shipped-record check as flows.
+
+Add a small helper near `DashboardRoute`:
+
+```tsx
+function upsertPatchById<T extends { id: string }>(
+  records: Array<{ id: string; patch: Partial<T> }>,
+  id: string,
+  patch: Partial<T>,
+) {
+  const existingIndex = records.findIndex((record) => record.id === id);
+  if (existingIndex === -1) return [...records, { id, patch }];
+
+  return records.map((record, index) =>
+    index === existingIndex ? { id, patch: { ...record.patch, ...patch } } : record,
+  );
+}
 ```
 
 - [ ] **Step 7: Run edit smoke test**
