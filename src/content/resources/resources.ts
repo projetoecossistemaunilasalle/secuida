@@ -22,6 +22,15 @@ export const resourcesContent = {
       imageUrl:
         'https://lh3.googleusercontent.com/aida-public/AB6AXuBUu8741_OQaC5gUnsKWur7Ue7XjPl0zrmuOIJ4Beja1qwe3ecefY-jAPirXyxkalCbdbrni9ru9BNvN445eECuIikPSHgiq06Tzqu-95xgP3UoyvMQVVQI36N81_js4EGvH1QQRVXJ_e8rIpiTlui2vOpllyou7wJMei-tkTvrlnzhswzlJVMxW6GA0QKmGziWmfB7sY5Eskwn6YISBEpc1HqIHOmjdvGPEcHf13Ez2CF_WEnk99EtkQo2HAQMRaTBB1WY5bv-ygQ',
       tags: ['regulação-emocional', 'sala-de-aula', 'professores'],
+      audience: 'teachers',
+      contentType: 'summary',
+      body: [
+        {
+          id: 'overview',
+          kind: 'paragraph',
+          text: 'Material inicial para apoiar conversas sobre regulação emocional e sobrecarga no cotidiano escolar.',
+        },
+      ],
       review: pendingReview,
     },
   ],
