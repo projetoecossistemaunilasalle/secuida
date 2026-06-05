@@ -9,11 +9,23 @@ export type EducationResourceContentType =
   | 'audio_link';
 export type EducationResourceAudience = 'teachers' | 'public_school_teachers' | 'general';
 
+export type EducationResourceFeaturedImage =
+  | { kind: 'catalog'; imageId: string }
+  | { kind: 'external'; imageUrl: string; alt?: string };
+
+export type EducationResourceBlockKind = 'paragraph' | 'heading' | 'list' | 'image' | 'video' | 'sourceLink';
+
 export interface EducationResourceBlock {
   id: string;
-  kind: 'paragraph' | 'heading' | 'list';
+  kind: EducationResourceBlockKind;
+  title?: string;
   text?: string;
   items?: string[];
+  imageUrl?: string;
+  alt?: string;
+  url?: string;
+  label?: string;
+  description?: string;
 }
 
 export interface EducationResourceEmbed {
@@ -27,6 +39,7 @@ export interface EducationResource {
   source: string;
   description: string;
   imageUrl?: string;
+  featuredImage?: EducationResourceFeaturedImage;
   tags: string[];
   audience: EducationResourceAudience;
   contentType: EducationResourceContentType;

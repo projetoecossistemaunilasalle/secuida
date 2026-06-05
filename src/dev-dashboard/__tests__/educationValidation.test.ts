@@ -7,6 +7,8 @@ const baseResource: EducationResource = {
   title: 'Material de teste',
   source: 'Equipe SeCuida',
   description: 'Descrição clara do material.',
+  imageUrl: 'https://example.com/thumb.jpg',
+  featuredImage: { kind: 'catalog', imageId: 'hands-holding-plant' },
   tags: ['descanso'],
   audience: 'teachers',
   contentType: 'summary',
@@ -48,6 +50,43 @@ describe('validateDashboardEducation', () => {
       expect.objectContaining({
         id: 'empty-tags:resource-one',
         message: 'Este material ainda não tem tags.',
+      }),
+    );
+  });
+
+  it('rejects materials without a featured image', () => {
+    const result = validateDashboardEducation([{ ...baseResource, featuredImage: undefined }]);
+
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({
+        id: 'missing-featured-image:resource-one',
+        message: 'A imagem principal do material é obrigatória.',
+      }),
+    );
+  });
+
+  it('rejects unknown featured image catalog IDs', () => {
+    const result = validateDashboardEducation([
+      { ...baseResource, featuredImage: { kind: 'catalog', imageId: 'unknown-image' } },
+    ]);
+
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({
+        id: 'unknown-featured-image:resource-one',
+        message: 'A imagem principal selecionada não existe no catálogo.',
+      }),
+    );
+  });
+
+  it('rejects invalid external featured image URLs', () => {
+    const result = validateDashboardEducation([
+      { ...baseResource, featuredImage: { kind: 'external', imageUrl: 'not-a-url' } },
+    ]);
+
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({
+        id: 'invalid-featured-image-url:resource-one',
+        message: 'A URL da imagem principal precisa começar com http:// ou https://.',
       }),
     );
   });
