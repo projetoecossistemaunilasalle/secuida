@@ -98,12 +98,7 @@ describe('Resources content', () => {
     const resource = resourcesContent.resources[0];
 
     expect(resource.featuredImage).toEqual({ kind: 'catalog', imageId: 'hands-holding-plant' });
-    expect(resource.body?.map((block) => block.kind)).toEqual([
-      'paragraph',
-      'video',
-      'paragraph',
-      'sourceLink',
-    ]);
+    expect(resource.body?.map((block) => block.kind)).toEqual(['paragraph', 'video', 'paragraph', 'sourceLink']);
   });
 });
 

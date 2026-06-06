@@ -43,6 +43,7 @@ Run this logic plan before `docs/superpowers/plans/2026-06-05-estudos-material-d
 ### Task 1: Resource Types And Featured Image Catalog
 
 **Files:**
+
 - Modify: `src/domain/resources/types.ts`
 - Create: `src/content/resources/featuredImages.ts`
 - Test: `src/dev-dashboard/__tests__/educationValidation.test.ts`
@@ -201,6 +202,7 @@ Expected: commit succeeds. If `src/dev-dashboard/__tests__/dashboardRoute.test.t
 ### Task 2: Education Validation
 
 **Files:**
+
 - Modify: `src/dev-dashboard/education/educationValidation.ts`
 - Test: `src/dev-dashboard/__tests__/educationValidation.test.ts`
 
@@ -276,33 +278,33 @@ type EducationResourceBodyBlock = NonNullable<EducationResource['body']>[number]
 Inside the per-resource loop, after required title/source/description checks, add:
 
 ```ts
-    if (!resource.featuredImage) {
-      issues.push({
-        level: 'error',
-        area: 'education',
-        id: `missing-featured-image:${resource.id}`,
-        message: 'A imagem principal do material é obrigatória.',
-        path: `${resource.id}.featuredImage`,
-      });
-    } else if (resource.featuredImage.kind === 'catalog' && !findFeaturedImageOption(resource.featuredImage.imageId)) {
-      issues.push({
-        level: 'error',
-        area: 'education',
-        id: `unknown-featured-image:${resource.id}`,
-        message: 'A imagem principal selecionada não existe no catálogo.',
-        path: `${resource.id}.featuredImage.imageId`,
-      });
-    } else if (resource.featuredImage.kind === 'external' && !isHttpUrl(resource.featuredImage.imageUrl)) {
-      issues.push({
-        level: 'error',
-        area: 'education',
-        id: `invalid-featured-image-url:${resource.id}`,
-        message: 'A URL da imagem principal precisa começar com http:// ou https://.',
-        path: `${resource.id}.featuredImage.imageUrl`,
-      });
-    }
+if (!resource.featuredImage) {
+  issues.push({
+    level: 'error',
+    area: 'education',
+    id: `missing-featured-image:${resource.id}`,
+    message: 'A imagem principal do material é obrigatória.',
+    path: `${resource.id}.featuredImage`,
+  });
+} else if (resource.featuredImage.kind === 'catalog' && !findFeaturedImageOption(resource.featuredImage.imageId)) {
+  issues.push({
+    level: 'error',
+    area: 'education',
+    id: `unknown-featured-image:${resource.id}`,
+    message: 'A imagem principal selecionada não existe no catálogo.',
+    path: `${resource.id}.featuredImage.imageId`,
+  });
+} else if (resource.featuredImage.kind === 'external' && !isHttpUrl(resource.featuredImage.imageUrl)) {
+  issues.push({
+    level: 'error',
+    area: 'education',
+    id: `invalid-featured-image-url:${resource.id}`,
+    message: 'A URL da imagem principal precisa começar com http:// ou https://.',
+    path: `${resource.id}.featuredImage.imageUrl`,
+  });
+}
 
-    resource.body?.forEach((block) => validateBodyBlock(issues, resource.id, block));
+resource.body?.forEach((block) => validateBodyBlock(issues, resource.id, block));
 ```
 
 Add below `pushMissing`:
@@ -389,6 +391,7 @@ Expected: commit succeeds.
 ### Task 3: Seed Content And Dashboard Defaults
 
 **Files:**
+
 - Modify: `src/content/resources/resources.ts`
 - Modify: `src/content/__tests__/content.test.ts`
 - Modify: `src/dev-dashboard/DashboardRoute.tsx`
@@ -403,12 +406,7 @@ it('seeds education resources with detail preview fields', () => {
   const resource = resourcesContent.resources[0];
 
   expect(resource.featuredImage).toEqual({ kind: 'catalog', imageId: 'hands-holding-plant' });
-  expect(resource.body?.map((block) => block.kind)).toEqual([
-    'paragraph',
-    'video',
-    'paragraph',
-    'sourceLink',
-  ]);
+  expect(resource.body?.map((block) => block.kind)).toEqual(['paragraph', 'video', 'paragraph', 'sourceLink']);
 });
 ```
 
@@ -440,7 +438,7 @@ body: [
     id: 'breathing-video',
     kind: 'video',
     title: 'Vídeo: pausa de respiração para professores',
-    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    url: 'https://www.youtube.com/watch?v=kiEmbhvv7Fo',
     description: 'Embed configurável pelo dashboard.',
   },
   {
@@ -508,6 +506,7 @@ Expected: commit succeeds.
 ### Task 4: Draft Preview Resolver And Video Embed Parser
 
 **Files:**
+
 - Create: `src/features/education/educationResourcePreview.ts`
 - Create: `src/features/education/videoEmbeds.ts`
 - Modify: `src/features/education/__tests__/EducationScreens.test.tsx`
@@ -704,6 +703,7 @@ Expected: commit succeeds.
 ### Task 5: Export Coverage And Logic Verification
 
 **Files:**
+
 - Modify: `src/dev-dashboard/__tests__/exportBundle.test.ts`
 - Test: `src/dev-dashboard/__tests__/exportBundle.test.ts`
 

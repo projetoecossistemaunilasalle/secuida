@@ -39,6 +39,7 @@ Run `docs/superpowers/plans/2026-06-05-estudos-material-detail-logic.md` first. 
 ### Task 1: Public Detail Screen Tests
 
 **Files:**
+
 - Modify: `src/features/education/__tests__/EducationScreens.test.tsx`
 - Test: `src/features/education/__tests__/EducationScreens.test.tsx`
 
@@ -50,7 +51,10 @@ Update the existing `renders configured resources and navigates to the detail ro
 expect(screen.getByRole('heading', { name: resource.title })).toBeInTheDocument();
 expect(screen.getByText('Sobre este material')).toBeInTheDocument();
 expect(screen.getByText('Aplicação prática')).toBeInTheDocument();
-expect(screen.getByRole('link', { name: /acessar fonte original/i })).toHaveAttribute('href', 'https://www.feevale.br/');
+expect(screen.getByRole('link', { name: /acessar fonte original/i })).toHaveAttribute(
+  'href',
+  'https://www.feevale.br/',
+);
 ```
 
 - [ ] **Step 2: Add preview warning detail test**
@@ -161,6 +165,7 @@ Expected: FAIL because the public UI still renders the current minimal detail su
 ### Task 2: Public Library And Detail UI
 
 **Files:**
+
 - Modify: `src/features/education/EducationLibraryScreen.tsx`
 - Modify: `src/features/education/ResourceDetailScreen.tsx`
 - Test: `src/features/education/__tests__/EducationScreens.test.tsx`
@@ -194,11 +199,13 @@ with:
 Add above the `<section>` grid:
 
 ```tsx
-{isPreviewingDrafts ? (
-  <div className="rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-3 font-body-md text-yellow-900">
-    Essa é uma versão de teste. O conteúdo não está salvo no site oficial.
-  </div>
-) : null}
+{
+  isPreviewingDrafts ? (
+    <div className="rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-3 font-body-md text-yellow-900">
+      Essa é uma versão de teste. O conteúdo não está salvo no site oficial.
+    </div>
+  ) : null;
+}
 ```
 
 - [ ] **Step 2: Replace detail screen implementation**
@@ -252,7 +259,9 @@ export function ResourceDetailScreen() {
       ) : null}
 
       <section className="flex flex-col gap-stack-md">
-        {resource.body?.map((block) => <ResourceBodyBlock key={block.id} block={block} source={resource.source} />)}
+        {resource.body?.map((block) => (
+          <ResourceBodyBlock key={block.id} block={block} source={resource.source} />
+        ))}
       </section>
     </Page>
   );
@@ -293,7 +302,9 @@ function ResourceBodyBlock({ block, source }: { block: EducationResourceBlock; s
         <ul className="list-disc space-y-2 pl-5 font-body-lg text-on-surface-variant">
           {block.items
             ?.filter((item) => item.trim())
-            .map((item, index) => <li key={`${block.id}-${index}`}>{item}</li>)}
+            .map((item, index) => (
+              <li key={`${block.id}-${index}`}>{item}</li>
+            ))}
         </ul>
       </Card>
     );
@@ -397,6 +408,7 @@ Expected: commit succeeds.
 ### Task 3: Dashboard UI Tests
 
 **Files:**
+
 - Modify: `src/dev-dashboard/__tests__/dashboardRoute.test.tsx`
 - Test: `src/dev-dashboard/__tests__/dashboardRoute.test.tsx`
 
@@ -494,6 +506,7 @@ Expected: FAIL because the dashboard UI controls do not exist.
 ### Task 4: Dashboard Featured Image And Block Editor
 
 **Files:**
+
 - Modify: `src/dev-dashboard/education/EducationDashboard.tsx`
 - Test: `src/dev-dashboard/__tests__/dashboardRoute.test.tsx`
 
@@ -690,6 +703,7 @@ Expected: commit succeeds.
 ### Task 5: UI Verification
 
 **Files:**
+
 - No source changes expected.
 
 - [ ] **Step 1: Run public and dashboard UI tests**

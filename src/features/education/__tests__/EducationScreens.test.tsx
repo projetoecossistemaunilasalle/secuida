@@ -122,7 +122,9 @@ describe('ResourceDetailScreen', () => {
     );
 
     const detailHeader = screen.getByRole('heading', { name: resource.title }).closest('header');
-    const visibleBadgeTexts = Array.from(detailHeader?.querySelectorAll('span') ?? []).map((badge) => badge.textContent);
+    const visibleBadgeTexts = Array.from(detailHeader?.querySelectorAll('span') ?? []).map(
+      (badge) => badge.textContent,
+    );
 
     expect(visibleBadgeTexts).toEqual([resource.source, 'Respiração', 'Sala de aula']);
     expect(visibleBadgeTexts).not.toContain('Material educativo');
