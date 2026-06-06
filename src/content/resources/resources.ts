@@ -30,22 +30,19 @@ export const resourcesContent = {
           id: 'overview',
           kind: 'paragraph',
           title: 'Sobre este material',
-          text:
-            'Este conteúdo reúne orientações breves para reconhecer sinais de tensão, organizar pequenas pausas e retomar a rotina com mais presença. Ele não substitui atendimento profissional e não tem finalidade diagnóstica.',
+          text: 'Este conteúdo reúne orientações breves para reconhecer sinais de tensão, organizar pequenas pausas e retomar a rotina com mais presença. Ele não substitui atendimento profissional e não tem finalidade diagnóstica.',
         },
         {
           id: 'breathing-video',
           kind: 'video',
           title: 'Vídeo: pausa de respiração para professores',
-          url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-          description: 'Embed configurável pelo dashboard.',
+          url: 'https://www.youtube.com/watch?v=kiEmbhvv7Fo',
         },
         {
           id: 'practice',
           kind: 'paragraph',
           title: 'Aplicação prática',
-          text:
-            'Uma sugestão é reservar um momento curto antes ou depois da aula para uma pausa guiada. O professor pode adaptar a prática ao tempo disponível e ao contexto da turma.',
+          text: 'Uma sugestão é reservar um momento curto antes ou depois da aula para uma pausa guiada. O professor pode adaptar a prática ao tempo disponível e ao contexto da turma.',
         },
         {
           id: 'source',

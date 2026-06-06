@@ -46,6 +46,21 @@ export function EducationDashboard({
 
   const [newBlockKind, setNewBlockKind] = useState<EducationResourceBlock['kind']>('paragraph');
 
+  if (!selectedResource) {
+    return (
+      <section className="rounded-lg border border-outline-variant/50 bg-surface-container-lowest p-5">
+        <p className="font-body-md text-on-surface-variant">Nenhum material disponível.</p>
+        <button
+          type="button"
+          onClick={addResource}
+          className="mt-3 min-h-11 rounded-full bg-primary px-4 font-label-md text-on-primary"
+        >
+          Novo material
+        </button>
+      </section>
+    );
+  }
+
   const selectedResourceBody = selectedResource.body ?? [
     {
       id: `${selectedResource.id}-overview`,
@@ -86,10 +101,6 @@ export function EducationDashboard({
     if (nextIndex < 0 || nextIndex >= body.length) return;
     [body[blockIndex], body[nextIndex]] = [body[nextIndex], body[blockIndex]];
     updateBody(body);
-  }
-
-  if (!selectedResource) {
-    return <p className="font-body-md text-on-surface-variant">Nenhum material disponível.</p>;
   }
 
   return (

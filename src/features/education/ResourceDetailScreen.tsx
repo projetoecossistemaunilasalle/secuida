@@ -11,13 +11,15 @@ import { resolveVideoEmbed } from './videoEmbeds';
 
 export function ResourceDetailScreen() {
   const { resourceId } = useParams();
-  const { resources, isPreviewingDrafts } = resolveEducationResourcesForPreview();
+  const { resources, changedResourceIds } = resolveEducationResourcesForPreview();
   const resource = resources.find((item) => item.id === resourceId) ?? resources[0];
+  const isPreviewingResource = changedResourceIds.includes(resource.id);
   const featuredImage = resolveFeaturedImage(resource);
+  const resourceTags = resource.tags.map((tag) => tag.trim()).filter(Boolean);
 
   return (
     <Page width="narrow" className="gap-stack-md">
-      {isPreviewingDrafts ? (
+      {isPreviewingResource ? (
         <div className="rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-3 font-body-md text-yellow-900">
           Essa é uma versão de teste. O conteúdo não está salvo no site oficial.
         </div>
@@ -31,7 +33,9 @@ export function ResourceDetailScreen() {
       <header className="flex flex-col gap-stack-sm">
         <div className="flex flex-wrap gap-2">
           <Badge tone="secondary">{resource.source}</Badge>
-          <Badge>Material educativo</Badge>
+          {resourceTags.map((tag, index) => (
+            <Badge key={`${tag}-${index}`}>{tag}</Badge>
+          ))}
         </div>
         <h1 className="font-headline-lg text-on-surface">{resource.title}</h1>
         <p className="font-body-lg text-on-surface-variant">{resource.description}</p>
@@ -109,6 +113,12 @@ function ResourceBodyBlock({ block, source }: { block: EducationResourceBlock; s
     if (video.kind === 'youtube') {
       return (
         <Card className="overflow-hidden p-0">
+          {block.title || block.description ? (
+            <div className="p-5">
+              {block.title ? <h2 className="font-headline-sm text-on-surface">{block.title}</h2> : null}
+              {block.description ? <p className="font-body-md text-on-surface-variant">{block.description}</p> : null}
+            </div>
+          ) : null}
           <iframe
             className="aspect-video w-full"
             src={video.embedUrl}
@@ -116,10 +126,6 @@ function ResourceBodyBlock({ block, source }: { block: EducationResourceBlock; s
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
-          <div className="p-5">
-            {block.title ? <h2 className="font-headline-sm text-on-surface">{block.title}</h2> : null}
-            {block.description ? <p className="font-body-md text-on-surface-variant">{block.description}</p> : null}
-          </div>
         </Card>
       );
     }

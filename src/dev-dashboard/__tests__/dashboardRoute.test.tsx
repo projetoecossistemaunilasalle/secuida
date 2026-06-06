@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DashboardRoute } from '../DashboardRoute';
+import { EducationDashboard } from '../education/EducationDashboard';
 
 vi.mock('../content/shippedContent', () => ({
   getShippedDashboardContent: () => ({
@@ -393,5 +394,23 @@ describe('DashboardRoute', () => {
     await user.keyboard('s');
 
     expect(screen.getByLabelText('Texto do bloco 1')).toHaveFocus();
+  });
+
+  it('renders an empty state with an action to create the first material', () => {
+    const onResourceAdd = vi.fn();
+
+    render(
+      <EducationDashboard
+        resources={[]}
+        onResourceChange={vi.fn()}
+        onResourceAdd={onResourceAdd}
+      />
+    );
+
+    expect(screen.getByText('Nenhum material disponível.')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Novo material' }));
+
+    expect(onResourceAdd).toHaveBeenCalledOnce();
   });
 });
