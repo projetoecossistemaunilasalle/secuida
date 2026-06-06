@@ -167,7 +167,7 @@ describe('DashboardRoute', () => {
     fireEvent.change(screen.getByLabelText('Texto da opção 1 da etapa 1'), {
       target: { value: 'Continuar editado' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Adicionar etapa final' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar etapa' }));
     fireEvent.click(screen.getByRole('button', { name: 'Adicionar opção na etapa 1' }));
 
     expect(screen.getByDisplayValue('Texto editado da etapa inicial')).toBeInTheDocument();
@@ -194,7 +194,7 @@ describe('DashboardRoute', () => {
 
     expect(screen.getByDisplayValue('Opção editada na segunda etapa')).toBeInTheDocument();
 
-    const finalStepButton = screen.getByRole('button', { name: 'Adicionar etapa final' });
+    const finalStepButton = screen.getByRole('button', { name: 'Adicionar etapa' });
     const etapaToggles = screen.getAllByRole('button', { name: /^Abrir etapa \d+$/ });
     const lastEtapaToggle = etapaToggles[etapaToggles.length - 1];
 

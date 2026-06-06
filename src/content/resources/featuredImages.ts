@@ -12,7 +12,7 @@ export const featuredImageOptions = [
   },
 ] satisfies FeaturedImageOption[];
 
-export const defaultFeaturedImageId = featuredImageOptions[0].id;
+export const defaultFeaturedImageId = featuredImageOptions[0]?.id ?? '';
 
 export function findFeaturedImageOption(imageId: string | undefined) {
   return featuredImageOptions.find((image) => image.id === imageId);

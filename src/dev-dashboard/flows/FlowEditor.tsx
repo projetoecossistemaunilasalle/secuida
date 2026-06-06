@@ -406,7 +406,7 @@ export function FlowEditor({
           onClick={addResultNode}
           className="min-h-11 w-fit rounded-full bg-secondary-container px-4 font-label-md text-on-secondary-container"
         >
-          Adicionar etapa final
+          Adicionar etapa
         </button>
       </section>
     </section>
