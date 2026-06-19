@@ -43,9 +43,13 @@ describe('EducationLibraryScreen', () => {
     expect(screen.getByRole('heading', { name: resource.title })).toBeInTheDocument();
     expect(screen.getByText('Sobre este material')).toBeInTheDocument();
     expect(screen.getByText('Aplicação prática')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /acessar fonte original/i })).toHaveAttribute(
-      'href',
-      'https://www.feevale.br/',
+    expect(screen.getByRole('img', { name: 'Ilustração de técnica de respiração guiada.' })).toHaveAttribute(
+      'src',
+      expect.stringContaining('respiracao1'),
+    );
+    expect(screen.getByRole('img', { name: 'Ilustração complementar de exercício de respiração.' })).toHaveAttribute(
+      'src',
+      expect.stringContaining('respiracao2'),
     );
   });
 

@@ -96,8 +96,30 @@ describe('Resources content', () => {
   it('seeds education resources with detail preview fields', () => {
     const resource = resourcesContent.resources[0];
 
-    expect(resource.featuredImage).toEqual({ kind: 'catalog', imageId: 'hands-holding-plant' });
-    expect(resource.body?.map((block) => block.kind)).toEqual(['paragraph', 'video', 'paragraph', 'sourceLink']);
+    expect(resource.title).toBe('Guia de Regulação Emocional');
+    expect(resource.description).toBe(
+      'Estratégias de suporte para apoiar o professor no cuidado pessoal com a sua saúde mental.',
+    );
+    expect(resource.tags).toEqual(['regulação-emocional', 'respiração', 'professores']);
+    expect(resource.featuredImage).toEqual({
+      kind: 'external',
+      imageUrl: resource.imageUrl,
+    });
+    expect(resource.body?.map((block) => block.kind)).toEqual(['paragraph', 'video', 'image', 'image', 'paragraph']);
+    expect(resource.body?.slice(2, 4)).toEqual([
+      expect.objectContaining({
+        id: 'breathing-image-1',
+        kind: 'image',
+        imageUrl: 'secuida-asset:respiracao1',
+        alt: 'Ilustração de técnica de respiração guiada.',
+      }),
+      expect.objectContaining({
+        id: 'breathing-image-2',
+        kind: 'image',
+        imageUrl: 'secuida-asset:respiracao2',
+        alt: 'Ilustração complementar de exercício de respiração.',
+      }),
+    ]);
   });
 });
 
