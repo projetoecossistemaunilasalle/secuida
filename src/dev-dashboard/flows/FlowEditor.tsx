@@ -38,7 +38,7 @@ export function FlowEditor({
     }
   }, [selectedNodeId]);
 
-  function getOrderedNodes(): FlowNode[] {
+  const nodes = useMemo(() => {
     if (flow.nodeOrder) {
       const nodeMap = flow.nodes;
       const ordered = flow.nodeOrder
@@ -52,10 +52,10 @@ export function FlowEditor({
       return ordered;
     }
     return Object.values(flow.nodes);
-  }
+  }, [flow.nodes, flow.nodeOrder]);
 
   function handleMoveNode(nodeId: string, direction: 'up' | 'down') {
-    const currentOrder = getOrderedNodes().map((n) => n.id);
+    const currentOrder = nodes.map((n) => n.id);
     const currentIndex = currentOrder.indexOf(nodeId);
     const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
 
@@ -65,8 +65,6 @@ export function FlowEditor({
     [newOrder[currentIndex], newOrder[targetIndex]] = [newOrder[targetIndex], newOrder[currentIndex]];
     onChange({ nodeOrder: newOrder });
   }
-
-  const nodes = getOrderedNodes();
   const existingScoreKeys = useMemo(() => {
     const keys = new Set<string>();
     Object.values(flow.nodes).forEach((node) => {
