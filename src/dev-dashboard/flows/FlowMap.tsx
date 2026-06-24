@@ -100,10 +100,12 @@ export function FlowMap({
   flow,
   flows,
   onFlowChange,
+  onEditNode,
 }: {
   flow: GuidedFlow;
   flows: GuidedFlow[];
   onFlowChange: (patch: Partial<GuidedFlow>) => void;
+  onEditNode: (nodeId: string) => void;
 }) {
   const { nodes: initialNodes, edges: initialEdges } = useMemo(
     () => buildFlowGraph(flow),
@@ -184,8 +186,7 @@ export function FlowMap({
           onTextChange={handleTextChange}
           onRemoveEffect={handleRemoveEffect}
           onEditFully={() => {
-            // FlowDashboard needs to handle this — we emit via a prop
-            // The parent wires this up in Task 5
+            if (selectedNodeId) onEditNode(selectedNodeId);
           }}
           onClose={() => setSelectedNodeId(null)}
         />
