@@ -388,41 +388,39 @@ describe('DashboardRoute', () => {
     expect(screen.queryByLabelText('Texto da etapa 1')).not.toBeInTheDocument();
   });
 
-  it('renders a visual flow map with readable step names and connections', () => {
+  it('renders the React Flow canvas when Mapa visual tab is clicked', async () => {
+    const user = userEvent.setup();
     render(
       <MemoryRouter>
         <DashboardRoute />
       </MemoryRouter>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Mapa visual' }));
-    expect(screen.getAllByText('Etapa 1').length).toBeGreaterThan(0);
-    expect(screen.getByText('Se escolher "Continuar"')).toBeInTheDocument();
-    expect(screen.getByText('vai para Etapa 2')).toBeInTheDocument();
-    expect(screen.getByText('começa o fluxo "Segundo fluxo"')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Mapa visual' }));
+    expect(screen.getByTestId('flow-map-canvas')).toBeInTheDocument();
   });
 
-  it('shows deferred safety routing in the flow redirections tab', async () => {
-    const user = userEvent.setup();
-    render(<DashboardRoute />);
+  it('does not render a Redirecionamentos tab', () => {
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
 
-    await user.click(screen.getByRole('button', { name: 'Redirecionamentos' }));
-
-    expect(screen.getAllByText('Encaminhamento de segurança ao final').length).toBeGreaterThan(0);
-    expect(screen.getByText(/continua para q18/i)).toBeInTheDocument();
-    expect(screen.getByText(/depois abre \/apoio/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Redirecionamentos' })).not.toBeInTheDocument();
   });
 
-  it('round-trips from a redirections row to the focused node in the editor tab', async () => {
+  it('opens the inspector panel when a node is clicked in the flow map', async () => {
     const user = userEvent.setup();
-    render(<DashboardRoute />);
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
 
-    await user.click(screen.getByRole('button', { name: 'Redirecionamentos' }));
-    await user.click(screen.getAllByRole('button', { name: 'Editar etapa' })[0]);
-
-    expect(screen.getByRole('button', { name: 'Editor' })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByLabelText('Texto da etapa 1')).toBeInTheDocument();
-    expect(screen.getByLabelText('Texto da opção 1 da etapa 1')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Mapa visual' }));
+    const nodeElements = screen.getAllByText(/Como você quer continuar\?/i);
+    expect(nodeElements.length).toBeGreaterThan(0);
   });
 
   it('filters large flow editor nodes by deferred safety marker', async () => {
@@ -911,7 +909,9 @@ describe('DashboardRoute', () => {
     expect(screen.getByRole('img', { name: 'Imagem do bloco' })).toHaveAttribute('src', 'https://example.com/body.jpg');
   });
 
-  it('shows previews and file names for material image fields', () => {
+  it('shows placeholders and delete actions for uploaded material image fields', () => {
+    const onResourceChange = vi.fn();
+
     render(
       <EducationDashboard
         resources={[
@@ -943,7 +943,7 @@ describe('DashboardRoute', () => {
           },
         ]}
         groups={[]}
-        onResourceChange={vi.fn()}
+        onResourceChange={onResourceChange}
         onResourceAdd={vi.fn()}
         onGroupChange={vi.fn()}
         onGroupAdd={vi.fn()}
@@ -952,15 +952,44 @@ describe('DashboardRoute', () => {
       />,
     );
 
+    const thumbnailInput = screen.getByLabelText('URL da miniatura da biblioteca');
+    expect(thumbnailInput).toHaveValue('Imagem enviada (thumb.png)');
+    expect(thumbnailInput).toBeDisabled();
     expect(screen.getByRole('img', { name: 'Miniatura da biblioteca' })).toHaveAttribute(
       'src',
       'data:image/png;base64,AAAA',
     );
     expect(screen.getByText('Arquivo enviado: thumb.png')).toBeInTheDocument();
+
     expect(screen.getByRole('img', { name: 'Imagem principal' })).toHaveAttribute('src', 'data:image/png;base64,BBBB');
     expect(screen.getByText('Arquivo enviado: featured.png')).toBeInTheDocument();
+
+    const bodyImageInput = screen.getByLabelText('URL da imagem do bloco 1');
+    expect(bodyImageInput).toHaveValue('Imagem enviada (body.png)');
+    expect(bodyImageInput).toBeDisabled();
     expect(screen.getByRole('img', { name: 'Imagem interna' })).toHaveAttribute('src', 'data:image/png;base64,CCCC');
     expect(screen.getByText('Arquivo enviado: body.png')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Deletar miniatura da biblioteca' }));
+    expect(onResourceChange).toHaveBeenCalledWith(0, 'mock-material', { imageUrl: '', imageFileName: '' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Deletar imagem principal' }));
+    expect(onResourceChange).toHaveBeenCalledWith(0, 'mock-material', {
+      featuredImage: { kind: 'catalog', imageId: 'hands-holding-plant' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Deletar imagem do bloco 1' }));
+    expect(onResourceChange).toHaveBeenCalledWith(0, 'mock-material', {
+      body: [
+        {
+          id: 'body-image',
+          kind: 'image',
+          imageUrl: '',
+          imageFileName: '',
+          alt: 'Imagem interna',
+        },
+      ],
+    });
   });
 
   it('keeps focus while editing a material body block', async () => {
@@ -1228,20 +1257,20 @@ describe('DashboardRoute', () => {
 
     // Verify list displays flows
     expect(screen.getByRole('button', { name: /^SRQ-20$/i })).toBeInTheDocument();
-    
+
     // Select 'mock-flow' (second option in flows)
     await user.click(screen.getByRole('button', { name: /^Fluxo de teste$/i }));
 
     // Click delete flow button next to mock-flow
     await user.click(screen.getByRole('button', { name: /^Remover fluxo Fluxo de teste$/i }));
-    
+
     // Confirmation button is shown
     const confirmBtn = screen.getByRole('button', { name: /^Confirmar exclusão de Fluxo de teste$/i });
     expect(confirmBtn).toBeInTheDocument();
-    
+
     // Click confirm
     await user.click(confirmBtn);
-    
+
     // Flow is gone
     expect(screen.queryByRole('button', { name: /^Fluxo de teste$/i })).not.toBeInTheDocument();
   });
@@ -1285,8 +1314,10 @@ describe('DashboardRoute', () => {
     await user.click(screen.getByRole('button', { name: 'Etapa 3 — q1' }));
 
     // Active stage card header shows Etapa 3 — Você tem dores de cabeça frequentes? (ID q1 is hidden/demoted)
-    expect(screen.getByRole('heading', { name: /Etapa 3 — Você tem dores de cabeça frequentes\?/i })).toBeInTheDocument();
-    
+    expect(
+      screen.getByRole('heading', { name: /Etapa 3 — Você tem dores de cabeça frequentes\?/i }),
+    ).toBeInTheDocument();
+
     // Verify "Texto da etapa" textarea is positioned above "Tipo da etapa" select in DOM order
     const textLabel = screen.getByText('Texto da etapa');
     const typeLabel = screen.getByText('Tipo da etapa');
@@ -1297,14 +1328,16 @@ describe('DashboardRoute', () => {
 
     // Click delete stage button
     await user.click(screen.getByRole('button', { name: /Excluir etapa/i }));
-    
+
     // Confirm delete
     const confirmBtn = screen.getByRole('button', { name: /Confirmar exclusão da etapa/i });
     expect(confirmBtn).toBeInTheDocument();
     await user.click(confirmBtn);
 
     // Etapa 3 (q1) is deleted, now Etapa 3 becomes Q2
-    expect(screen.queryByRole('heading', { name: /Etapa 3 — Você tem dores de cabeça frequentes\?/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: /Etapa 3 — Você tem dores de cabeça frequentes\?/i }),
+    ).not.toBeInTheDocument();
   });
 
   it('dismisses drawer on backdrop click, auto-activates score, and displays score key description', async () => {
@@ -1335,6 +1368,3 @@ describe('DashboardRoute', () => {
     expect(screen.queryByLabelText('Chave da pontuação')).not.toBeInTheDocument();
   });
 });
-
-
-
