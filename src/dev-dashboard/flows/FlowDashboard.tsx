@@ -8,7 +8,7 @@ import { FlowEditor } from './FlowEditor';
 import { FlowMap } from './FlowMap';
 import { FlowPreview } from './FlowPreview';
 import { FlowRedirections } from './FlowRedirectionsPanel';
-import { inputClass, inputClassSm } from '../components/fieldStyles';
+import { inputClassSm } from '../components/fieldStyles';
 import { getFlowNodeTitle } from './flowDisplay';
 
 type FlowDetailTab = 'editor' | 'preview' | 'map' | 'redirections';

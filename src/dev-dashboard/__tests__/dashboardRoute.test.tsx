@@ -1282,7 +1282,7 @@ describe('DashboardRoute', () => {
     await user.click(screen.getByRole('button', { name: 'Editor' }));
 
     // Click Etapa 3 (q1)
-    await user.click(screen.getByRole('button', { name: /Etapa 3/i }));
+    await user.click(screen.getByRole('button', { name: 'Etapa 3 — q1' }));
 
     // Active stage card header shows Etapa 3 — Você tem dores de cabeça frequentes? (ID q1 is hidden/demoted)
     expect(screen.getByRole('heading', { name: /Etapa 3 — Você tem dores de cabeça frequentes\?/i })).toBeInTheDocument();
@@ -1316,7 +1316,7 @@ describe('DashboardRoute', () => {
     );
     await user.click(screen.getByRole('button', { name: 'SRQ-20' }));
     await user.click(screen.getByRole('button', { name: 'Editor' }));
-    await user.click(screen.getByRole('button', { name: /Etapa 4/i })); // Q2 stage in the outline list
+    await user.click(screen.getByRole('button', { name: 'Etapa 4 — q2' })); // Q2 stage in the outline list
 
     // Click option 1 actions to open drawer (Ações/Score button)
     await user.click(screen.getAllByRole('button', { name: /Ações\/Score/i })[0]);

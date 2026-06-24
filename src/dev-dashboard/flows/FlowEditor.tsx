@@ -4,7 +4,7 @@ import { Button } from '../../design-system/components/Button';
 import { Field } from '../components/Field';
 import { FieldHint } from '../components/FieldHint';
 import { inputClass, inputClassSm, textareaClass } from '../components/fieldStyles';
-import { getFlowNodeLabel, getFlowNodeTitle } from './flowDisplay';
+import { getFlowNodeLabel } from './flowDisplay';
 import { flowPurposeLabels } from './flowLabels';
 
 export function FlowEditor({
@@ -77,8 +77,6 @@ export function FlowEditor({
     if (activeNodeFilter === 'safety') return nodeHasDeferredSafety(node);
     return true;
   });
-
-  const activeNode = visibleNodes.find((node) => node.id === selectedNodeId) || visibleNodes[0];
 
   function updateEntry(patch: Partial<GuidedFlow['entry']>) {
     onChange({ entry: { ...flow.entry, ...patch } });
@@ -196,21 +194,6 @@ export function FlowEditor({
     setActiveOptionEdit({ nodeId: node.id, optionId });
   }
 
-
-  function addResultNode() {
-    const nodeId = createUniqueId('nova_etapa', flow.nodes);
-    onChange({
-      nodes: {
-        ...flow.nodes,
-        [nodeId]: {
-          id: nodeId,
-          kind: 'result',
-          text: 'Nova etapa final.',
-        },
-      },
-    });
-  }
-
   function addOption(node: ChoiceFlowNode) {
     const optionId = createUniqueId(
       'nova_opcao',
@@ -252,8 +235,16 @@ export function FlowEditor({
     <section className="flex flex-col gap-stack-sm rounded-lg border border-outline-variant/50 bg-surface-container-lowest p-5">
       <section className="bg-white rounded-xl border border-outline-variant/40 shadow-sm overflow-hidden mb-4">
         <div 
+          role="button"
+          tabIndex={0}
           className="px-5 py-3.5 bg-surface-container-low flex justify-between items-center cursor-pointer select-none"
           onClick={() => setInitialConfigCollapsed(!initialConfigCollapsed)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setInitialConfigCollapsed(!initialConfigCollapsed);
+            }
+          }}
         >
           <div className="flex items-center gap-2">
             <span className="text-primary text-lg">⚙️</span>
@@ -369,13 +360,21 @@ export function FlowEditor({
                     isSelected ? 'border-l-primary' : 'border-l-outline-variant/40'
                   }`}
                 >
-                  <div 
-                    className="flex w-full items-start justify-between gap-3 p-4 text-left cursor-pointer select-none"
-                    onClick={() => {
-                      onSelectNodeId(isSelected ? null : node.id);
-                    }}
-                  >
-                    <div className="flex min-w-0 flex-1 flex-col gap-2">
+                  <div className="flex w-full items-start justify-between gap-3 p-4 select-none">
+                    <div 
+                      role="button"
+                      tabIndex={0}
+                      className="flex min-w-0 flex-1 flex-col gap-2 cursor-pointer text-left"
+                      onClick={() => {
+                        onSelectNodeId(isSelected ? null : node.id);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          onSelectNodeId(isSelected ? null : node.id);
+                        }
+                      }}
+                    >
                       <div className="flex flex-wrap items-center gap-2">
                         <h4 className="font-label-lg text-on-surface font-bold">
                           {stepTitle}
@@ -388,7 +387,7 @@ export function FlowEditor({
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 shrink-0">
                       {isSelected && (
                         <>
                           <Button
@@ -559,13 +558,23 @@ export function FlowEditor({
 
           return (
             <div
+              role="button"
+              tabIndex={-1}
               data-testid="drawer-backdrop"
-              className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-sm"
-              onClick={() => setActiveOptionEdit(null)}
+              className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-sm cursor-default"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                  setActiveOptionEdit(null);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  setActiveOptionEdit(null);
+                }
+              }}
             >
               <div
                 className="h-full w-full max-w-md overflow-y-auto bg-surface-container-lowest p-6 shadow-2xl flex flex-col gap-4 border-l border-outline-variant"
-                onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
                   <h3 className="font-headline-sm text-on-surface font-semibold">Configurações Avançadas</h3>
