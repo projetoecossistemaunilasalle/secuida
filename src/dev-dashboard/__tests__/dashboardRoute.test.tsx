@@ -519,6 +519,37 @@ describe('DashboardRoute', () => {
     expect(screen.getByText(/vamos abrir a página de apoio agora/i)).toBeInTheDocument();
   });
 
+  it('displays quick-suggest keys when editing score and sets input on click', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+    const select = screen.queryByRole('combobox', { name: 'Selecionar fluxo' });
+    if (select) {
+      await user.selectOptions(select, 'srq20');
+    } else {
+      await user.click(screen.getByRole('button', { name: 'SRQ-20' }));
+    }
+    await user.click(screen.getByRole('button', { name: 'Editor' }));
+    await user.click(screen.getByRole('button', { name: /Etapa 4 — q2/i })); // select q2
+
+    // Open drawer
+    await user.click(screen.getAllByRole('button', { name: /Ações\/Score/i })[0]);
+
+    // Quick select tag for 'srq20' exists (since q1 uses it)
+    const tag = screen.getByRole('button', { name: 'srq20' });
+    expect(tag).toBeInTheDocument();
+
+    // Clear field and click tag
+    const scoreKeyInput = screen.getByPlaceholderText('Chave (ex: srq20)');
+    await user.clear(scoreKeyInput);
+    await user.click(tag);
+
+    expect(scoreKeyInput).toHaveValue('srq20');
+  });
+
   it('updates a local education title draft', () => {
     render(
       <MemoryRouter>

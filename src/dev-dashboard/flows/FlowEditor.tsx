@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import type { ChoiceFlowNode, DeferredSafetyFlowEffect, FlowNode, GuidedFlow } from '../../domain/flow-engine/types';
 import { Button } from '../../design-system/components/Button';
 import { Field } from '../components/Field';
@@ -24,6 +24,23 @@ export function FlowEditor({
 }) {
   const [activeOptionEdit, setActiveOptionEdit] = useState<{ nodeId: string; optionId: string } | null>(null);
   const nodes = Object.values(flow.nodes);
+  const existingScoreKeys = useMemo(() => {
+    const keys = new Set<string>();
+    Object.values(flow.nodes).forEach((node) => {
+      if (node.kind === 'choice') {
+        node.options.forEach((option) => {
+          option.effects?.forEach((effect) => {
+            if (effect.kind === 'score') {
+              keys.add(effect.scoreKey);
+            }
+          });
+        });
+      } else if (node.kind === 'score_branch') {
+        keys.add(node.scoreKey);
+      }
+    });
+    return Array.from(keys).filter(Boolean);
+  }, [flow]);
   const firstNodeId = nodes[0]?.id ?? flow.entry.nodeId;
 
   function nodeHasDeferredSafety(node: FlowNode) {
@@ -521,6 +538,27 @@ export function FlowEditor({
                             }
                           />
                         </label>
+                        {existingScoreKeys.length > 0 && (
+                          <div className="col-span-2 flex flex-wrap gap-1.5 items-center mt-1">
+                            <span className="text-xs text-on-surface-variant font-medium">Sugestões:</span>
+                            {existingScoreKeys.map((key) => (
+                              <button
+                                key={key}
+                                type="button"
+                                className="px-2.5 py-1 text-xs font-label-sm bg-secondary-container text-on-secondary-container hover:bg-secondary-container/85 active:bg-secondary-container/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md transition-colors cursor-pointer"
+                                onClick={() =>
+                                  updateOptionEffects(editNode as ChoiceFlowNode, editOption.id, (effects) =>
+                                    effects?.map((effect) =>
+                                      effect.kind === 'score' ? { ...effect, scoreKey: key } : effect,
+                                    ),
+                                  )
+                                }
+                              >
+                                {key}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                         <div className="col-span-2">
                           <Button
                             type="button"
