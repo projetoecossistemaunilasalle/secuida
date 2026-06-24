@@ -280,7 +280,7 @@ export function FlowDashboard({
                     key={node.id}
                     type="button"
                     onClick={() => setSelectedNodeId(node.id)}
-                    aria-label={`${nodeTitle} — ${node.id}`}
+                    aria-label={`${nodeTitle} — ${node.text || node.id}`}
                     className={`w-full rounded-lg px-3 py-2 text-left font-label-md transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary ${
                       isSelected
                         ? 'bg-primary text-on-primary'
@@ -288,7 +288,7 @@ export function FlowDashboard({
                     }`}
                   >
                     <div className="flex items-center justify-between gap-1 w-full min-w-0">
-                      <span className="block font-medium truncate">{node.id}</span>
+                      <span className="block font-medium truncate">{node.text || node.id}</span>
                       <div className="flex items-center gap-1 shrink-0">
                         {hasScore && <span className="bg-secondary-container text-on-secondary-container px-1 py-0.5 rounded text-[10px] font-bold shrink-0 ml-1">+pts</span>}
                         {hasSafety && <span className="bg-error-container text-error px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0 ml-1">⚠</span>}
@@ -349,7 +349,13 @@ export function FlowDashboard({
           <FlowPreview key={`${selectedFlow.id}-${effectiveIndex}`} flow={selectedFlow} flows={flows} />
         )}
 
-        {activeDetailTab === 'map' && <FlowMap flow={selectedFlow} flows={flows} />}
+        {activeDetailTab === 'map' && (
+          <FlowMap
+            flow={selectedFlow}
+            flows={flows}
+            onFlowChange={(patch) => onFlowChange(effectiveIndex, selectedFlow.id, patch)}
+          />
+        )}
 
         {activeDetailTab === 'redirections' && <FlowRedirections flow={selectedFlow} onEditNode={handleEditNode} />}
 
