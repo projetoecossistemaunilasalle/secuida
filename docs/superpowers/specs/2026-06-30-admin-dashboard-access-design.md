@@ -2,7 +2,7 @@
 
 ## Goal
 
-Keep the public Se Cuida app focused on the user-facing experience while allowing authenticated admins to access the dashboard, preview content changes, and approve updates into the site.
+Keep the public Se Cuida app focused on the user-facing experience while allowing authenticated admins to access the dashboard, preview content changes, and confirm updates into the live site.
 
 ## Current Context
 
@@ -10,7 +10,7 @@ The app currently defines a `/dashboard` route and conditionally includes a Dash
 
 `VITE_ENABLE_DEV_DASHBOARD` should remain as a build-time master kill switch for the dashboard bundle and admin routes. Runtime authentication controls who can use admin mode only when this flag is enabled. If `VITE_ENABLE_DEV_DASHBOARD` is not `true`, `/login` and `/dashboard` should not expose admin functionality and should redirect to `/`. Production or staging builds that need prototype admin access must set `VITE_ENABLE_DEV_DASHBOARD=true`.
 
-The current dashboard stores editor drafts in browser `localStorage`, previews drafts inside dashboard tools, validates them, and exports reviewable JSON/assets for repository merge. V1 admin access should preserve this model rather than turning public app routes into a draft-content overlay.
+The current dashboard stores editor drafts in browser `localStorage`, previews drafts inside dashboard tools, validates them, and exports reviewable JSON/assets for repository merge. The new dashboard direction changes that model: confirmed dashboard changes should be saved to a database-backed content source and become live for all users without requiring export, repository merge, or redeploy as the primary publishing path.
 
 ## Approved UX Direction
 
@@ -39,7 +39,7 @@ This passphrase is not a production security boundary because Vite-exposed value
 
 ## Admin Mode
 
-After a successful login, the app should know the user is in admin mode. Admin mode controls only administrative access and navigation visibility; it should not change the public user experience unless a preview/draft state is intentionally added later.
+After a successful login, the app should know the user is in admin mode. Admin mode controls administrative access and navigation visibility. It does not create a private content view for admins; once an admin confirms a valid change, that change becomes live content for normal public users too.
 
 Admin mode should provide:
 
@@ -50,16 +50,17 @@ Admin mode should provide:
 - Desktop admin menu contents: public app navigation/preview and Logout. Dashboard should remain in the existing desktop navigation only, avoiding duplicate Dashboard links in the same top bar.
 - A way to return from Dashboard to the public preview/app.
 - A Logout action that clears admin mode and removes admin navigation immediately.
+- Public routes should render confirmed database-backed content for every user.
 
 For the prototype, admin mode should be stored in browser `localStorage` under a Se Cuida namespace, matching the dashboard's existing storage pattern and allowing admin state to survive page reloads and separate tabs in the same browser profile. A future backend-backed auth provider can replace this storage without changing the navigation contract.
 
 ## Approval Flow
 
-The dashboard remains the place where admins review content changes. In V1, admins preview drafts inside the dashboard's existing preview/editing tools, not by overlaying draft content onto public routes such as `/orientacao` or `/educacao`.
+The dashboard remains the place where admins review content changes. Draft edits are not shown in public routes by default. Once an admin confirms a valid change, the dashboard should write that content to the database-backed live content source.
 
-Approval should mark validated dashboard drafts as ready for the existing export/repository-merge publishing flow. The approved changes become part of the public site only after they are exported, merged into shipped content, and deployed through the project's publishing mechanism. This avoids changing the public app data loaders for an admin-only draft overlay in this scope.
+For all users, confirmation should feel immediate: after the admin confirms a change, routes such as `/orientacao` or `/educacao` should read the live database-backed version without requiring export, repository merge, or redeploy.
 
-If a future requirement needs admins to browse public routes with locally approved draft content overlaid, that should be designed as a separate preview-mode feature with explicit content-loader changes and tests.
+Implementation should introduce an app-level content resolver/provider that prefers live database-backed content and falls back to shipped static content when no live record exists or when the database is unavailable. This keeps the app resilient while making the dashboard the normal publishing surface.
 
 ## Out Of Scope
 
@@ -67,7 +68,7 @@ If a future requirement needs admins to browse public routes with locally approv
 - Creating a public link to admin login.
 - Changing the existing public information architecture.
 - Designing a full role/permission system beyond admin-only dashboard access.
-- Overlaying dashboard drafts onto public app routes.
+- Requiring repository changes, JSON export, or redeploy for normal content publishing after admin confirmation.
 
 ## Testing Expectations
 
@@ -85,5 +86,9 @@ Tests should cover:
 - Admins can log out, clearing admin mode and removing admin navigation.
 - Admin session state persists across page reloads and separate tabs in the same browser profile.
 - Login redirects admins into the intended admin-capable app state.
+- Draft dashboard changes do not affect public routes until confirmed.
+- Confirmed dashboard changes are persisted to the database-backed content source.
+- Confirmed dashboard changes appear on relevant public routes for normal unauthenticated users.
+- Public routes fall back to shipped static content when live database content is missing or unavailable.
 
 Implementation should introduce a small admin auth module, for example `src/app/auth/adminSession.ts`, that centralizes `isAdminMode()`, `loginAdmin()`, `logoutAdmin()`, and test-only reset behavior. Tests should reset this module/storage state in `beforeEach` to avoid leakage between route and navigation cases.
