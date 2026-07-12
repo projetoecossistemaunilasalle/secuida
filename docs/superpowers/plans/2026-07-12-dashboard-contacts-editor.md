@@ -31,6 +31,7 @@
 ### Task 1: Pure Contact Helpers And Validation
 
 **Files:**
+
 - Create: `src/dev-dashboard/contacts/contactDrafts.ts`
 - Create: `src/dev-dashboard/contacts/contactsValidation.ts`
 - Create: `src/dev-dashboard/contacts/__tests__/contactDrafts.test.ts`
@@ -144,7 +145,12 @@ describe('validateDashboardContacts', () => {
       { ...service, name: ' ', state: 'R', phoneDisplay: '123', phoneHref: 'tel:999' },
     ]);
     expect(result.errors.map((issue) => issue.path)).toEqual(
-      expect.arrayContaining(['contacts.0.name', 'contacts.0.state', 'contacts.0.phoneDisplay', 'contacts.0.phoneHref']),
+      expect.arrayContaining([
+        'contacts.0.name',
+        'contacts.0.state',
+        'contacts.0.phoneDisplay',
+        'contacts.0.phoneHref',
+      ]),
     );
   });
 
@@ -218,6 +224,7 @@ git commit -m "feat: add dashboard contact validation"
 ### Task 2: Contact Draft Storage And Migration
 
 **Files:**
+
 - Modify: `src/dev-dashboard/content/shippedContent.ts`
 - Modify: `src/dev-dashboard/draft-storage/dashboardStorage.ts`
 - Modify: `src/dev-dashboard/__tests__/dashboardStorage.test.ts`
@@ -247,10 +254,13 @@ it('merges patched, added, and removed contacts', () => {
 });
 
 it('migrates v2 drafts by initializing contact collections', () => {
-  localStorage.setItem('secuida:dev-dashboard:drafts:v1', JSON.stringify({
-    ...legacyV2Draft,
-    schemaVersion: '2.0.0',
-  }));
+  localStorage.setItem(
+    'secuida:dev-dashboard:drafts:v1',
+    JSON.stringify({
+      ...legacyV2Draft,
+      schemaVersion: '2.0.0',
+    }),
+  );
   const loaded = loadDashboardDrafts();
   expect(loaded.schemaVersion).toBe('3.0.0');
   expect(loaded.contactPatches).toEqual([]);
@@ -340,6 +350,7 @@ git commit -m "feat: persist dashboard contact drafts"
 ### Task 3: Compact Contacts Editor Component
 
 **Files:**
+
 - Create: `src/dev-dashboard/contacts/ContactsDashboard.tsx`
 - Create: `src/dev-dashboard/contacts/__tests__/ContactsDashboard.test.tsx`
 
@@ -404,9 +415,7 @@ Render:
 <section className="flex flex-col gap-stack-md">
   <header>
     <h2 className="font-headline-md text-on-surface">Contatos</h2>
-    <p className="mt-1 font-body-md text-on-surface-variant">
-      Edite os serviços que aparecem na rede de apoio.
-    </p>
+    <p className="mt-1 font-body-md text-on-surface-variant">Edite os serviços que aparecem na rede de apoio.</p>
   </header>
   <div className="grid gap-stack-md lg:grid-cols-[280px_minmax(0,1fr)]">
     {/* compact list */}
@@ -448,6 +457,7 @@ git commit -m "feat: add compact dashboard contacts editor"
 ### Task 4: Dashboard Tab And Route Integration
 
 **Files:**
+
 - Modify: `src/dev-dashboard/components/DashboardShell.tsx`
 - Modify: `src/dev-dashboard/draft-storage/dashboardTabStorage.ts`
 - Modify: `src/dev-dashboard/DashboardRoute.tsx`
@@ -537,6 +547,7 @@ git commit -m "feat: integrate contacts dashboard tab"
 ### Task 5: Contact Export Integration
 
 **Files:**
+
 - Modify: `src/dev-dashboard/export/exportBundle.ts`
 - Modify: `src/dev-dashboard/export/ExportDashboard.tsx`
 - Modify: `src/dev-dashboard/__tests__/exportBundle.test.ts`
@@ -552,7 +563,10 @@ it('exports changed contacts and removed contact IDs', () => {
   const bundle = buildExportBundle({
     shipped: { flows: [], educationMaterials: [], educationGroups: [], contacts: [service] },
     drafts: {
-      flows: [], educationMaterials: [], educationGroups: [], contacts: [changedContact],
+      flows: [],
+      educationMaterials: [],
+      educationGroups: [],
+      contacts: [changedContact],
       removedContactIds: ['contact-removed'],
     },
     validation: { errors: [], warnings: [] },
@@ -621,6 +635,7 @@ git commit -m "feat: export dashboard contact changes"
 ### Task 6: Full Verification And Browser UX Review
 
 **Files:**
+
 - Modify only files required to resolve verified failures or visual defects in the contacts feature.
 
 - [ ] **Step 1: Run the focused contact/dashboard suite**
