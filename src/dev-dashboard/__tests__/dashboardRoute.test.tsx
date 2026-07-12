@@ -421,6 +421,71 @@ describe('DashboardRoute', () => {
     ]);
   });
 
+  it('rebases a recovered unique contact patch when the reordered contact is edited again', () => {
+    const originalContact = createDefaultShippedContact();
+    const insertedContact = {
+      ...createDefaultShippedContact(),
+      id: 'canoas-contact-inserted',
+      name: 'Contato inserido',
+    };
+    shippedContacts.splice(0, shippedContacts.length, insertedContact, originalContact);
+
+    const initialDraft = createEmptyDashboardDraftState();
+    initialDraft.contactPatches = [
+      {
+        id: originalContact.id,
+        sourceIndex: 0,
+        sourceIdUnique: true,
+        patch: { name: 'Contato único recuperado' },
+      },
+    ];
+    localStorage.setItem('secuida:dev-dashboard:drafts:v1', JSON.stringify(initialDraft));
+
+    const view = render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Contatos' }));
+    fireEvent.click(
+      within(screen.getByRole('list', { name: 'Contatos disponíveis' })).getByRole('button', {
+        name: /Contato único recuperado/,
+      }),
+    );
+    expect(screen.getByRole('textbox', { name: 'Nome' })).toHaveValue('Contato único recuperado');
+
+    fireEvent.change(screen.getByRole('textbox', { name: 'Endereço' }), {
+      target: { value: 'Rua Reordenada, 123' },
+    });
+
+    const storedDraft = JSON.parse(localStorage.getItem('secuida:dev-dashboard:drafts:v1') ?? '{}');
+    expect(storedDraft.contactPatches).toEqual([
+      {
+        id: originalContact.id,
+        sourceIndex: 1,
+        sourceIdUnique: true,
+        patch: { name: 'Contato único recuperado', address: 'Rua Reordenada, 123' },
+      },
+    ]);
+
+    view.unmount();
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Contatos' }));
+    fireEvent.click(
+      within(screen.getByRole('list', { name: 'Contatos disponíveis' })).getByRole('button', {
+        name: /Contato único recuperado/,
+      }),
+    );
+    expect(screen.getByRole('textbox', { name: 'Nome' })).toHaveValue('Contato único recuperado');
+    expect(screen.getByRole('textbox', { name: 'Endereço' })).toHaveValue('Rua Reordenada, 123');
+  });
+
   it('summarizes edited contacts and enables contact-only exports', () => {
     render(
       <MemoryRouter>

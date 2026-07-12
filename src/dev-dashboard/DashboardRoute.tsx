@@ -30,11 +30,20 @@ function upsertPatchById<T extends { id: string }>(
   sourceIdUnique?: boolean,
 ) {
   const existingIndex = records.findIndex((record) => record.id === id && record.sourceIndex === sourceIndex);
+  const sameIdIndexes = records.flatMap((record, index) => (record.id === id ? [index] : []));
+  const rebaseIndex =
+    existingIndex === -1 &&
+    sourceIdUnique === true &&
+    sameIdIndexes.length === 1 &&
+    records[sameIdIndexes[0]]?.sourceIdUnique === true
+      ? sameIdIndexes[0]
+      : -1;
+  const targetIndex = existingIndex === -1 ? rebaseIndex : existingIndex;
   const uniquenessMetadata = sourceIdUnique === undefined ? {} : { sourceIdUnique };
-  if (existingIndex === -1) return [...records, { id, sourceIndex, ...uniquenessMetadata, patch }];
+  if (targetIndex === -1) return [...records, { id, sourceIndex, ...uniquenessMetadata, patch }];
 
   return records.map((record, index) =>
-    index === existingIndex
+    index === targetIndex
       ? { ...record, id, sourceIndex, ...uniquenessMetadata, patch: { ...record.patch, ...patch } }
       : record,
   );
