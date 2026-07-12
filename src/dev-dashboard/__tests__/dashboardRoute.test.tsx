@@ -176,6 +176,7 @@ vi.mock('../content/shippedContent', () => ({
         description: 'Descrição do material.',
         tags: ['teste'],
         audience: 'teachers',
+        featuredImage: { kind: 'catalog', imageId: 'hands-holding-plant' },
         review: { status: 'pending_review', reviewedBy: null, reviewedAt: null, notes: '' },
       },
     ],
@@ -191,7 +192,27 @@ vi.mock('../content/shippedContent', () => ({
         order: 2,
       },
     ],
-    contacts: [],
+    contacts: [
+      {
+        id: 'canoas-caps-praca-brasil',
+        name: 'CAPS II Praça Brasil',
+        type: 'CAPS',
+        badgeTone: 'primary',
+        city: 'Canoas',
+        state: 'RS',
+        address: 'Av. Getúlio Vargas, 7071 - Centro, Canoas - RS',
+        phoneDisplay: '(51) 3236-1500',
+        phoneHref: 'tel:5132361500',
+        hours: 'Segunda a sexta, 08:00 - 18:00',
+        notes: 'Atendimento por acolhimento.',
+        review: {
+          status: 'approved',
+          reviewedBy: 'Equipe SeCuida',
+          reviewedAt: '2026-07-01T12:00:00.000Z',
+          notes: 'Contato conferido com a rede municipal.',
+        },
+      },
+    ],
   }),
 }));
 
@@ -291,6 +312,181 @@ describe('DashboardRoute', () => {
 
     expect(await screen.findByRole('heading', { name: 'Materiais' })).toBeInTheDocument();
     expect(screen.getByText('Use palavras curtas para ajudar professores a encontrar o material.')).toBeInTheDocument();
+  });
+
+  it('renders the contacts tab in order and opens the shipped contact editor', () => {
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
+      'Fluxos',
+      'Materiais',
+      'Contatos',
+      'Exportar',
+    ]);
+    expect(screen.getByText('Rascunhos locais para fluxos, materiais e contatos.')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Contatos' }));
+
+    expect(screen.getByRole('tab', { name: 'Contatos' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('heading', { level: 2, name: 'Contatos' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Nome' })).toHaveValue('CAPS II Praça Brasil');
+  });
+
+  it('persists shipped contact edits by source index and derives the phone href', () => {
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Contatos' }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Nome' }), {
+      target: { value: 'CAPS II Centro' },
+    });
+    fireEvent.change(screen.getByRole('textbox', { name: 'Telefone' }), {
+      target: { value: '(51) 99999-8888' },
+    });
+
+    expect(screen.getByRole('textbox', { name: 'Nome' })).toHaveValue('CAPS II Centro');
+    expect(screen.getByRole('textbox', { name: 'Telefone' })).toHaveValue('(51) 99999-8888');
+
+    const draft = JSON.parse(localStorage.getItem('secuida:dev-dashboard:drafts:v1') ?? '{}');
+    expect(draft.contactPatches).toEqual([
+      {
+        id: 'canoas-caps-praca-brasil',
+        sourceIndex: 0,
+        patch: {
+          name: 'CAPS II Centro',
+          phoneDisplay: '(51) 99999-8888',
+          phoneHref: 'tel:51999998888',
+        },
+      },
+    ]);
+  });
+
+  it('adds, selects, edits, and removes a local contact through two-stage confirmation', () => {
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Contatos' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Novo contato' }));
+
+    expect(screen.getByRole('textbox', { name: 'Nome' })).toHaveValue('Novo contato');
+    let draft = JSON.parse(localStorage.getItem('secuida:dev-dashboard:drafts:v1') ?? '{}');
+    expect(draft.addedContacts).toHaveLength(1);
+    expect(draft.addedContacts[0]).toMatchObject({
+      id: 'service-local-1',
+      name: 'Novo contato',
+      review: { status: 'pending_review' },
+    });
+
+    fireEvent.change(screen.getByRole('textbox', { name: 'Nome' }), {
+      target: { value: 'Contato local editado' },
+    });
+
+    draft = JSON.parse(localStorage.getItem('secuida:dev-dashboard:drafts:v1') ?? '{}');
+    expect(draft.addedContacts).toHaveLength(1);
+    expect(draft.addedContacts[0]).toMatchObject({
+      id: 'service-local-1',
+      name: 'Contato local editado',
+      review: { status: 'pending_review' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Remover contato Contato local editado' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirmar: Remover contato Contato local editado' }));
+
+    draft = JSON.parse(localStorage.getItem('secuida:dev-dashboard:drafts:v1') ?? '{}');
+    expect(draft.addedContacts).toEqual([]);
+    expect(screen.getByRole('textbox', { name: 'Nome' })).toHaveValue('CAPS II Praça Brasil');
+  });
+
+  it('removes a shipped contact once and clears its stale patch', () => {
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Contatos' }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Nome' }), {
+      target: { value: 'CAPS II editado' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Remover contato CAPS II editado' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirmar: Remover contato CAPS II editado' }));
+
+    const draft = JSON.parse(localStorage.getItem('secuida:dev-dashboard:drafts:v1') ?? '{}');
+    expect(draft.removedContactIds).toEqual(['canoas-caps-praca-brasil']);
+    expect(draft.contactPatches).toEqual([]);
+    expect(screen.queryByRole('textbox', { name: 'Nome' })).not.toBeInTheDocument();
+  });
+
+  it('persists the contacts tab and restores it after remounting', () => {
+    const view = render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Contatos' }));
+    expect(localStorage.getItem('secuida:dev-dashboard:active-tab')).toBe('contacts');
+
+    view.unmount();
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole('heading', { level: 2, name: 'Contatos' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Contatos' })).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('shows contact errors locally and includes them in global export validation', () => {
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByText('Configurações Iniciais e Entrada do Fluxo'));
+    fireEvent.change(screen.getByLabelText('Título do fluxo'), {
+      target: { value: 'Fluxo com alteração válida' },
+    });
+    fireEvent.click(screen.getByRole('tab', { name: 'Exportar' }));
+    expect(screen.getByRole('button', { name: 'Gerar arquivo ZIP' })).toBeEnabled();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Contatos' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Novo contato' }));
+
+    expect(screen.getByText('2 erros impeditivos')).toBeInTheDocument();
+    expect(screen.getAllByText('O endereço é obrigatório.').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('O telefone precisa ter pelo menos 8 dígitos.').length).toBeGreaterThan(0);
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Exportar' }));
+    expect(screen.getByText('1 editado')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Gerar arquivo ZIP' })).toBeDisabled();
+  });
+
+  it('keeps the contacts validation summary scoped to contacts', () => {
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Materiais' }));
+    fireEvent.change(screen.getByLabelText('Título do material'), { target: { value: '' } });
+    fireEvent.click(screen.getByRole('tab', { name: 'Contatos' }));
+
+    expect(screen.getByText('Nenhum problema encontrado neste rascunho.')).toBeInTheDocument();
+    expect(screen.queryByText('O título é obrigatório.')).not.toBeInTheDocument();
   });
 
   it('renders export handoff copy', () => {

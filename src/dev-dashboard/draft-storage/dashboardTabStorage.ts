@@ -7,7 +7,7 @@ import type { DashboardTab } from '../components/DashboardShell';
  */
 const STORAGE_KEY = 'secuida:dev-dashboard:active-tab';
 
-const validTabs: readonly DashboardTab[] = ['flows', 'education', 'export'];
+const validTabs: readonly DashboardTab[] = ['flows', 'education', 'contacts', 'export'];
 
 export function loadActiveTab(defaultTab: DashboardTab = 'flows'): DashboardTab {
   if (typeof window === 'undefined') return defaultTab;

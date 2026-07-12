@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react';
 import { DashboardNotice } from './DashboardNotice';
 
-export type DashboardTab = 'flows' | 'education' | 'export';
+export type DashboardTab = 'flows' | 'education' | 'contacts' | 'export';
 
 const tabs: Array<{ id: DashboardTab; label: string }> = [
   { id: 'flows', label: 'Fluxos' },
   { id: 'education', label: 'Materiais' },
+  { id: 'contacts', label: 'Contatos' },
   { id: 'export', label: 'Exportar' },
 ];
 

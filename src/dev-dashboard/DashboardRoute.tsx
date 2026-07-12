@@ -18,6 +18,9 @@ import { defaultFeaturedImageId } from '../content/resources/featuredImages';
 import { DEFAULT_EDUCATION_GROUP_ID } from '../content/resources/groups';
 import type { EducationResourceGroup } from '../content/resources/groups';
 import { loadActiveTab, saveActiveTab } from './draft-storage/dashboardTabStorage';
+import { ContactsDashboard } from './contacts/ContactsDashboard';
+import { createLocalService } from './contacts/contactDrafts';
+import { validateDashboardContacts } from './contacts/contactsValidation';
 
 function upsertPatchById<T extends { id: string }>(
   records: Array<DashboardRecordPatch<T>>,
@@ -135,6 +138,7 @@ export function DashboardRoute() {
     });
   }
 
+  const contactValidation = useMemo(() => validateDashboardContacts(mergedDrafts.contacts), [mergedDrafts.contacts]);
   const validation = useMemo(() => {
     const flowValidation = validateDashboardFlows(
       mergedDrafts.flows,
@@ -146,21 +150,23 @@ export function DashboardRoute() {
     );
 
     return {
-      errors: [...flowValidation.errors, ...educationValidation.errors],
-      warnings: [...flowValidation.warnings, ...educationValidation.warnings],
+      errors: [...flowValidation.errors, ...educationValidation.errors, ...contactValidation.errors],
+      warnings: [...flowValidation.warnings, ...educationValidation.warnings, ...contactValidation.warnings],
     };
-  }, [mergedDrafts]);
+  }, [contactValidation, mergedDrafts]);
   const drafts = {
     flows: mergedDrafts.flows,
     educationMaterials: mergedDrafts.educationMaterials,
     educationGroups: mergedDrafts.educationGroups,
+    contacts: mergedDrafts.contacts,
     defaultGroupOrder: mergedDrafts.defaultGroupOrder,
     removedEducationGroupIds: draftState.removedGroupIds ?? [],
+    removedContactIds: draftState.removedContactIds ?? [],
   };
 
   return (
     <Page>
-      <PageHeader title="Dashboard" description="Rascunhos locais para fluxos e materiais educativos." />
+      <PageHeader title="Dashboard" description="Rascunhos locais para fluxos, materiais e contatos." />
       <DashboardShell activeTab={activeTab} onTabChange={setActiveTab}>
         {activeTab === 'flows' && (
           <FlowDashboard
@@ -419,6 +425,60 @@ export function DashboardRoute() {
                 }
 
                 return next;
+              })
+            }
+          />
+        )}
+        {activeTab === 'contacts' && (
+          <ContactsDashboard
+            services={mergedDrafts.contacts}
+            validation={contactValidation}
+            onServiceChange={(_serviceIndex, serviceId, patch) =>
+              updateDraftState((current) => {
+                const addedIndex = current.addedContacts.findIndex((service) => service.id === serviceId);
+
+                if (addedIndex >= 0) {
+                  return {
+                    ...current,
+                    addedContacts: updateRecordAtIndex(current.addedContacts, addedIndex, patch),
+                  };
+                }
+
+                const shippedIndex = shipped.contacts.findIndex((service) => service.id === serviceId);
+                if (shippedIndex < 0) return current;
+
+                return {
+                  ...current,
+                  contactPatches: upsertPatchById(current.contactPatches, serviceId, shippedIndex, patch),
+                };
+              })
+            }
+            onServiceAdd={() => {
+              const newService = createLocalService(mergedDrafts.contacts.map((service) => service.id));
+              updateDraftState((current) => ({
+                ...current,
+                addedContacts: [...current.addedContacts, newService],
+              }));
+              return newService.id;
+            }}
+            onServiceRemove={(_serviceIndex, serviceId) =>
+              updateDraftState((current) => {
+                const addedIndex = current.addedContacts.findIndex((service) => service.id === serviceId);
+                if (addedIndex >= 0) {
+                  return {
+                    ...current,
+                    addedContacts: current.addedContacts.filter((service) => service.id !== serviceId),
+                  };
+                }
+
+                const shippedIndex = shipped.contacts.findIndex((service) => service.id === serviceId);
+                if (shippedIndex < 0) return current;
+
+                return {
+                  ...current,
+                  contactPatches: current.contactPatches.filter((patch) => patch.id !== serviceId),
+                  removedContactIds: [...new Set([...(current.removedContactIds ?? []), serviceId])],
+                };
               })
             }
           />
