@@ -20,6 +20,15 @@ export function validateDashboardContacts(services: ServiceDirectoryEntry[]): Da
   });
 
   services.forEach((service, index) => {
+    if (!service.id.trim()) {
+      issues.push({
+        level: 'error',
+        area: 'contacts',
+        id: `missing-contact-id:${index}`,
+        message: 'O ID do contato é obrigatório.',
+      });
+    }
+
     const requiredFields = [
       ['name', service.name, 'O nome do contato é obrigatório.'],
       ['type', service.type, 'O tipo de serviço é obrigatório.'],

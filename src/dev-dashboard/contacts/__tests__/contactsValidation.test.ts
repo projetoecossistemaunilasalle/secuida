@@ -101,6 +101,19 @@ describe('validateDashboardContacts', () => {
     ]);
   });
 
+  it.each(['', '   '])('reports a blank contact ID %j as a summary-level error', (id) => {
+    const result = validateDashboardContacts([{ ...service, id }]);
+
+    expect(result.errors).toEqual([
+      {
+        level: 'error',
+        area: 'contacts',
+        id: 'missing-contact-id:0',
+        message: 'O ID do contato é obrigatório.',
+      },
+    ]);
+  });
+
   it('reports duplicate IDs once as a summary-level error', () => {
     const result = validateDashboardContacts([service, { ...service }, { ...service }]);
 
