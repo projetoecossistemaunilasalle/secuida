@@ -60,6 +60,18 @@ where user_id = (select id from neon_auth."user" where email = 'admin@example.co
 
 For GitHub Pages, configure `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` as repository variables. In Neon Console → Auth → Configuration → Domains, also add `https://niciniv.github.io` as a trusted production domain (protocol included, no trailing slash). Localhost origins are preconfigured by Neon. Browser route guards protect the UI; all future dashboard database writes must also use Neon Data API RLS policies based on `public.is_admin()`.
 
+## Operations
+
+The dashboard publishes validated drafts through the Neon Data API. Behavior:
+
+- **Migration order:** apply `20260709000000_admin_accounts.sql` first, then the `published_content` migration. The app reads from `published_content` and falls back to bundled content when that table is empty.
+- **First publication** creates revision `1` and increments on each subsequent publish.
+- **Public routes** serve the current database snapshot; a new publication is visible after a page reload with no redeploy.
+- **Client refresh:** open clients refresh published content on page load and on window focus; there is no realtime push.
+- **Payload limits:** 1 MiB per image and 5 MiB total request payload.
+- **Export recovery mode:** set `VITE_DASHBOARD_PUBLISH_MODE=export` to skip database writes and emit a ZIP for the legacy recovery/development workflow (e.g. when auth is disabled for local mock-auth work). The default `database` mode writes directly to Neon.
+- **Conflicts:** a publish that fails validation or a concurrent revision conflict returns an error and retains the local draft; it does not overwrite the published snapshot.
+
 ## Documentation
 
 - Product requirements: [`docs/PRD.md`](docs/PRD.md)
@@ -67,7 +79,3 @@ For GitHub Pages, configure `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` as
 - Implementation plans: [`docs/plans/README.md`](docs/plans/README.md)
 - Current repository context: [`docs/Project-Context.md`](docs/Project-Context.md)
 - Analytics/LGPD policy note: [`docs/fronts/12b-anonymous-analytics-lgpd-policy.md`](docs/fronts/12b-anonymous-analytics-lgpd-policy.md)
-
-## Current Caution
-
-The app has no backend, login, analytics, saved questionnaire answers, saved chat transcript, or location access. The onboarding first-visit flag currently uses `localStorage`; this should be reviewed under the Privacy/LGPD front before the product makes strong persistence claims.
