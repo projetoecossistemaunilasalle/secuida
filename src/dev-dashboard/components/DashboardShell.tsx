@@ -1,25 +1,28 @@
 import { useRef, type KeyboardEvent, type ReactNode } from 'react';
 import { DashboardNotice } from './DashboardNotice';
+import type { DashboardPublishMode } from '../publishing/publishMode';
 
 export type DashboardTab = 'flows' | 'education' | 'contacts' | 'export';
-
-const tabs: Array<{ id: DashboardTab; label: string }> = [
-  { id: 'flows', label: 'Fluxos' },
-  { id: 'education', label: 'Materiais' },
-  { id: 'contacts', label: 'Contatos' },
-  { id: 'export', label: 'Exportar' },
-];
 
 export function DashboardShell({
   activeTab,
   onTabChange,
+  publishMode,
   children,
 }: {
   activeTab: DashboardTab;
   onTabChange: (tab: DashboardTab) => void;
+  publishMode: DashboardPublishMode;
   children: ReactNode;
 }) {
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const finalTabLabel = publishMode === 'database' ? 'Publicar' : 'Exportar';
+  const tabs: Array<{ id: DashboardTab; label: string }> = [
+    { id: 'flows', label: 'Fluxos' },
+    { id: 'education', label: 'Materiais' },
+    { id: 'contacts', label: 'Contatos' },
+    { id: 'export', label: finalTabLabel },
+  ];
 
   function activateTabAtIndex(index: number) {
     const tab = tabs[index];

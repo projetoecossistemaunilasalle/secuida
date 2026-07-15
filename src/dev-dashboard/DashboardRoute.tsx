@@ -2,16 +2,20 @@ import { useMemo, useState } from 'react';
 import { Page } from '../design-system/components/Page';
 import { PageHeader } from '../design-system/components/PageHeader';
 import { DashboardShell, type DashboardTab } from './components/DashboardShell';
-import { getShippedDashboardContent } from './content/shippedContent';
 import {
   type DashboardRecordPatch,
   loadDashboardDrafts,
   mergeDashboardDrafts,
+  resetDashboardDrafts,
   saveDashboardDrafts,
 } from './draft-storage/dashboardStorage';
 import { EducationDashboard } from './education/EducationDashboard';
 import { validateDashboardEducation } from './education/educationValidation';
 import { ExportDashboard } from './export/ExportDashboard';
+import { PublishDashboard } from './publishing/PublishDashboard';
+import { getDashboardPublishMode } from './publishing/publishMode';
+import { usePublishedContent } from '../app/content/PublishedContentContext';
+import type { PublishedContentPayload } from '../app/content/publishedContent';
 import { FlowDashboard } from './flows/FlowDashboard';
 import { validateDashboardFlows } from './flows/flowValidation';
 import { defaultFeaturedImageId } from '../content/resources/featuredImages';
@@ -153,7 +157,9 @@ function resolveContactOrigin(
 
 export function DashboardRoute() {
   const [activeTab, setActiveTabState] = useState<DashboardTab>(() => loadActiveTab());
-  const shipped = useMemo(() => getShippedDashboardContent(), []);
+  const { content: baseline } = usePublishedContent();
+  const publishMode = getDashboardPublishMode();
+  const shipped = baseline;
   const [draftState, setDraftState] = useState(() => loadDashboardDrafts());
   const mergedDrafts = useMemo(() => mergeDashboardDrafts(shipped, draftState), [draftState, shipped]);
 
@@ -199,11 +205,18 @@ export function DashboardRoute() {
     removedEducationGroupIds: draftState.removedGroupIds ?? [],
     removedContactIds: draftState.removedContactIds ?? [],
   };
+  const publishedDraft: PublishedContentPayload = {
+    flows: mergedDrafts.flows,
+    educationMaterials: mergedDrafts.educationMaterials,
+    educationGroups: mergedDrafts.educationGroups,
+    contacts: mergedDrafts.contacts,
+    defaultGroupOrder: mergedDrafts.defaultGroupOrder,
+  };
 
   return (
     <Page>
       <PageHeader title="Dashboard" description="Rascunhos locais para fluxos, materiais e contatos." />
-      <DashboardShell activeTab={activeTab} onTabChange={setActiveTab}>
+      <DashboardShell activeTab={activeTab} onTabChange={setActiveTab} publishMode={publishMode}>
         {activeTab === 'flows' && (
           <FlowDashboard
             flows={mergedDrafts.flows}
@@ -353,7 +366,7 @@ export function DashboardRoute() {
                   if (groups.length === 0) return current;
 
                   const firstGroup = groups[0];
-                  const defaultGroupOrder = current.defaultGroupOrder ?? 0;
+                  const defaultGroupOrder = currentMergedDrafts.defaultGroupOrder;
                   if (!firstGroup || firstGroup.order <= defaultGroupOrder) return current;
 
                   const firstAddedIndex = findGroupIndex(current.addedGroups, firstGroup.id);
@@ -384,7 +397,7 @@ export function DashboardRoute() {
                   const groups = currentMergedDrafts.educationGroups;
                   if (groups.length === 0) return current;
 
-                  const defaultGroupOrder = current.defaultGroupOrder ?? 0;
+                  const defaultGroupOrder = currentMergedDrafts.defaultGroupOrder;
                   const adjacentGroup = direction === -1 ? groups[groups.length - 1] : groups[0];
                   if (!adjacentGroup) return current;
                   if (direction === -1 && defaultGroupOrder <= adjacentGroup.order) return current;
@@ -533,14 +546,23 @@ export function DashboardRoute() {
             }
           />
         )}
-        {activeTab === 'export' && (
-          <ExportDashboard
-            shipped={shipped}
-            drafts={drafts}
-            validation={validation}
-            draftUpdatedAt={draftState.updatedAt}
-          />
-        )}
+        {activeTab === 'export' &&
+          (publishMode === 'database' ? (
+            <PublishDashboard
+              baseline={baseline}
+              draft={publishedDraft}
+              validation={validation}
+              draftUpdatedAt={draftState.updatedAt}
+              onPublished={() => setDraftState(resetDashboardDrafts())}
+            />
+          ) : (
+            <ExportDashboard
+              shipped={shipped}
+              drafts={drafts}
+              validation={validation}
+              draftUpdatedAt={draftState.updatedAt}
+            />
+          ))}
       </DashboardShell>
     </Page>
   );

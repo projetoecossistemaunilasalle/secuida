@@ -7,8 +7,10 @@ import type { DashboardDraftState } from '../draft-storage/dashboardStorage';
 import {
   DASHBOARD_DRAFT_SCHEMA_VERSION,
   clearDashboardDrafts,
+  createEmptyDashboardDraftState,
   loadDashboardDrafts,
   mergeDashboardDrafts,
+  resetDashboardDrafts,
   saveDashboardDrafts,
 } from '../draft-storage/dashboardStorage';
 import { getShippedDashboardContent } from '../content/shippedContent';
@@ -24,7 +26,6 @@ const emptyDraft: DashboardDraftState = {
   addedGroups: [],
   contactPatches: [],
   addedContacts: [],
-  defaultGroupOrder: 0,
   removedGroupIds: [],
   removedFlowIds: [],
   removedContactIds: [],
@@ -65,7 +66,6 @@ describe('dashboardStorage', () => {
       addedGroups: [],
       contactPatches: [],
       addedContacts: [],
-      defaultGroupOrder: 0,
       removedGroupIds: [],
       removedFlowIds: [],
       removedContactIds: [],
@@ -83,7 +83,7 @@ describe('dashboardStorage', () => {
 
     saveDashboardDrafts(v3Draft);
 
-    expect(DASHBOARD_DRAFT_SCHEMA_VERSION).toBe('3.0.0');
+    expect(DASHBOARD_DRAFT_SCHEMA_VERSION).toBe('4.0.0');
     expect(loadDashboardDrafts()).toEqual(v3Draft);
   });
 
@@ -92,6 +92,26 @@ describe('dashboardStorage', () => {
     clearDashboardDrafts();
 
     expect(loadDashboardDrafts().updatedAt).toBeNull();
+  });
+
+  it('resets dashboard drafts to an empty state in storage and returns it', () => {
+    saveDashboardDrafts({ ...emptyDraft, defaultGroupOrder: 5 });
+
+    const result = resetDashboardDrafts();
+
+    expect(result).toEqual(createEmptyDashboardDraftState());
+    expect(loadDashboardDrafts()).toEqual(createEmptyDashboardDraftState());
+  });
+
+  it('keeps a database baseline default group order for an empty draft', () => {
+    const draft = createEmptyDashboardDraftState();
+
+    expect(
+      mergeDashboardDrafts(
+        { flows: [], educationMaterials: [], educationGroups: [], contacts: [], defaultGroupOrder: 3 },
+        draft,
+      ).defaultGroupOrder,
+    ).toBe(3);
   });
 
   it('merges sparse overrides onto current shipped content', () => {
@@ -310,7 +330,7 @@ describe('dashboardStorage', () => {
     const draft = loadDashboardDrafts();
     expect(draft.groupPatches).toEqual([]);
     expect(draft.addedGroups).toEqual([]);
-    expect(draft.defaultGroupOrder).toBe(0);
+    expect(draft.defaultGroupOrder).toBeUndefined();
     expect(draft.removedGroupIds).toEqual([]);
     expect(draft.removedFlowIds).toEqual([]);
     expect(draft.contactPatches).toEqual([]);
@@ -339,7 +359,7 @@ describe('dashboardStorage', () => {
     expect(loaded.updatedAt).toBe(v1Draft.updatedAt);
     expect(loaded.groupPatches).toEqual([]);
     expect(loaded.addedGroups).toEqual([]);
-    expect(loaded.defaultGroupOrder).toBe(0);
+    expect(loaded.defaultGroupOrder).toBeUndefined();
     expect(loaded.removedGroupIds).toEqual([]);
     expect(loaded.removedFlowIds).toEqual([]);
     expect(loaded.contactPatches).toEqual([]);
@@ -381,13 +401,13 @@ describe('dashboardStorage', () => {
       addedFlows: [],
       addedEducationMaterials: [],
       addedGroups: [],
-      defaultGroupOrder: 0,
       updatedAt: null,
     };
     localStorage.setItem('secuida:dev-dashboard:drafts:v1', JSON.stringify(incompleteV3Draft));
 
     expect(loadDashboardDrafts()).toEqual({
       ...incompleteV3Draft,
+      schemaVersion: DASHBOARD_DRAFT_SCHEMA_VERSION,
       removedGroupIds: [],
       removedFlowIds: [],
       contactPatches: [],
@@ -442,7 +462,7 @@ describe('dashboardStorage', () => {
     expect(loaded.schemaVersion).toBe(DASHBOARD_DRAFT_SCHEMA_VERSION);
     expect(loaded.groupPatches).toEqual([]);
     expect(loaded.addedGroups).toEqual([]);
-    expect(loaded.defaultGroupOrder).toBe(0);
+    expect(loaded.defaultGroupOrder).toBeUndefined();
     expect(loaded.removedGroupIds).toEqual([]);
     expect(loaded.removedFlowIds).toEqual([]);
     expect(loaded.contactPatches).toEqual([]);

@@ -5,7 +5,7 @@ import type { ServiceDirectoryEntry } from '../../domain/services/types';
 import type { DashboardShippedContent } from '../content/shippedContent';
 
 const STORAGE_KEY = 'secuida:dev-dashboard:drafts:v1';
-export const DASHBOARD_DRAFT_SCHEMA_VERSION = '3.0.0' as const;
+export const DASHBOARD_DRAFT_SCHEMA_VERSION = '4.0.0' as const;
 
 export interface DashboardRecordPatch<T extends { id: string }> {
   id: string;
@@ -42,12 +42,15 @@ export function createEmptyDashboardDraftState(): DashboardDraftState {
     addedEducationMaterials: [],
     addedGroups: [],
     addedContacts: [],
-    defaultGroupOrder: 0,
     removedGroupIds: [],
     removedFlowIds: [],
     removedContactIds: [],
     updatedAt: null,
   };
+}
+
+function preserveNonZeroDefaultGroupOrder(value: unknown): number | undefined {
+  return typeof value === 'number' && value !== 0 ? value : undefined;
 }
 
 export function loadDashboardDrafts(storage: Storage = localStorage): DashboardDraftState {
@@ -68,25 +71,32 @@ export function loadDashboardDrafts(storage: Storage = localStorage): DashboardD
         schemaVersion: DASHBOARD_DRAFT_SCHEMA_VERSION,
         groupPatches: (record.groupPatches ?? []) as DashboardRecordPatch<EducationResourceGroup>[],
         addedGroups: (record.addedGroups ?? []) as EducationResourceGroup[],
-        defaultGroupOrder: (record.defaultGroupOrder ?? 0) as number,
+        defaultGroupOrder: preserveNonZeroDefaultGroupOrder(record.defaultGroupOrder),
         removedGroupIds: (record.removedGroupIds ?? []) as string[],
         removedFlowIds: (record.removedFlowIds ?? []) as string[],
         contactPatches: [],
         addedContacts: [],
         removedContactIds: [],
       } as DashboardDraftState;
-    } else if (version !== DASHBOARD_DRAFT_SCHEMA_VERSION) {
-      return createEmptyDashboardDraftState();
-    } else {
+    } else if (version === '3.0.0' || version === DASHBOARD_DRAFT_SCHEMA_VERSION) {
       const result = parsed as DashboardDraftState;
       state = {
         ...result,
+        schemaVersion: DASHBOARD_DRAFT_SCHEMA_VERSION,
+        defaultGroupOrder:
+          version === '3.0.0'
+            ? preserveNonZeroDefaultGroupOrder(result.defaultGroupOrder)
+            : typeof result.defaultGroupOrder === 'number'
+              ? result.defaultGroupOrder
+              : undefined,
         contactPatches: Array.isArray(result.contactPatches) ? result.contactPatches : [],
         addedContacts: Array.isArray(result.addedContacts) ? result.addedContacts : [],
         removedGroupIds: result.removedGroupIds ?? [],
         removedFlowIds: result.removedFlowIds ?? [],
         removedContactIds: Array.isArray(result.removedContactIds) ? result.removedContactIds : [],
       };
+    } else {
+      return createEmptyDashboardDraftState();
     }
 
     // Sanitize flow drafts to clean up any legacy/accidental empty effects on load
@@ -115,8 +125,14 @@ export function saveDashboardDrafts(state: DashboardDraftState, storage: Storage
   storage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-export function clearDashboardDrafts(storage: Storage = localStorage) {
+export function resetDashboardDrafts(storage: Storage = localStorage) {
+  const empty = createEmptyDashboardDraftState();
   storage.removeItem(STORAGE_KEY);
+  return empty;
+}
+
+export function clearDashboardDrafts(storage: Storage = localStorage) {
+  resetDashboardDrafts(storage);
 }
 
 export function mergeDashboardDrafts(shipped: DashboardShippedContent, drafts: DashboardDraftState) {
@@ -144,7 +160,7 @@ export function mergeDashboardDrafts(shipped: DashboardShippedContent, drafts: D
     ),
     educationGroups: sortGroupsByOrder(educationGroups),
     contacts,
-    defaultGroupOrder: drafts.defaultGroupOrder ?? 0,
+    defaultGroupOrder: drafts.defaultGroupOrder ?? shipped.defaultGroupOrder ?? 0,
   };
 }
 

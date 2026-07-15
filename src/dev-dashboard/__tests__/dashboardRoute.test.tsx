@@ -7,8 +7,58 @@ import { DashboardRoute } from '../DashboardRoute';
 import { createEmptyDashboardDraftState } from '../draft-storage/dashboardStorage';
 import { EducationDashboard } from '../education/EducationDashboard';
 import { MAX_IMAGE_UPLOAD_BYTES } from '../components/fileUpload';
+import { getShippedDashboardContent } from '../content/shippedContent';
+import type {
+  PublishedContentPayload,
+  PublishedContentSnapshot,
+} from '../../app/content/publishedContent';
+import type { DashboardShippedContent } from '../content/shippedContent';
+
+function asPayload(shipped: DashboardShippedContent): PublishedContentPayload {
+  return {
+    flows: shipped.flows,
+    educationMaterials: shipped.educationMaterials,
+    educationGroups: shipped.educationGroups,
+    contacts: shipped.contacts,
+    defaultGroupOrder: shipped.defaultGroupOrder ?? 0,
+  };
+}
 
 const shippedContacts = vi.hoisted(() => [] as ServiceDirectoryEntry[]);
+
+const dashboardMocks = vi.hoisted(() => ({
+  publishMode: 'export' as 'export' | 'database',
+  content: null as PublishedContentPayload | null,
+  snapshot: null as PublishedContentSnapshot | null,
+  publish: vi.fn(),
+  account: { id: 'admin-id', email: 'admin@secuida.test' } as { id: string; email: string } | null,
+}));
+
+vi.mock('../publishing/publishMode', () => ({
+  getDashboardPublishMode: () => dashboardMocks.publishMode,
+}));
+
+vi.mock('../../app/content/PublishedContentContext', () => ({
+  usePublishedContent: () => ({
+    content: dashboardMocks.content,
+    snapshot: dashboardMocks.snapshot,
+    source: 'database',
+    status: 'ready',
+    loadError: null,
+    refresh: vi.fn(),
+    publish: dashboardMocks.publish,
+  }),
+}));
+
+vi.mock('../../app/auth/AdminAuthContext', () => ({
+  useAdminAuth: () => ({
+    status: dashboardMocks.account ? 'authenticated' : 'unauthenticated',
+    account: dashboardMocks.account,
+    login: vi.fn(),
+    logout: vi.fn(),
+    refresh: vi.fn(),
+  }),
+}));
 
 function createDefaultShippedContact(): ServiceDirectoryEntry {
   return {
@@ -227,6 +277,19 @@ describe('DashboardRoute', () => {
   beforeEach(() => {
     localStorage.clear();
     shippedContacts.splice(0, shippedContacts.length, createDefaultShippedContact());
+    vi.clearAllMocks();
+    dashboardMocks.publishMode = 'export';
+    dashboardMocks.content = asPayload(getShippedDashboardContent());
+    dashboardMocks.snapshot = null;
+    dashboardMocks.account = { id: 'admin-id', email: 'admin@secuida.test' };
+    dashboardMocks.publish.mockResolvedValue({
+      flows: 0,
+      materials: 0,
+      groups: 0,
+      contacts: 0,
+      publishedAt: '2024-02-01T00:00:00.000Z',
+      revision: 4,
+    });
   });
 
   it('renders pt-BR flow editor helper text', () => {
@@ -1873,4 +1936,172 @@ describe('DashboardRoute', () => {
     // Verify drawer is closed (Chave da pontuação is not in document anymore)
     expect(screen.queryByLabelText('Chave da pontuação')).not.toBeInTheDocument();
   });
+
+  it('shows Exportar tab and export UI in export mode', () => {
+    dashboardMocks.publishMode = 'export';
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole('tab', { name: 'Exportar' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Exportar' }));
+    expect(screen.getByRole('button', { name: 'Gerar arquivo ZIP' })).toBeInTheDocument();
+  });
+
+  it('shows Publicar tab and publish UI in database mode', async () => {
+    const user = userEvent.setup();
+    dashboardMocks.publishMode = 'database';
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole('tab', { name: 'Publicar' })).toBeInTheDocument();
+    await user.click(screen.getByRole('tab', { name: 'Publicar' }));
+    expect(screen.getByRole('button', { name: 'Publicar alterações' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Gerar arquivo ZIP' })).not.toBeInTheDocument();
+  });
+
+  it('publishes merged content and clears local drafts on success', async () => {
+    const user = userEvent.setup();
+    dashboardMocks.publishMode = 'database';
+    localStorage.setItem(
+      'secuida:dev-dashboard:drafts:v1',
+      JSON.stringify({
+        schemaVersion: '4.0.0',
+        flowPatches: [],
+        educationMaterialPatches: [],
+        groupPatches: [],
+        addedFlows: [],
+        addedEducationMaterials: [],
+        addedGroups: [],
+        contactPatches: [
+          { id: 'canoas-caps-praca-brasil', sourceIndex: 0, patch: { name: 'CAPS II Praça Brasil (editado)' } },
+        ],
+        removedContactIds: [],
+        updatedAt: '2026-07-12T00:00:00.000Z',
+      }),
+    );
+    dashboardMocks.publish.mockResolvedValueOnce({
+      flows: 0,
+      materials: 0,
+      groups: 0,
+      contacts: 1,
+      publishedAt: '2024-02-01T00:00:00.000Z',
+      revision: 4,
+    });
+
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole('tab', { name: 'Publicar' }));
+    await user.click(screen.getByRole('button', { name: 'Publicar alterações' }));
+    await user.click(screen.getByRole('button', { name: 'Confirmar publicação' }));
+
+    await waitFor(() =>
+      expect(screen.getByText('Publicado na revisão 4.')).toBeInTheDocument(),
+    );
+    expect(dashboardMocks.publish).toHaveBeenCalledTimes(1);
+    const [payload, publisherId] = dashboardMocks.publish.mock.calls[0] as [
+      PublishedContentPayload,
+      string,
+    ];
+    expect(publisherId).toBe('admin-id');
+    expect(payload.contacts[0].name).toBe('CAPS II Praça Brasil (editado)');
+    expect(payload.flows.length).toBeGreaterThan(0);
+    expect(payload.educationMaterials.length).toBeGreaterThan(0);
+    expect(payload.educationGroups.length).toBeGreaterThan(0);
+    expect(payload.defaultGroupOrder).toBe(0);
+    expect(localStorage.getItem('secuida:dev-dashboard:drafts:v1')).toBeNull();
+  });
+
+  it('keeps local drafts when publication fails', async () => {
+    const user = userEvent.setup();
+    dashboardMocks.publishMode = 'database';
+    localStorage.setItem(
+      'secuida:dev-dashboard:drafts:v1',
+      JSON.stringify({
+        schemaVersion: '4.0.0',
+        flowPatches: [],
+        educationMaterialPatches: [],
+        groupPatches: [],
+        addedFlows: [],
+        addedEducationMaterials: [],
+        addedGroups: [],
+        contactPatches: [
+          { id: 'canoas-caps-praca-brasil', sourceIndex: 0, patch: { name: 'CAPS II Praça Brasil (editado)' } },
+        ],
+        removedContactIds: [],
+        updatedAt: '2026-07-12T00:00:00.000Z',
+      }),
+    );
+    dashboardMocks.publish.mockRejectedValueOnce(new Error('boom'));
+
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole('tab', { name: 'Publicar' }));
+    await user.click(screen.getByRole('button', { name: 'Publicar alterações' }));
+    await user.click(screen.getByRole('button', { name: 'Confirmar publicação' }));
+
+    expect(
+      await screen.findByText('Não foi possível publicar agora. Tente novamente.'),
+    ).toBeInTheDocument();
+    expect(localStorage.getItem('secuida:dev-dashboard:drafts:v1')).not.toBeNull();
+  });
+
+  it('compares edits against the database content baseline', async () => {
+    const user = userEvent.setup();
+    dashboardMocks.publishMode = 'database';
+    dashboardMocks.content = {
+      flows: [],
+      educationMaterials: [],
+      educationGroups: [],
+      contacts: [
+        {
+          ...createDefaultShippedContact(),
+          id: 'db-contact',
+          name: 'Contato do banco',
+        },
+      ],
+      defaultGroupOrder: 0,
+    };
+    localStorage.setItem(
+      'secuida:dev-dashboard:drafts:v1',
+      JSON.stringify({
+        schemaVersion: '4.0.0',
+        flowPatches: [],
+        educationMaterialPatches: [],
+        groupPatches: [],
+        addedFlows: [],
+        addedEducationMaterials: [],
+        addedGroups: [],
+        contactPatches: [
+          { id: 'db-contact', sourceIndex: 0, patch: { name: 'Contato do banco (editado)' } },
+        ],
+        removedContactIds: [],
+        updatedAt: '2026-07-12T00:00:00.000Z',
+      }),
+    );
+
+    render(
+      <MemoryRouter>
+        <DashboardRoute />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole('tab', { name: 'Publicar' }));
+
+    const contactsStat = screen.getByText('Contatos', { selector: 'p' }).closest('div');
+    expect(contactsStat).toHaveTextContent('1 editado');
+  });
 });
+
+
+
