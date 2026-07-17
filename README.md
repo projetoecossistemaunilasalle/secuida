@@ -1,4 +1,6 @@
-# SeCuida
+# ~~SeCuida~~ Bem-Te-Vi
+
+15/7/2026: o projeto mudou de nome de "SeCuida" para "Bem-te-vi".
 
 SeCuida is a mobile-first React/Vite prototype for educator mental-health support in Portuguese. It offers a calm, anonymous-by-default experience for guided orientation, immediate support, educational resources, and local support contacts.
 
