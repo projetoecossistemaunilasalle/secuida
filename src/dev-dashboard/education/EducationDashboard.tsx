@@ -754,11 +754,7 @@ export function EducationDashboard({
                             className="p-1.5 text-on-surface-variant hover:text-on-surface transition-colors"
                             aria-label={isExpanded ? 'Recolher bloco' : 'Expandir bloco'}
                           >
-                            {isExpanded ? (
-                              <ChevronUp className="h-5 w-5" />
-                            ) : (
-                              <ChevronDown className="h-5 w-5" />
-                            )}
+                            {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                           </button>
                         </div>
                       </div>

@@ -26,9 +26,7 @@ const mockResources: EducationResource[] = [
   },
 ];
 
-const mockGroups: EducationResourceGroup[] = [
-  { id: 'geral', title: 'Geral', description: 'Grupo geral', order: 0 },
-];
+const mockGroups: EducationResourceGroup[] = [{ id: 'geral', title: 'Geral', description: 'Grupo geral', order: 0 }];
 
 describe('EducationDashboard - Source Preview & Accordion Layout', () => {
   it('renders live preview of card badges and parsed links under Fonte do material', () => {
@@ -42,7 +40,7 @@ describe('EducationDashboard - Source Preview & Accordion Layout', () => {
         onGroupAdd={vi.fn()}
         onGroupRemove={vi.fn()}
         onGroupMove={vi.fn()}
-      />
+      />,
     );
 
     // Header of source preview
@@ -69,7 +67,7 @@ describe('EducationDashboard - Source Preview & Accordion Layout', () => {
         onGroupAdd={vi.fn()}
         onGroupRemove={vi.fn()}
         onGroupMove={vi.fn()}
-      />
+      />,
     );
 
     // By default, blocks are expanded

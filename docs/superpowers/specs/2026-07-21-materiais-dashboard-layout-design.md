@@ -39,7 +39,7 @@
   - Novos blocos adicionados são automaticamente expandidos.
   - Por padrão, o primeiro bloco inicia expandido (ou todos recolhidos para síntese limpa).
 - **Barra de Ferramentas Superior:**
-  - Exibe o número total de blocos (ex: *"4 blocos de conteúdo"*).
+  - Exibe o número total de blocos (ex: _"4 blocos de conteúdo"_).
   - Botões para **"Expandir todos"** e **"Recolher todos"**.
 - **Cartão de Bloco Expansível (`BlockItem`):**
   - **Modo Recolhido (Padrão):**
